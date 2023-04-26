@@ -1,0 +1,14 @@
+{
+  "menu": [
+    {
+      "viewName": "banklist"
+    },
+    {
+      "viewName": "bankcard"
+    },
+    {
+      "viewName": "hiddenTest",
+      "hidden": true
+    }
+  ]
+}

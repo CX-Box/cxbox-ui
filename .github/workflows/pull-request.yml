@@ -1,0 +1,21 @@
+name: Pipeline
+
+on:
+  pull_request:
+    branches-ignore:
+    - 'main'
+    - 'alpha'
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: install
+      run: yarn install
+    - name: linter
+      run: yarn lint
+    - name: build
+      run: yarn build
