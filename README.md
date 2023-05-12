@@ -1,22 +1,45 @@
+<h4 align="center">CXBOX - Rapid Enterprise Level Application Development Platform</h4>
 
-# Cxbox UI &middot; [![Build status](https://github.com/CX-Box/cxbox-ui/workflows/Build/badge.svg)](https://github.com/CX-Box/cxbox-ui/actions?query=workflow%3ABuild) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CX-Box_cxbox-ui&metric=alert_status)](https://sonarcloud.io/dashboard?id=CX-Box_cxbox-ui) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=CX-Box_cxbox-ui&metric=coverage)](https://sonarcloud.io/dashboard?id=CX-Box_cxbox-ui)
+<p align="center">
+<a href="http://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat" alt="license" title=""></a>
+</p>
 
 
-Cxbox UI is an open source library that supplies user interaction support for Cxbox framework in form of React components, Redux reducers and redux-observable epics for handling asynchronous actions.
-More specifically that includes:
-- Major UI abstractions of Cxbox framework such as Screen, View, Widget, Field
-- Standard actions, reducers and epics for handling Cxbox API, routing and build-in controls
-- Custom <Provider> component and `connect` function to work with combined Redux store of Cxbox UI library and your own application
-- Reusable UI controls
+<div align="center">
+  <h3>
+    <a href="https://www.cxbox.org/" target="_blank">
+      Website
+    </a>
+    <span> | </span>
+    <a href="https://www.cxbox.org/demo/" target="_blank">
+      Demo
+    </a>
+    <span> | </span>
+    <a href="https://www.cxbox.org/doc/" target="_blank">
+      Documentation
+    </a>
+  </h3>
+</div>
 
-# Main concepts
+## Description
+CXBOX main purpose is to speed up development of typical Enterprise Level Application based on Spring Boot. A fixed contract with a user interface called [Cxbox-UI (e.g. this repository)](https://github.com/CX-Box/cxbox-ui) allows backend developer to create typical interfaces providing just Json meta files. Full set of typical Enterprise Level UI components included - widgets, fields, layouts (views), navigation (screens) available.
+
+## Using CXBOX
+To get started,
+- [download Intellij Plugin](https://plugins.jetbrains.com/plugin/19523-tesler-helper). [Intellij Plugin](https://plugins.jetbrains.com/plugin/19523-tesler-helper) adds platform specific autocomplete, inspection, navigation and code generation features.
+
+- [download Demo](https://github.com/CX-Box/cxbox-demo) and follow [README.md](https://github.com/CX-Box/cxbox-demo#readme) instructions. Feel free to use demo as template project to start your own projects
+
+# CXBOX-UI
+
+## Main concepts
 
 UI side of Cxbox framework is based on a concept of configurable dashboards ("views") with widgets. Visually widgets could be  represented as a card with a table, graph, form or something more exotic inside.
 Internally, every widget has a direct link to an entity that we call "business component" (BC). BC controls what data is displayed on widget and whhich interactions are available to the user. Interactions could be a simple filtration or some complex business process, initiated through Cxbox API.
 Information about loaded views and widgets grouped into "screens" and stored in application Redux store.
 Client applications could reuse, extend and customize that functionality by providing its own reducers and epics, widgets and ui controls.
 
-# Installation
+## Installation
 
 Cxbox UI distributed in form of ES5 compatible npm package:
 ```sh
@@ -25,7 +48,7 @@ yarn add @cxbox-ui/core
 
 Several libraries are specified as peer dependencies and should be installed for client application: react, react-dom, redux, react-redux, rxjs, redux-observable, antd, axios. 
 
-# Usage
+## Usage
 
 <Provider> component provides configurable Redux context and should be used on top level of your application:
 
@@ -60,21 +83,6 @@ function mapStateToProps(store) {
 
 export default connect(mapStateToProps)(ClientComponent)
 ```
-
-# Documentation
-
-The documentation is divided into several sections:
-* [Tutorial](http://idocs.cxbox.io/ui/#/screen/tutorial)
-* [Components Overview](http://idocs.cxbox.io/ui/#/screen/components)
-* [Features](http://idocs.cxbox.io/ui/#/screen/features)
-* [API Reference](https://CX-Box.github.io/cxbox-ui)
-
-You could also check our [changelog section](https://github.com/CX-Box/cxbox-ui/blob/main/CHANGELOG.md).
-
-# Reporting an error
-
-In case you've encountered a problem, please open an issue with reproducible example and detailed description.  
-If you are also willing to provide a fix, please check our [contributing guide](https://github.com/CX-Box/cxbox-ui/blob/main/CONTRIBUTING.md)!
 
 # Contributing
 

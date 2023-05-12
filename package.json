@@ -11,7 +11,7 @@
     "./interfaces/router": "./interfaces/router.js",
     "./interfaces/view": "./interfaces/view.js"
   },
-  "homepage": "https://cxbox.io/",
+  "homepage": "https://cxbox.org/",
   "types": "index.d.ts",
   "author": "cxbox",
   "license": "Apache-2.0",
