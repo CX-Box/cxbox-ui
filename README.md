@@ -1,7 +1,7 @@
 <h2 align="center">CXBOX UI</h2>
 
 <div align="center">
-<a href="https://github.com/CX-Box/cxbox-ui/actions/workflows/build_main.yml"><img src="https://github.com/CX-Box/cxbox-ui/actions/workflows/build_main.yml/badge.svg" title="">
+<a href="https://github.com/CX-Box/cxbox-ui/actions/workflows/build.yml"><img src="https://github.com/CX-Box/cxbox-ui/actions/workflows/build.yml/badge.svg" title="">
 </a>
 <a href="https://sonarcloud.io/summary/overall?id=CX-Box_cxbox-ui"><img src="https://sonarcloud.io/api/project_badges/measure?project=CX-Box_cxbox-ui&metric=alert_status&branch=main" alt="sonar" title="">
 </a>
