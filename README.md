@@ -58,54 +58,287 @@ widgets, fields, layouts (views), navigation (screens).
 
 ## Main concepts
 
-UI side of Cxbox framework is based on a concept of configurable dashboards ("views") with widgets. Visually widgets could be  represented as a card with a table, graph, form or something more exotic inside.
-Internally, every widget has a direct link to an entity that we call "business component" (BC). BC controls what data is displayed on widget and whhich interactions are available to the user. Interactions could be a simple filtration or some complex business process, initiated through Cxbox API.
-Information about loaded views and widgets grouped into "screens" and stored in application Redux store.
-Client applications could reuse, extend and customize that functionality by providing its own reducers and epics, widgets and ui controls.
+**[@cxbox-ui/core](https://www.npmjs.com/package/@cxbox-ui/core)** is a typescript library that includes set of prebuilt pieces of Redux ecosystem, to correctly interact with CXBox framework. It contains all parts to combine Redux store inside of your React application.
 
-## Installation
+- Actions
+- Reducers
+- Middlewares
+- Epics
+    - *RxJS methods for asynchronous interaction with CXBOX framework*
+- Api
+    - *Wrapped in RxJS observables*
+- Utilities
+- Interfaces
+    - *CXBOX interaction typescript contract*
 
-Cxbox UI distributed in form of ES5 compatible npm package:
-```sh
+![schema](./docs/schemas/arch.jpg)
+
+---
+
+## Changelog
+
+![changelog](./docs/schemas/changelog.jpg)
+
+---
+
+## Getting started
+
+The best way to start CXBox project is to clone [CXBox-Demo](https://github.com/CX-Box/cxbox-demo) and follow the [README](https://github.com/CX-Box/cxbox-demo/blob/main/README.md) instructions
+
+---
+
+## Manual installation
+
+**[@cxbox-ui/core](https://www.npmjs.com/package/@cxbox-ui/core)** distributed in form of ESM* npm package:
+```bash
 yarn add @cxbox-ui/core
 ```
+or
+```bash
+npm install @cxbox-ui/core
+```
 
-Several libraries are specified as peer dependencies and should be installed for client application: react, react-dom, redux, react-redux, rxjs, redux-observable, antd, axios. 
+Several libraries are specified as peer dependencies and should be installed
+- react
+- react-dom
+- @reduxjs/toolkit
+- rxjs
+- redux-observable
+- axios
+
+> [!WARNING]
+> CJS module system are no longer supported
+---
 
 ## Usage
 
-<Provider> component provides configurable Redux context and should be used on top level of your application:
+Library proposes to use common way of configuring your Redux store with some nuances
 
-```tsx
-import {Provider} from '@cxbox-ui/core'
-import {reducers} from 'reducers'
+[How to configure default Redux store](https://redux-toolkit.js.org/tutorials/quick-start)
 
-const App = <Provider>
-    <div>Client side application</div>
-</Provider>
+### Reducers
+[Proper way of creating reducers](https://redux-toolkit.js.org/api/createReducer#usage-with-the-builder-callback-notation)
 
-render(App, document.getElementById('root'))
+**@cxbox-ui/core** exports all arguments for **@reduxjs/toolkit** `createReducer` method, such as `initialState` and `createReducerBuilderManager` instances of default **_CXBox reducers_**
+
+```ts
+import {reducers} from '@cxbox-ui/core'
+import {createReducer} from '@reduxjs/toolkit'
+
+const viewReducerBuilder = reducers
+    .createViewReducerBuilderManager(reducers.initialViewState)
+    .builder
+
+const viewReducer = createReducer(reducers.initialViewState, viewReducerBuilder)
 ```
 
-After that, components of your own application could access combined Redux store and import library components:
+`ReducerBuildManager` implements default methods of `createReducer` builder callback argument, with `removeCase` and `replaceCase`
+
+```ts
+const viewReducerBuilder = reducers
+    .createViewReducerBuilderManager(reducers.initialViewState)
+    .removeCase('sampleCXBoxAction')
+    .addCase('anotherSampleAction', () => {/** do something with state */})
+    .replaceCase('someCXBoxActionToo', () => {/** in case of CXBox realization is not satisfying */})
+    .builder
+
+const viewReducer = createReducer(reducers.initialViewState, viewReducerBuilder)
+```
+
+More appropriate case samples in [CXBox-Demo](https://github.com/CX-Box/cxbox-demo/tree/main/ui/src/reducers)
+
+### Combine reducers
+
+```ts
+import {combineReducers, configureStore} from '@reduxjs/toolkit'
+
+const rootReducer = combineReducers({
+    screen: screenReducer,
+    data: dataReducer,
+    view: viewReducer,
+    session: sessionReducer,
+    router: routerReducer,
+    notification: notificationReducer
+})
+
+const store = configureStore({
+    reducers: rootReducer
+})
+```
+
+### Redux-observable middleware
+
+To make this store work with CXBox backend, you should configure asynchronous interaction by applying preconfigured [Redux-Observable](https://redux-observable.js.org/) **Epics**
+
+It will take two steps
+- Configure Api Axios instance
+
+```ts
+import {Api} from '@cxbox-ui/core'
+import Axios from 'axios'
+
+const __AJAX_TIMEOUT__ = 900000
+const __CLIENT_ID__: number = Date.now()
+
+const HEADERS = { Pragma: 'no-cache', 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+
+const instance = axios.create({
+    baseURL: __API__,
+    timeout: __AJAX_TIMEOUT__,
+    responseType: 'json',
+    headers: {
+        ...HEADERS,
+        ...{ ClientId: __CLIENT_ID__ }
+    }
+})
+
+const CXBoxApiInstance = new Api(instance)
+```
+
+_You can also extend any of Api methods to use in your epics_
+
+```ts
+import {Api} from '@cxbox-ui/core'
+
+class ExtendedApi extends Api {
+    getSomethingUnusual(thing: string) {
+        return this.$api.get(thing)
+    }
+}
+
+const CXBoxApiInstance = new ExtendedApi(axiosInstance)
+```
+
+- [Setting up middleware](https://redux-observable.js.org/docs/basics/SettingUpTheMiddleware.html)
+
+```ts
+import {epics} from '@cxbox-ui/core'
+import {combineEpics, createEpicMiddleware} from 'redux-observable'
+import {configureStore, getDefaultMiddleware} from '@reduxjs/toolkit'
+
+// Typescript cast if you changed default CXBoxEpic type
+const coreEpics = {...epics} as unknown as Record<string, RootEpic>
+
+const rootEpic = combineEpics(Object.values(coreEpics))
+
+const epicMiddleware = createEpicMiddleware({
+    dependencies: {
+        api: CXBoxApiInstance
+    }
+})
+
+const store = configureStore({
+    reducer: rootReducer,
+    middleware: getDefaultMiddleware().concat(epicMiddleware)
+})
+
+epicMiddleware.run(rootEpic)
+```
+
+### Epics
+
+Feel free to add, but be careful to replace or remove some epics. They can call actions that causes chain effect, but if you sure in consequences, manipulate imported epics object as you want.
+
+```ts
+import {createAction} from '@reduxjs/toolkit'
+
+const sampleAction = createAction<string>('sampleAction')
+
+const sampleEpic: RootEpic = (action$, state$, {api}) =>
+    action$.pipe(
+        filter(sampleAction.match),
+        switchMap(action => {
+            const name = action.payload
+
+            if (name) {
+                api.doSomething(name)
+            }
+
+            return EMPTY
+        }),
+        catchError(error => {
+            return utils.createApiErrorObservable(error)
+        })
+    )
+
+const rootEpic = combineEpics(...Object.values(epics), sampleEpic)
+```
+
+### Middlewares 
+
+@cxbox-ui/core also exports some middlewares, that not uses Redux-Observable way, but they still need to be applied
+
+```ts
+import {configureStore, getDefaultMiddleware} from '@reduxjs/toolkit'
+import {middlewares} from '@cxbox-ui/core'
+
+const store = configureStore({
+    reducer: rootReducer,
+    middleware: getDefaultMiddleware()
+        .concat(...Object.values(middlewares))
+        .concat(epicMiddleware)
+})
+```
+
+---
+
+## Widget example
+
 
 ```tsx
 import React from 'react'
-import {connect, View} from '@cxbox-ui/core'
+import { interfaces } from '@cxbox-ui/core'
+import { useDispatch } from 'react-redux'
+import { useAppSelector } from '@store'
+import { actions } from '@cxbox-ui/core'
+import InfoRow from './components/InfoRow'
+import { Row } from 'antd'
+import { useFlatFormFields } from '@hooks/useFlatFormFields'
 
-export const ClientComponent: FunctionComponent = (props: { screenName }) => {
-    const Card = (props) => <div>
-        <h1>Client side component</h1>
-        {props.children}
-    </div>
-    return <View card={Card} />
+interface FunnelProps {
+    meta: FunnelWidgetMeta
 }
 
-function mapStateToProps(store) {
-    return { screenName: store.router.screenName }
+function Funnel({ meta }: FunnelProps) {
+    const { bcName } = meta
+    const data = useAppSelector(state => state.data[bcName])
+    const sortedData = data?.slice().sort(sorter)
+    const funnelData = sortedData?.map(i => ({ id: i.funnelKey, value: i.amount }))
+    const color = sortedData?.map(i => i.color) as Array<string>
+
+    const legend: Types.LegendCfg = {
+        position: 'right',
+        layout: 'vertical',
+        itemMarginBottom: 16,
+        itemName: { style: { fontSize: 14, fontFamily: 'Roboto', fontWeight: 400 } },
+        marker: (name, index) => ({
+            symbol: 'circle',
+            style: {
+                fill: color[index]
+            }
+        })
+    }
+    const label: Label = {
+        content: labelData => labelData.value,
+        style: {
+            fontSize: 20,
+            fontFamily: 'Roboto',
+            fontWeight: '700',
+            fill: '#141F35'
+        }
+    }
+    return (
+        <div>
+            <AntFunnel data={funnelData} xField="id" yField="value" color={color} conversionTag={false} legend={legend} label={label} />
+        </div>
+    )
 }
 
-export default connect(mapStateToProps)(ClientComponent)
+function sorter(a: interfaces.DataItem, b: interfaces.DataItem) {
+    return parseInt(b.amount as string) - parseInt(a.amount as string)
+}
+
+export default React.memo(Funnel)
 ```
 
 # Contributing

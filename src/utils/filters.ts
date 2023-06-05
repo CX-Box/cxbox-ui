@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import { BcFilter, BcSorter, FilterType } from '../interfaces/filters'
-import { DataValue } from '../interfaces/data'
-import qs from 'query-string'
-import { FieldType } from '../interfaces/view'
+import { BcFilter, BcSorter, FilterType, DataValue, FieldType } from '../interfaces'
 
 /**
  * Maps an input array of BcFilter objects into a dictionary of GET-request params
@@ -55,7 +52,9 @@ export function getFilters(filters: BcFilter[]) {
                 const values = (item.value as DataValue[]).map(val => `"${val}"`)
                 value = `[${values}]`
             }
-            result[`${item.fieldName}.${item.type}`] = value
+
+            const separator = item.fieldName ? '.' : ''
+            result[`${item.fieldName}${separator}${item.type}`] = value
         }
     })
     return result
@@ -81,6 +80,16 @@ export function getSorters(sorters: BcSorter[]) {
     return result
 }
 
+const jsonParse = <T extends string>(value: T) => {
+    try {
+        return JSON.parse(value)
+    } catch (e) {
+        console.warn(e)
+
+        return null
+    }
+}
+
 /**
  * Function for parsing filters from string into BcFilter type
  *
@@ -88,28 +97,48 @@ export function getSorters(sorters: BcSorter[]) {
  * @param defaultFilters string representation of filters
  * @category Utils
  */
-export function parseFilters(defaultFilters: string) {
+export function parseFilters(defaultFilters: string = '') {
     const result: BcFilter[] = []
-    const urlParams = qs.parse(defaultFilters)
-    Object.keys(urlParams).forEach(param => {
+    const urlParams = new URLSearchParams(defaultFilters)
+    const paramKeys = Object.keys(Object.fromEntries(urlParams))
+
+    paramKeys.forEach(param => {
         const [fieldName, type] = param.split('.')
-        if (fieldName && type && urlParams[param]) {
-            let value = urlParams[param]
+        const isStandardFilter = fieldName && type && urlParams.get(param)
+
+        if (isStandardFilter) {
+            let value: string | string[] = urlParams.getAll(param)
+
             if (type === FilterType.containsOneOf || type === FilterType.equalsOneOf) {
-                try {
-                    value = JSON.parse(value)
-                } catch (e) {
-                    console.warn(e)
+                if (value.length === 1) {
+                    value = jsonParse(value[0]) ?? value
                 }
+
                 value = Array.isArray(value) ? value : []
+            } else {
+                value = Array.isArray(value) ? value[0] : value
             }
+
             result.push({
                 fieldName,
                 type: type as FilterType,
                 value
             })
+        } else if (defaultFilters) {
+            let value: string | string[] = urlParams.getAll(param)
+
+            if (value.length === 1) {
+                value = jsonParse(value[0]) ?? value[0]
+            }
+
+            result.push({
+                fieldName: '',
+                type: param as any,
+                value: value
+            })
         }
     })
+
     return result.length ? result : null
 }
 
@@ -118,22 +147,22 @@ export function parseFilters(defaultFilters: string) {
  * String representation of sorters is url based:
  * "_sort.{order}.{direction}={fieldKey}&_sort.{order}.{direction}"
  *
- * @param fieldKey Sort by field
- * @param order Priority of this specfic sorter
- * @param direction "asc" or "desc"
+ * fieldKey Sort by field
+ * order Priority of this specfic sorter
+ * direction "asc" or "desc"
  *
  * i.e. "_sort.0.asc=firstName"
  *
  * @param sorters string representation of sorters
  * @category Utils
  */
-export function parseSorters(sorters: string) {
+export function parseSorters(sorters?: string) {
     if (!sorters || !sorters.length) {
         return null
     }
     const result: BcSorter[] = []
-    const dictionary = qs.parse(sorters)
-    Object.entries(dictionary)
+    const dictionary = new URLSearchParams(sorters)
+    Array.from(dictionary.entries())
         .map(([sort, fieldKey]) => {
             const [order, direction] = sort.split('.').slice(1)
             return { fieldName: fieldKey as string, order: Number.parseInt(order, 10), direction }

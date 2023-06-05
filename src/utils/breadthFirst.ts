@@ -29,7 +29,7 @@ export function breadthFirstSearch<T>(
 ): BreadthFirstResult<T> {
     // Check the root if we can stop searching
     const rootMatch = predicate(root) && root
-    const rootChildren = (root[childrenProperty] as unknown) as T[]
+    const rootChildren = root[childrenProperty] as unknown as T[]
     if (!rootMatch && !rootChildren) {
         return null
     }

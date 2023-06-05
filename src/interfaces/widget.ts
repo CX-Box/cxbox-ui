@@ -16,15 +16,13 @@
 
 import { WidgetShowCondition, WidgetTypes, WidgetOptions, WidgetFormField, WidgetListField, WidgetInfoField } from '@cxbox-ui/schema'
 import { ComponentType } from 'react'
-export {
-    WidgetShowCondition,
-    WidgetTypes,
+export type {
     WidgetOptions,
+    WidgetShowCondition,
     LayoutRow,
     LayoutCol,
     WidgetOperations,
     TableOperations,
-    PositionTypes,
     WidgetTableHierarchy,
     WidgetFieldBase,
     WidgetListFieldBase,
@@ -51,6 +49,7 @@ export {
     WidgetInfoField
 } from '@cxbox-ui/schema'
 
+export { WidgetTypes, PositionTypes } from '@cxbox-ui/schema'
 /**
  * Different widget types that are considered `tables` in nature for purposes of applying some shared features.
  * For example, autofocus on missing required field should work for tables but not forms.
@@ -74,9 +73,9 @@ export const TableLikeWidgetTypes = [
 export const PopupWidgetTypes: string[] = [WidgetTypes.PickListPopup, WidgetTypes.AssocListPopup, WidgetTypes.FlatTreePopup]
 
 /**
- * All widget types that display table-like data
+ * All widget types that display table-like data.ts
  */
-type TableLikeWidgetType = typeof TableLikeWidgetTypes[number]
+type TableLikeWidgetType = (typeof TableLikeWidgetTypes)[number]
 
 export interface WidgetInfoOptions {
     fieldBorderBottom?: boolean
@@ -137,7 +136,7 @@ export interface WidgetFieldBlock<T> {
 export type WidgetFieldsOrBlocks<T> = Array<T | WidgetFieldBlock<T>>
 
 /**
- * Configuration for widgets dislaying form data
+ * Configuration for widgets dislaying form data.ts
  */
 export interface WidgetFormMeta extends WidgetMeta {
     /**
@@ -151,7 +150,7 @@ export interface WidgetFormMeta extends WidgetMeta {
 }
 
 /**
- * Configuration for widgets displaying table-like data
+ * Configuration for widgets displaying table-like data.ts
  */
 export interface WidgetTableMeta extends WidgetMeta {
     /**
@@ -165,7 +164,7 @@ export interface WidgetTableMeta extends WidgetMeta {
 }
 
 /**
- * Configuration for widgets displaying read-only table data
+ * Configuration for widgets displaying read-only table data.ts
  */
 export interface WidgetInfoMeta extends WidgetMeta {
     /**
@@ -256,7 +255,7 @@ export interface CustomWidgetConfiguration {
 
 export type CustomWidgetDescriptor = CustomWidget | CustomWidgetConfiguration
 /**
- * Check if descriptor is just a widget, or it has additional data
+ * Check if descriptor is just a widget, or it has additional data.ts
  */
 export function isCustomWidget(descriptor: CustomWidgetDescriptor): descriptor is CustomWidget {
     return !!descriptor && !('component' in descriptor)

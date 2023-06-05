@@ -14,72 +14,63 @@
  * limitations under the License.
  */
 
-import { Observable } from 'rxjs'
-import { Store } from 'redux'
-import { Epic, types, $do, AnyAction, ActionsMap } from '../../actions/actions'
-import { Store as CoreStore } from '../../interfaces/store'
-import { buildBcUrl } from '../../utils/strings'
-import { customAction } from '../../api/api'
-import { matchOperationRole } from '../../utils/operations'
-import { OperationTypeCrud } from '../../interfaces/operation'
+import { catchError, concat, EMPTY, filter, mergeMap, of } from 'rxjs'
+import { buildBcUrl, matchOperationRole } from '../../utils'
+import { OperationTypeCrud } from '@cxbox-ui/schema'
+import { bcChangeCursors, bcDeleteDataFail, processPostInvoke, sendOperation, sendOperationSuccess } from '../../actions'
+import { CXBoxEpic } from '../../interfaces'
+import { isAnyOf } from '@reduxjs/toolkit'
+import { createApiErrorObservable } from '../../utils/apiError'
+
+const actionTypesMatcher = isAnyOf(sendOperation)
 
 /**
  * Sends `cancel-create` custom operation with record's pending changes and vstamp;
  * Dispatches `sendOperationSuccess` and `bcChangeCursors` to drop cursors, also
- * `processPostInvoke` if received `postActions` in response.
+ * `processPostInvokeEpic` if received `postActions` in response.
  *
- * @param action sendOperation with `cancel-create` role
- * @param store Store instance
  * @category Epics
  */
 
-export const bcCancelCreateDataEpic: Epic = (action$, store) =>
-    action$
-        .ofType(types.sendOperation)
-        .filter(action => matchOperationRole(OperationTypeCrud.cancelCreate, action.payload, store.getState()))
-        .mergeMap(action => {
-            return bcCancelCreateDataEpicImpl(action, store)
-        })
-
-/**
- * Default implementation for `bcCancelCreateDataEpic` epic
- *
- * Sends `cancel-create` custom operation with record's pending changes and vstamp;
- * Dispatches `sendOperationSuccess` and `bcChangeCursors` to drop cursors, also
- * `processPostInvoke` if received `postActions` in response.
- *
- * On error dispatches `bcDeleteDataFail`.
- *
- * @param action sendOperation with `cancel-create` role
- * @param store Store instance
- * @category Epics
- */
-export function bcCancelCreateDataEpicImpl(action: ActionsMap['sendOperation'], store: Store<CoreStore, AnyAction>): Observable<AnyAction> {
-    const state = store.getState()
-    const screenName = state.screen.screenName
-    const bcName = action.payload.bcName
-    const bcUrl = buildBcUrl(bcName, true)
-    const bc = state.screen.bo.bc[bcName]
-    const cursor = bc?.cursor
-    const context = { widgetName: action.payload.widgetName }
-    const record = state.data[bcName]?.find(item => item.id === bc.cursor)
-    const pendingRecordChange = state.view.pendingDataChanges[bcName]?.[bc.cursor]
-    const data = record && { ...pendingRecordChange, vstamp: record.vstamp }
-    const params = { _action: action.payload.operationType }
-    const cursorsMap: Record<string, string> = { [action.payload.bcName]: null }
-    return customAction(screenName, bcUrl, data, context, params)
-        .mergeMap(response => {
-            const postInvoke = response.postActions[0]
-            return Observable.concat(
-                Observable.of($do.sendOperationSuccess({ bcName, cursor })),
-                Observable.of($do.bcChangeCursors({ cursorsMap })),
-                postInvoke
-                    ? Observable.of($do.processPostInvoke({ bcName, postInvoke, cursor, widgetName: context.widgetName }))
-                    : Observable.empty<never>()
+export const bcCancelCreateDataEpic: CXBoxEpic = (action$, state$, { api }) =>
+    action$.pipe(
+        filter(actionTypesMatcher),
+        filter(action => matchOperationRole(OperationTypeCrud.cancelCreate, action.payload, state$.value)),
+        mergeMap(action => {
+            /**
+             * Default implementation for `bcCancelCreateDataEpic` epic
+             *
+             * Sends `cancel-create` custom operation with record's pending changes and vstamp;
+             * Dispatches `sendOperationSuccess` and `bcChangeCursors` to drop cursors, also
+             * `processPostInvokeEpic` if received `postActions` in response.
+             *
+             * On error dispatches `bcDeleteDataFail`.
+             */
+            const state = state$.value
+            const screenName = state.screen.screenName
+            const bcName = action.payload.bcName
+            const bcUrl = buildBcUrl(bcName, true, state)
+            const bc = state.screen.bo.bc[bcName]
+            const cursor = bc?.cursor
+            const context = { widgetName: action.payload.widgetName }
+            const record = state.data[bcName]?.find(item => item.id === bc.cursor)
+            const pendingRecordChange = state.view.pendingDataChanges[bcName]?.[bc.cursor as string]
+            const data = record && { ...pendingRecordChange, vstamp: record.vstamp }
+            const params = { _action: action.payload.operationType }
+            const cursorsMap: Record<string, string> = { [action.payload.bcName]: null }
+            return api.customAction(screenName, bcUrl as string, data, context, params).pipe(
+                mergeMap(response => {
+                    const postInvoke = response.postActions?.[0]
+                    return concat(
+                        of(sendOperationSuccess({ bcName, cursor })),
+                        of(bcChangeCursors({ cursorsMap })),
+                        postInvoke ? of(processPostInvoke({ bcName, postInvoke, cursor, widgetName: context.widgetName })) : EMPTY
+                    )
+                }),
+                catchError((error: any) => {
+                    console.error(error)
+                    return concat(of(bcDeleteDataFail({ bcName })), createApiErrorObservable(error, context))
+                })
             )
         })
-        .catch((error: any) => {
-            console.error(error)
-            return Observable.of($do.bcDeleteDataFail({ bcName }))
-        })
-}
+    )

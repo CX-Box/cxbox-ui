@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { WidgetMeta } from '../interfaces/widget'
-import { RowMeta } from '../interfaces/rowMeta'
-import { PendingDataItem, PickMap } from '../interfaces/data'
+import { WidgetMeta } from './widget'
+import { RowMeta } from './rowMeta'
+import { PendingDataItem, PickMap } from './data'
 import { SystemNotification } from './objectMap'
 import { OperationTypeCrud, OperationPostInvokeConfirm } from './operation'
 import { AxiosError } from 'axios'

@@ -13,21 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import session from './session'
-import router from './router'
-import screen from './screen'
-import view from './view'
-import data from './data'
-import { Store, CombinedReducersMapObject } from '../interfaces/store'
-import { AnyAction } from '../actions/actions'
-import depthData from './depthData'
-
-export const reducers: CombinedReducersMapObject<Store, AnyAction> = {
-    router,
-    session,
-    screen,
-    view,
-    data,
-    depthData
-}
+export * from './data'
+export * from './depthData'
+export * from './router'
+export * from './screen'
+export * from './session'
+export * from './view'

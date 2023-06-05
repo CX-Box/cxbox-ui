@@ -19,6 +19,7 @@ export { DrillDownType } from '@cxbox-ui/schema'
 export interface Route {
     type: RouteType
     path: string
+    search: string
     params: Record<string, unknown>
     screenName?: string
     viewName?: string
