@@ -114,9 +114,9 @@ export function buildSearchResultTree<T extends TreeNodeBidirectional = TreeNode
  * Items with level `1` considered to be root-level items.
  *
  * Notice: not very performant and almost always wasted as Cxbox API mostly returns already
- * sorted data.
+ * sorted data.ts.
  *
- * @param data Unsorted data
+ * @param data Unsorted data.ts
  */
 export function presort(data: TreeNodeBidirectional[]) {
     const result: string[] = []

@@ -15,7 +15,7 @@
  */
 
 import { ViewNavigationGroup, MenuItem, ViewNavigationCategory, ViewNavigationItem } from '@cxbox-ui/schema'
-export { ViewNavigationGroup, MenuItem, ViewNavigationCategory, ViewNavigationItem } from '@cxbox-ui/schema'
+export type { ViewNavigationGroup, MenuItem, ViewNavigationCategory, ViewNavigationItem } from '@cxbox-ui/schema'
 /**
  * Returns MenuItem if it is ViewNavigationItem
  *

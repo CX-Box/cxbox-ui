@@ -16,10 +16,10 @@
 
 import { OperationPostInvokeAny, OperationPreInvoke } from './operation'
 import { DataValue, DataItem } from '@cxbox-ui/schema'
-export { DataValue, DataItem, MultivalueSingleValue, MultivalueSingleValueOptions, RecordSnapshotState } from '@cxbox-ui/schema'
+export type { DataValue, DataItem, MultivalueSingleValue, MultivalueSingleValueOptions, RecordSnapshotState } from '@cxbox-ui/schema'
 
 /**
- * API's response on Business Component's data request
+ * API's response on Business Component's data.ts request
  */
 export interface BcDataResponse {
     data: DataItem[]
@@ -34,7 +34,7 @@ export interface PendingDataItem {
 }
 
 /**
- * State of `data` in global store
+ * State of `data.ts` in global store
  */
 export interface DataState {
     [bcName: string]: DataItem[]

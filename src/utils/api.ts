@@ -14,162 +14,9 @@
  * limitations under the License.
  */
 
-import { Observable } from 'rxjs/Observable'
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
-import qs from 'query-string'
-import { axiosInstance, getStoreInstance } from '../Provider'
-import { CxboxResponse } from '../interfaces/objectMap'
-import { $do } from '../actions/actions'
-
+import { AxiosInstance } from 'axios'
 export interface ApiCallContext {
     widgetName: string
-}
-
-export const HEADERS = { Pragma: 'no-cache', 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-
-const createAxiosRequest = () => {
-    return (
-        axiosInstance ||
-        axios.create({
-            responseType: 'json',
-            headers: {
-                ...HEADERS
-            }
-        })
-    )
-}
-
-const onResponseHook = <ResponsePayload>(response: AxiosResponse<ResponsePayload>) => {
-    return response
-}
-
-/**
- * TODO
- *
- * @param value
- */
-function redirectOccurred(value: AxiosResponse<CxboxResponse>) {
-    if (value.data?.redirectUrl) {
-        let redirectUrl = value.data.redirectUrl
-        if (!redirectUrl.startsWith('/') && !redirectUrl.match('^http(.?)://')) {
-            redirectUrl = `${window.location.pathname}#/${redirectUrl}`
-        }
-        if (redirectUrl.startsWith('/') && !redirectUrl.startsWith('//')) {
-            redirectUrl = `${window.location.origin}${redirectUrl}`
-        }
-        window.location.replace(redirectUrl)
-        return false
-    }
-    return true
-}
-
-/**
- * TODO
- *
- * @param error
- * @param callContext
- */
-function onErrorHook(error: AxiosError, callContext?: ApiCallContext) {
-    getStoreInstance().dispatch($do.apiError({ error, callContext }))
-    throw error
-}
-
-/**
- * @category Utils
- */
-const axiosForApi = {
-    get: <ResponsePayload>(path: string, config: AxiosRequestConfig, callContext?: ApiCallContext) =>
-        createAxiosRequest()
-            .get<ResponsePayload>(path, config)
-            .then(onResponseHook)
-            .catch((reason: any) => {
-                onErrorHook(reason, callContext)
-            }) as Promise<AxiosResponse<ResponsePayload>>, // TODO: Как работает типизация для catch-ветки?
-    put: <ResponsePayload>(path: string, data: any, callContext?: ApiCallContext) =>
-        createAxiosRequest()
-            .put<ResponsePayload>(path, data)
-            .then(onResponseHook)
-            .catch((reason: any) => {
-                onErrorHook(reason, callContext)
-            }) as Promise<AxiosResponse<ResponsePayload>>,
-    post: <ResponsePayload>(path: string, data: any, config?: AxiosRequestConfig, callContext?: ApiCallContext) =>
-        createAxiosRequest()
-            .post(path, data, config)
-            .then(onResponseHook)
-            .catch((reason: any) => {
-                onErrorHook(reason, callContext)
-            }) as Promise<AxiosResponse<ResponsePayload>>,
-    delete: <ResponsePayload>(path: string, callContext?: ApiCallContext) =>
-        createAxiosRequest()
-            .delete(path)
-            .then(onResponseHook)
-            .catch((reason: any) => {
-                onErrorHook(reason, callContext)
-            }) as Promise<AxiosResponse<ResponsePayload>>
-}
-
-/**
- * HTTP GET axios request wrapped into RxJS Observable.
- * Can be interrupted by `redirectOccured` function.
- *
- * @param path Endpoint url
- * @param headers Request headers
- * @param callContext Call context
- * @template ResponsePayload Response payload type
- * @category Utils
- */
-const axiosGet = <ResponsePayload>(path: string, config: AxiosRequestConfig = {}, callContext?: ApiCallContext) => {
-    return Observable.fromPromise(axiosForApi.get<ResponsePayload>(path, config, callContext))
-        .takeWhile(redirectOccurred)
-        .map(response => response.data)
-}
-
-/**
- * HTTP POST axios request wrapped into RxJS Observable.
- * Can be interrupted by `redirectOccured` function.
- *
- * @param path Endpoint url
- * @param headers Request headers
- * @param callContext Call context
- * @template ResponsePayload Response payload type
- * @category Utils
- */
-const axiosPost = <ResponsePayload>(path: string, data: any, config: AxiosRequestConfig = {}, callContext?: ApiCallContext) => {
-    return Observable.fromPromise(axiosForApi.post<ResponsePayload>(path, data, config, callContext))
-        .takeWhile(redirectOccurred)
-        .map(response => response.data)
-}
-
-/**
- * HTTP PUT axios request wrapped into RxJS Observable.
- * Can be interrupted by `redirectOccured` function.
- *
- * @param path Endpoint url
- * @param headers Request headers
- * @param callContext Call context
- * @template ResponsePayload Response payload type
- * @category Utils
- */
-const axiosPut = <ResponsePayload>(path: string, data: any, callContext?: ApiCallContext) => {
-    return Observable.fromPromise(axiosForApi.put<ResponsePayload>(path, data, callContext))
-        .takeWhile(redirectOccurred)
-        .map(response => response.data)
-}
-
-/**
- * HTTP DELETE axios request wrapped into RxJS Observable.
- * Can be interrupted by `redirectOccured` function.
- *
- * @param path Endpoint url
- * @param headers Request headers
- * @param callContext Call context
- * @template ResponsePayload Response payload type
- * @category Utils
- */
-const axiosDelete = <ResponsePayload>(path: string, callContext?: ApiCallContext) => {
-    return Observable.fromPromise(axiosForApi.delete<ResponsePayload>(path, callContext))
-        .takeWhile(redirectOccurred)
-        .map(response => response.data)
 }
 
 type QueryParamsMap = Record<string, string | number>
@@ -218,11 +65,11 @@ export function applyParams(url: string, qso: QueryParamsMap) {
  * @param url
  * @param qso
  */
-export function applyRawParams(url: string, qso: Record<string, unknown>) {
+export function applyRawParams(url: string, qso: Record<string, any>) {
     if (!qso) {
         return url
     }
-    const result = qs.stringify(qso, { encode: true })
+    const result = new URLSearchParams(qso).toString()
     return `${addTailControlSequences(url)}${result && `${result}`}`
 }
 
@@ -233,11 +80,9 @@ export function applyRawParams(url: string, qso: Record<string, unknown>) {
  *
  * @returns File upload endpoint
  */
-export function getFileUploadEndpoint() {
-    if (!axiosInstance.defaults.baseURL) {
+export function getFileUploadEndpoint(instance: AxiosInstance) {
+    if (!instance.defaults.baseURL) {
         return '/file'
     }
-    return axiosInstance.defaults.baseURL.endsWith('/') ? `${axiosInstance.defaults.baseURL}file` : `${axiosInstance.defaults.baseURL}/file`
+    return instance.defaults.baseURL.endsWith('/') ? `${instance.defaults.baseURL}file` : `${instance.defaults.baseURL}/file`
 }
-
-export { axiosForApi, axiosGet, axiosPut, axiosDelete, axiosPost }

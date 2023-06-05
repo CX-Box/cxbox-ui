@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-export * as api from './api'
-export * as redux from './redux'
-export * as strings from './strings'
-export * as history from './history'
-export * as filters from './filters'
-export * as operations from './operations'
+export * from './api'
+export * from './strings'
+export * from './history'
+export * from './filters'
+export * from './operations'
+export * from './bc'
+export * from './tree'
+export * from './breadthFirst'
+export * from './deleteUndefinedFromObject'

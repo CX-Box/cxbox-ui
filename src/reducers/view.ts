@@ -14,16 +14,50 @@
  * limitations under the License.
  */
 
-import { AnyAction, types } from '../actions/actions'
-import { PendingValidationFails, PendingValidationFailsFormat, ViewState } from '../interfaces/view'
-import { PendingDataItem } from '../interfaces/data'
-import { Store } from '../interfaces/store'
-import { OperationTypeCrud } from '../interfaces/operation'
-import { buildBcUrl } from '../utils/strings'
-import i18n from 'i18next'
+import { PendingValidationFailsFormat, ViewState, PendingDataItem } from '../interfaces'
+import { OperationTypeCrud } from '@cxbox-ui/schema'
+import { buildBcUrl } from '../utils'
+import {
+    bcCancelPendingChanges,
+    bcFetchRowMeta,
+    bcFetchRowMetaFail,
+    bcFetchRowMetaSuccess,
+    bcLoadMore,
+    bcNewDataFail,
+    bcNewDataSuccess,
+    bcSaveDataFail,
+    bcSaveDataSuccess,
+    changeDataItem,
+    changeDataItems,
+    changeLocation,
+    clearValidationFails,
+    closeConfirmModal,
+    closeNotification,
+    closeViewError,
+    closeViewPopup,
+    dropAllAssociations,
+    dropAllAssociationsFull,
+    dropAllAssociationsSameBc,
+    forceActiveChangeFail,
+    forceActiveRmUpdate,
+    operationConfirmation,
+    processPostInvoke,
+    selectTableCell,
+    selectView,
+    sendOperation,
+    sendOperationFail,
+    sendOperationSuccess,
+    showFileUploadPopup,
+    showNotification,
+    showViewError,
+    showViewPopup,
+    viewClearPickMap,
+    viewPutPickMap
+} from '../actions'
+import { ReducerBuilderManager } from './ReducerBuilderManager'
 
-export const initialState: ViewState = {
-    id: null,
+export const initialViewState: ViewState = {
+    id: undefined,
     name: null,
     url: null,
     widgets: [],
@@ -50,108 +84,36 @@ export const initialState: ViewState = {
  *
  * Stores information about currently active view and various fast-living pending values which should be stored
  * until we navitage to a different view.
- *
- * @param state View branch of Redux store
- * @param action Redux action
- * @param store Store instance for read-only access of different branches of Redux store
  */
-export function view(state = initialState, action: AnyAction, store: Store): ViewState {
-    switch (action.type) {
-        case types.selectView: {
-            return {
-                ...state,
-                rowMeta: initialState.rowMeta,
-                ...action.payload
-            }
-        }
-        case types.bcFetchRowMeta: {
-            return {
-                ...state,
-                metaInProgress: {
-                    ...state.metaInProgress,
-                    [action.payload.bcName]: true
-                }
-            }
-        }
-        case types.bcLoadMore: {
+export const createViewReducerBuilderManager = <S extends ViewState>(initialState: S) =>
+    new ReducerBuilderManager<S>()
+        .addCase(selectView, (state, action) => {
+            state.rowMeta = initialViewState.rowMeta
+            Object.assign(state, action.payload)
+        })
+        .addCase(bcFetchRowMeta, (state, action) => {
+            state.metaInProgress[action.payload.bcName] = true
+        })
+        .addCase(bcLoadMore, (state, action) => {
             const infiniteWidgets: string[] = state.infiniteWidgets || []
-            infiniteWidgets.push(action.payload.widgetName)
-            return {
-                ...state,
-                infiniteWidgets: Array.from(new Set(infiniteWidgets))
+            if (action.payload.widgetName !== undefined) {
+                infiniteWidgets.push(action.payload.widgetName)
             }
-        }
-        case types.sendOperation: {
+            state.infiniteWidgets = Array.from(new Set(infiniteWidgets))
+        })
+        .addCase(sendOperation, (state, action) => {
             if (action.payload.operationType === OperationTypeCrud.create) {
-                return {
-                    ...state,
-                    metaInProgress: {
-                        ...state.metaInProgress,
-                        [action.payload.bcName]: true
-                    }
-                }
-            } else {
-                return state
+                state.metaInProgress[action.payload.bcName] = true
             }
-        }
-        case types.bcFetchRowMetaSuccess: {
-            const bcName = action.payload.bcName
-            return {
-                ...state,
-                rowMeta: {
-                    ...state.rowMeta,
-                    [bcName]: {
-                        ...(state.rowMeta[bcName] || {}),
-                        [action.payload.bcUrl]: action.payload.rowMeta
-                    }
-                },
-                metaInProgress: {
-                    ...state.metaInProgress,
-                    [action.payload.bcName]: false
-                }
-            }
-        }
-        case types.bcNewDataSuccess: {
-            return {
-                ...state,
-                selectedCell: initialState.selectedCell
-            }
-        }
-        case types.bcNewDataFail:
-        case types.bcFetchRowMetaFail: {
-            return {
-                ...state,
-                metaInProgress: {
-                    ...state.metaInProgress,
-                    [action.payload.bcName]: false
-                }
-            }
-        }
-        case types.forceActiveChangeFail:
-        case types.bcSaveDataFail:
-        case types.sendOperationFail: {
-            const bcName = action.payload.bcName
-            const errors: Record<string, string> = {}
-            if (action.payload.entityError) {
-                Object.entries(action.payload.entityError.fields).forEach(([fieldName, violation]) => {
-                    errors[fieldName] = violation
-                })
-            }
-            return {
-                ...state,
-                rowMeta: {
-                    ...state.rowMeta,
-                    [bcName]: {
-                        ...(state.rowMeta[bcName] || {}),
-                        [action.payload.bcUrl]: {
-                            ...state.rowMeta[bcName][action.payload.bcUrl],
-                            errors
-                        }
-                    }
-                }
-            }
-        }
-        case types.forceActiveRmUpdate: {
+        })
+        .addCase(bcFetchRowMetaSuccess, (state, action) => {
+            state.rowMeta[action.payload.bcName][action.payload.bcUrl] = action.payload.rowMeta
+            state.metaInProgress[action.payload.bcName] = false
+        })
+        .addCase(bcNewDataSuccess, (state, action) => {
+            state.selectedCell = initialViewState.selectedCell
+        })
+        .addCase(forceActiveRmUpdate, (state, action) => {
             const { bcName, bcUrl, currentRecordData, rowMeta, cursor } = action.payload
             const handledForceActive: PendingDataItem = {}
             const rowMetaForcedValues: PendingDataItem = {}
@@ -184,41 +146,17 @@ export function view(state = initialState, action: AnyAction, store: Store): Vie
                 }
             })
 
-            return {
-                ...state,
-                handledForceActive: {
-                    ...state.handledForceActive,
-                    [bcName]: {
-                        ...(state.handledForceActive[bcName] || {}),
-                        [cursor]: {
-                            ...(state.handledForceActive[bcName]?.[cursor] || {}),
-                            ...handledForceActive
-                        }
-                    }
-                },
-                pendingDataChanges: {
-                    ...state.pendingDataChanges,
-                    [bcName]: {
-                        ...(state.pendingDataChanges[bcName] || {}),
-                        [cursor]: newPendingDataChanges
-                    }
-                },
-                rowMeta: {
-                    ...state.rowMeta,
-                    [bcName]: {
-                        ...(state.rowMeta[bcName] || {}),
-                        [bcUrl]: rowMeta
-                    }
-                }
-            }
-        }
-        case types.changeDataItem: {
+            Object.assign(state.handledForceActive[bcName][cursor], handledForceActive)
+            state.pendingDataChanges[bcName][cursor] = newPendingDataChanges
+            state.rowMeta[bcName][bcUrl] = rowMeta
+        })
+        .addCase(changeDataItem, (state, action) => {
             const actionBcName = action.payload.bcName
             const prevBc = state.pendingDataChanges[action.payload.bcName] || {}
             const prevCursor = prevBc[action.payload.cursor] || {}
             const prevPending = prevCursor || {}
             const nextPending = { ...prevPending, ...action.payload.dataItem }
-            const bcUrl = buildBcUrl(actionBcName, true, store)
+            const bcUrl = buildBcUrl(actionBcName, true)
             const rowMeta = state.rowMeta[actionBcName]?.[bcUrl]
             const nextValidationFails: Record<string, string> = {}
             const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
@@ -230,51 +168,33 @@ export function view(state = initialState, action: AnyAction, store: Store): Vie
                     nextPending[fieldKey] === '' ||
                     (Array.isArray(nextPending[fieldKey]) && Object.keys(nextPending[fieldKey]).length === 0)
                 if (required && isEmpty) {
-                    nextValidationFails[fieldKey] = i18n.t('This field is mandatory')
+                    nextValidationFails[fieldKey] = 'This field is mandatory'
                 }
             })
-            return {
-                ...state,
-                pendingDataChanges: {
-                    ...state.pendingDataChanges,
-                    [action.payload.bcName]: {
-                        ...prevBc,
-                        [action.payload.cursor]: nextPending
-                    }
-                },
-                pendingValidationFails: isTargetFormatPVF
-                    ? {
-                          ...(state.pendingValidationFails as PendingValidationFails),
-                          [actionBcName]: {
-                              ...(state.pendingValidationFails[actionBcName] as { [cursor: string]: Record<string, string> }),
-                              [action.payload.cursor]: nextValidationFails
-                          }
-                      }
-                    : nextValidationFails
+            state.pendingDataChanges[action.payload.bcName][action.payload.cursor] = nextPending
+            if (isTargetFormatPVF) {
+                ;(state.pendingValidationFails[actionBcName] as { [cursor: string]: Record<string, string> })[action.payload.cursor] =
+                    nextValidationFails
+            } else {
+                state.pendingValidationFails = nextValidationFails
             }
-        }
-        case types.changeDataItems: {
+        })
+        .addCase(changeDataItems, (state, action) => {
             const newPendingChanges = { ...state.pendingDataChanges[action.payload.bcName] }
             action.payload.cursors.forEach((cursor, index) => {
                 newPendingChanges[cursor] = action.payload.dataItems[index]
             })
-            return {
-                ...state,
-                pendingDataChanges: {
-                    ...state.pendingDataChanges,
-                    [action.payload.bcName]: newPendingChanges
-                }
-            }
-        }
-        case types.dropAllAssociations: {
+            state.pendingDataChanges[action.payload.bcName] = newPendingChanges
+        })
+        .addCase(dropAllAssociations, (state, action) => {
             const pendingDataChanges = { ...state.pendingDataChanges }
             action.payload.bcNames.forEach(bcName => {
                 const pendingBcChanges: Record<string, PendingDataItem> = {}
-                ;(store.data[bcName] || [])
-                    .filter(item => item._associate)
-                    .forEach(item => {
-                        pendingBcChanges[item.id] = { id: item.id, _associate: false }
-                    })
+                // ;(store.data[bcName] || [])
+                //     .filter(item => item._associate)
+                //     .forEach(item => {
+                //         pendingBcChanges[item.id] = { id: item.id, _associate: false }
+                //     })
                 Object.keys(pendingDataChanges[bcName] || {}).forEach(itemId => {
                     pendingBcChanges[itemId] = { id: itemId, _associate: false }
                 })
@@ -287,104 +207,130 @@ export function view(state = initialState, action: AnyAction, store: Store): Vie
                     pendingValidationFails[i] = {}
                 })
             }
-            return {
-                ...state,
-                pendingDataChanges,
-                pendingValidationFails: isTargetFormatPVF ? pendingValidationFails : initialState.pendingValidationFails
-            }
-        }
-        case types.dropAllAssociationsSameBc: {
-            const pendingDataChanges = { ...state.pendingDataChanges }
-
-            Object.entries({ ...store.depthData, 1: store.data }).forEach(([depthLevelKey, depthLevelData]) => {
-                const depthLevel = Number(depthLevelKey)
-                const pendingBcChanges: Record<string, PendingDataItem> = {}
-                if (depthLevel >= action.payload.depthFrom && depthLevelData[action.payload.bcName]) {
-                    depthLevelData[action.payload.bcName]
-                        .filter((item: any) => item._associate)
-                        .forEach((item: any) => {
-                            pendingBcChanges[item.id] = { _associate: false }
-                        })
-                }
-                pendingDataChanges[action.payload.bcName] = pendingBcChanges
-            })
-            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-
-            return {
-                ...state,
-                pendingDataChanges,
-                pendingValidationFails: isTargetFormatPVF
-                    ? {
-                          ...(state.pendingValidationFails as PendingValidationFails),
-                          [action.payload.bcName]: {}
-                      }
-                    : initialState.pendingValidationFails
-            }
-        }
-        case types.dropAllAssociationsFull: {
-            const bcName = action.payload.bcName
-            const pendingDataChanges = { ...state.pendingDataChanges }
-            const dropDesc = action.payload.dropDescendants
-
-            const pendingBcChanges: Record<string, PendingDataItem> = {}
-            ;(store.data[bcName] || [])
-                .filter(item => item._associate)
-                .forEach(item => {
-                    if ((dropDesc && item.level === action.payload.depth) || item.level >= action.payload.depth) {
-                        pendingBcChanges[item.id] = { ...item, _associate: false }
-                    }
+            state.pendingDataChanges = pendingDataChanges
+            state.pendingValidationFails = isTargetFormatPVF ? pendingValidationFails : initialViewState.pendingValidationFails
+        })
+        //TODO: rewrite correctly (get data outside of reducer, place it in epic)
+        .addCase(dropAllAssociationsSameBc, (state, action) => {
+            //     const pendingDataChanges = { ...state.pendingDataChanges }
+            //
+            //     Object.entries({ ...store.depthData, 1: store.data }).forEach(([depthLevelKey, depthLevelData]) => {
+            //         const depthLevel = Number(depthLevelKey)
+            //         const pendingBcChanges: Record<string, PendingDataItem> = {}
+            //         if (depthLevel >= action.payload.depthFrom && depthLevelData[action.payload.bcName]) {
+            //             depthLevelData[action.payload.bcName]
+            //                 .filter((item: any) => item._associate)
+            //                 .forEach((item: any) => {
+            //                     pendingBcChanges[item.id] = { _associate: false }
+            //                 })
+            //         }
+            //         pendingDataChanges[action.payload.bcName] = pendingBcChanges
+            //     })
+            //     const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
+            //
+            //     return {
+            //         ...state,
+            //         pendingDataChanges,
+            //         pendingValidationFails: isTargetFormatPVF
+            //             ? {
+            //                   ...(state.pendingValidationFails as PendingValidationFails),
+            //                   [action.payload.bcName]: {}
+            //               }
+            //             : initialState.pendingValidationFails
+            //     }
+        })
+        //TODO: rewrite correctly (get data outside of reducer, place it in epic)
+        .addCase(dropAllAssociationsFull, (state, action) => {
+            // const bcName = action.payload.bcName
+            // const pendingDataChanges = { ...state.pendingDataChanges }
+            // const dropDesc = action.payload.dropDescendants
+            //
+            // const pendingBcChanges: Record<string, PendingDataItem> = {}
+            // ;(store.data[bcName] || [])
+            //     .filter(item => item._associate)
+            //     .forEach(item => {
+            //         if ((dropDesc && item.level === action.payload.depth) || item.level >= action.payload.depth) {
+            //             pendingBcChanges[item.id] = { ...item, _associate: false }
+            //         }
+            //     })
+            // Object.entries(pendingDataChanges[bcName] || {}).forEach(([itemId, item]) => {
+            //     if ((dropDesc && item.level === action.payload.depth) || item.level >= action.payload.depth) {
+            //         pendingBcChanges[itemId] = { ...item, _associate: false }
+            //     }
+            // })
+            // pendingDataChanges[bcName] = pendingBcChanges
+            // const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
+            //
+            // return {
+            //     ...state,
+            //     pendingDataChanges,
+            //     pendingValidationFails: isTargetFormatPVF
+            //         ? {
+            //               ...(state.pendingValidationFails as PendingValidationFails),
+            //               [action.payload.bcName]: {}
+            //           }
+            //         : initialState.pendingValidationFails
+            // }
+        })
+        .addCase(bcNewDataFail, (state, action) => {
+            state.metaInProgress[action.payload.bcName] = false
+        })
+        .addCase(bcFetchRowMetaFail, (state, action) => {
+            state.metaInProgress[action.payload.bcName] = false
+        })
+        .addCase(forceActiveChangeFail, (state, action) => {
+            const { bcName, bcUrl, entityError } = action.payload
+            const errors: Record<string, string> = {}
+            if (entityError) {
+                Object.entries(entityError.fields).forEach(([fieldName, violation]) => {
+                    errors[fieldName] = violation
                 })
-            Object.entries(pendingDataChanges[bcName] || {}).forEach(([itemId, item]) => {
-                if ((dropDesc && item.level === action.payload.depth) || item.level >= action.payload.depth) {
-                    pendingBcChanges[itemId] = { ...item, _associate: false }
-                }
-            })
-            pendingDataChanges[bcName] = pendingBcChanges
-            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-
-            return {
-                ...state,
-                pendingDataChanges,
-                pendingValidationFails: isTargetFormatPVF
-                    ? {
-                          ...(state.pendingValidationFails as PendingValidationFails),
-                          [action.payload.bcName]: {}
-                      }
-                    : initialState.pendingValidationFails
             }
-        }
-        case types.sendOperationSuccess:
-        case types.bcSaveDataSuccess: {
-            const prevBc = state.pendingDataChanges[action.payload.bcName] || {}
-            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-            return {
-                ...state,
-                pendingDataChanges: {
-                    ...state.pendingDataChanges,
-                    [action.payload.bcName]: {
-                        ...prevBc,
-                        [action.payload.cursor]: {}
-                    }
-                },
-                pendingValidationFails: isTargetFormatPVF
-                    ? {
-                          ...(state.pendingValidationFails as PendingValidationFails),
-                          [action.payload.bcName]: {
-                              ...(state.pendingValidationFails[action.payload.bcName] as { [cursor: string]: Record<string, string> }),
-                              [action.payload.cursor]: {}
-                          }
-                      }
-                    : initialState.pendingValidationFails,
-                handledForceActive: {
-                    ...state.handledForceActive,
-                    [action.payload.bcName]: {
-                        ...(state.handledForceActive[action.payload.bcName] || {}),
-                        [action.payload.cursor]: {}
-                    }
-                }
+            state.rowMeta[bcName][bcUrl].errors = errors
+        })
+        .addCase(bcSaveDataFail, (state, action) => {
+            const { bcName, bcUrl, entityError } = action.payload
+            const errors: Record<string, string> = {}
+            if (entityError) {
+                Object.entries(entityError.fields).forEach(([fieldName, violation]) => {
+                    errors[fieldName] = violation
+                })
             }
-        }
-        case types.bcCancelPendingChanges: {
+            state.rowMeta[bcName][bcUrl].errors = errors
+        })
+        .addCase(sendOperationFail, (state, action) => {
+            const { bcName, bcUrl, entityError } = action.payload
+            const errors: Record<string, string> = {}
+            if (entityError) {
+                Object.entries(entityError.fields).forEach(([fieldName, violation]) => {
+                    errors[fieldName] = violation
+                })
+            }
+            state.rowMeta[bcName][bcUrl].errors = errors
+        })
+        .addCase(sendOperationSuccess, (state, action) => {
+            const { bcName, cursor } = action.payload
+            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
+            state.pendingDataChanges[bcName][cursor] = {}
+            if (isTargetFormatPVF) {
+                ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
+            } else {
+                state.pendingValidationFails = initialViewState.pendingValidationFails
+            }
+            state.handledForceActive[bcName][cursor] = {}
+        })
+        .addCase(bcSaveDataSuccess, (state, action) => {
+            const { bcName, cursor } = action.payload
+            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
+            state.pendingDataChanges[bcName][cursor] = {}
+            if (isTargetFormatPVF) {
+                ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
+            } else {
+                state.pendingValidationFails = initialViewState.pendingValidationFails
+            }
+            state.handledForceActive[bcName][cursor] = {}
+        })
+        .addCase(bcCancelPendingChanges, (state, action) => {
             // TODO: Check if this works for hierarchy after 1.1.0
             const pendingDataChanges = { ...state.pendingDataChanges }
             for (const bcName in state.pendingDataChanges) {
@@ -406,113 +352,77 @@ export function view(state = initialState, action: AnyAction, store: Store): Vie
                     /**
                      * Clear a `pendingValidationFails` completely
                      */
-                    pendingValidationFails = initialState.pendingValidationFails
+                    pendingValidationFails = initialViewState.pendingValidationFails
                 }
             }
-            return {
-                ...state,
-                pendingDataChanges,
-                pendingValidationFails: isTargetFormatPVF ? pendingValidationFails : initialState.pendingValidationFails
-            }
-        }
-        case types.clearValidationFails: {
-            return { ...state, pendingValidationFails: initialState.pendingValidationFails }
-        }
-        case types.showViewPopup: {
-            const {
+            state.pendingDataChanges = pendingDataChanges
+            state.pendingValidationFails = isTargetFormatPVF ? pendingValidationFails : initialViewState.pendingValidationFails
+        })
+        .addCase(clearValidationFails, state => {
+            state.pendingValidationFails = initialViewState.pendingValidationFails
+        })
+        .addCase(showViewPopup, (state, action) => {
+            const { bcName, calleeBCName, calleeWidgetName, associateFieldKey, assocValueKey, active, isFilter, type, widgetName } =
+                action.payload
+            // const widgetValueKey = store.view.widgets.find(item => item.bcName === bcName)?.options?.displayedValueKey
+            state.popupData = {
+                widgetName,
+                type,
                 bcName,
                 calleeBCName,
                 calleeWidgetName,
                 associateFieldKey,
-                assocValueKey,
+                assocValueKey: assocValueKey,
                 active,
-                isFilter,
-                type,
-                widgetName
-            } = action.payload
-            const widgetValueKey = store.view.widgets.find(item => item.bcName === bcName)?.options?.displayedValueKey
-            return {
-                ...state,
-                popupData: {
-                    widgetName,
-                    type,
-                    bcName,
-                    calleeBCName,
-                    calleeWidgetName,
-                    associateFieldKey,
-                    assocValueKey: assocValueKey ?? widgetValueKey,
-                    active,
-                    isFilter
-                }
+                isFilter
             }
-        }
-        case types.showFileUploadPopup: {
+        })
+        .addCase(showFileUploadPopup, (state, action) => {
             const bcName = state.widgets.find(item => item.name === action.payload.widgetName)?.bcName
-            return {
-                ...state,
-                popupData: {
-                    type: 'file-upload',
-                    bcName, // should be null
-                    calleeBCName: bcName
-                }
+            state.popupData = {
+                type: 'file-upload',
+                bcName, // should be null
+                calleeBCName: bcName
             }
-        }
-        case types.viewPutPickMap:
-            return { ...state, pickMap: action.payload.map }
-        case types.viewClearPickMap:
-            return { ...state, pickMap: null }
-        case types.closeViewPopup:
-            return { ...state, popupData: { bcName: null } }
-        case types.selectTableCell:
-            return {
-                ...state,
-                selectedCell: {
-                    widgetName: action.payload.widgetName,
-                    rowId: action.payload.rowId,
-                    fieldKey: action.payload.fieldKey
-                }
-            }
-        case types.changeLocation:
-            return {
-                ...state,
-                pendingDataChanges: initialState.pendingDataChanges,
-                selectedCell: initialState.selectedCell
-            }
-        case types.showNotification: {
-            return {
-                ...state,
-                systemNotifications: [
-                    ...state.systemNotifications,
-                    {
-                        type: action.payload.type,
-                        message: action.payload.message,
-                        id: state.systemNotifications.length
-                    }
-                ]
-            }
-        }
-        case types.closeNotification: {
-            return {
-                ...state,
-                systemNotifications: state.systemNotifications.filter(item => item.id !== action.payload.id)
-            }
-        }
-        case types.showViewError: {
-            return { ...state, error: action.payload.error }
-        }
-        case types.operationConfirmation: {
-            return { ...state, modalInvoke: action.payload }
-        }
-        case types.closeConfirmModal: {
-            return { ...state, modalInvoke: null }
-        }
-        case types.closeViewError:
-            return { ...state, error: null }
-        case types.processPostInvoke:
-            return { ...state, selectedCell: null }
-        default:
-            return state
-    }
-}
-
-export default view
+        })
+        .addCase(viewPutPickMap, (state, action) => {
+            state.pickMap = action.payload.map
+        })
+        .addCase(viewClearPickMap, state => {
+            state.pickMap = null
+        })
+        .addCase(closeViewPopup, state => {
+            state.popupData.bcName = null
+        })
+        .addCase(selectTableCell, (state, action) => {
+            state.selectedCell = { widgetName: action.payload.widgetName, rowId: action.payload.rowId, fieldKey: action.payload.fieldKey }
+        })
+        .addCase(changeLocation, (state, action) => {
+            state.pendingDataChanges = initialViewState.pendingDataChanges
+            state.selectedCell = initialViewState.selectedCell
+        })
+        .addCase(showNotification, (state, action) => {
+            state.systemNotifications.push({
+                type: action.payload.type,
+                message: action.payload.message,
+                id: state.systemNotifications.length
+            })
+        })
+        .addCase(closeNotification, (state, action) => {
+            state.systemNotifications = state.systemNotifications.filter(item => item.id !== action.payload.id)
+        })
+        .addCase(showViewError, (state, action) => {
+            state.error = action.payload.error
+        })
+        .addCase(operationConfirmation, (state, action) => {
+            state.modalInvoke = action.payload
+        })
+        .addCase(closeConfirmModal, (state, action) => {
+            state.modalInvoke = null
+        })
+        .addCase(closeViewError, state => {
+            state.error = null
+        })
+        .addCase(processPostInvoke, state => {
+            state.selectedCell = null
+        })

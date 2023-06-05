@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-import { AnyAction, types } from '../actions/actions'
-import { Session } from '../interfaces/session'
+import { Session } from '../interfaces'
+import {
+    addNotification,
+    addPendingRequest,
+    login,
+    loginDone,
+    loginFail,
+    logout,
+    removeNotifications,
+    removePendingRequest,
+    switchDebugMode
+} from '../actions'
+import { ReducerBuilderManager } from './ReducerBuilderManager'
 
-export const initialState: Session = {
+export const initialSessionState: Session = {
     devPanelEnabled: false,
     activeRole: null,
     roles: null,
@@ -27,60 +38,54 @@ export const initialState: Session = {
     debugMode: false,
     exportStateEnabled: false,
     active: false,
+    logout: false,
     loginSpin: false,
     errorMsg: null,
     screens: [],
-    pendingRequests: []
+    pendingRequests: [],
+    notifications: []
 }
 
 /**
  * Session reducer
  *
- * Stores information about currently active session and data that should be persistent during all period of
+ * Stores information about currently active session and dataEpics.ts that should be persistent during all period of
  * user interaction with application.
- *
- * @param state Session branch of Redux store
- * @param action Redux action
- * @param store Store instance for read-only access of different branches of Redux store
  */
-export function session(state = initialState, action: AnyAction): Session {
-    switch (action.type) {
-        case types.login: {
-            return { ...state, loginSpin: true, errorMsg: null }
-        }
-        case types.loginDone: {
-            const loginResponse = action.payload
-            return {
-                ...state,
-                devPanelEnabled: loginResponse.devPanelEnabled,
-                activeRole: loginResponse.activeRole,
-                roles: loginResponse.roles,
-                firstName: loginResponse.firstName,
-                lastName: loginResponse.lastName,
-                login: loginResponse.login,
-                loginSpin: false,
-                active: true,
-                screens: loginResponse.screens || []
-            }
-        }
-        case types.loginFail: {
-            return { ...state, loginSpin: false, errorMsg: action.payload.errorMsg }
-        }
-        case types.switchDebugMode: {
-            return { ...state, debugMode: action.payload }
-        }
-        case types.addPendingRequest: {
-            return { ...state, pendingRequests: [...state.pendingRequests, action.payload.request] }
-        }
-        case types.removePendingRequest: {
-            return {
-                ...state,
-                pendingRequests: state.pendingRequests.filter(item => item.requestId !== action.payload.requestId)
-            }
-        }
-        default:
-            return state
-    }
-}
-
-export default session
+export const createSessionReducerBuilderManager = <S extends Session>(initialState: S) =>
+    new ReducerBuilderManager<S>()
+        .addCase(login, state => {
+            state.loginSpin = true
+            state.errorMsg = null
+        })
+        .addCase(loginDone, (state, action) => {
+            state = { ...state, ...action.payload }
+            state.loginSpin = false
+            state.active = true
+            state.logout = false
+        })
+        .addCase(loginFail, (state, action) => {
+            state.loginSpin = false
+            state.errorMsg = action.payload.errorMsg
+        })
+        .addCase(logout, state => {
+            state.loginSpin = false
+            state.active = false
+            state.logout = true
+        })
+        .addCase(switchDebugMode, (state, action) => {
+            state.debugMode = action.payload
+        })
+        .addCase(addPendingRequest, (state, action) => {
+            state.pendingRequests.push(action.payload.request)
+        })
+        .addCase(removePendingRequest, (state, action) => {
+            state.pendingRequests = state.pendingRequests.filter(item => item.requestId !== action.payload.requestId)
+        })
+        .addCase(addNotification, (state, action) => {
+            state.notifications.push(action.payload)
+        })
+        .addCase(removeNotifications, (state, action) => {
+            const closingKeys = action.payload
+            state.notifications = state.notifications.filter(notification => !closingKeys.includes(notification.key))
+        })

@@ -87,8 +87,8 @@ function getHierarchyChildBc(originBcName: string, hierarchyWidget: WidgetMeta) 
  *
  * @param condition Widget showCondition to check
  * @param cursor Id of active record for business component in condition
- * @param data An array of data items to check for condition
- * @param pendingDataChanges Pending data changes of the currently active view
+ * @param data An array of data.ts items to check for condition
+ * @param pendingDataChanges Pending data.ts changes of the currently active view
  */
 export function checkShowCondition(
     condition: WidgetShowCondition,

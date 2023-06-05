@@ -1,61 +1,27 @@
-/*
- * © OOO "SI IKS LAB", 2022-2023
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import { DataState, DataItem } from '../interfaces'
+import { bcFetchDataSuccess, bcFetchRowMetaSuccess, bcNewDataSuccess, bcSaveDataSuccess, changeAssociations, selectView } from '../actions'
+import { ReducerBuilderManager } from './ReducerBuilderManager'
 
-import { AnyAction, types } from '../actions/actions'
-import { DataState, DataItem } from '../interfaces/data'
-
-const initialState: DataState = {}
 const emptyData: DataItem[] = []
 
-/**
- * Data reducer
- *
- * Stores data (i.e. records, rows) for Business Components
- *
- * @param state Data branch of Redux store
- * @param action Redux action
- * @param store Store instance for read-only access of different branches of Redux store
- */
-export function data(state = initialState, action: AnyAction) {
-    switch (action.type) {
-        case types.bcFetchDataSuccess: {
-            return {
-                ...state,
-                [action.payload.bcName]: action.payload.data
-            }
-        }
-        case types.bcNewDataSuccess: {
-            return {
-                ...state,
-                [action.payload.bcName]: [...(state[action.payload.bcName] || emptyData), action.payload.dataItem]
-            }
-        }
-        case types.bcSaveDataSuccess: {
+export const dataInitialState: DataState = {}
+export const createDataReducerBuilderManager = (initialState: DataState) =>
+    new ReducerBuilderManager<typeof initialState>()
+        .addCase(bcFetchDataSuccess, (state, action) => {
+            state[action.payload.bcName] = action.payload.data
+        })
+        .addCase(bcNewDataSuccess, (state, action) => {
+            state[action.payload.bcName] = [...(state[action.payload.bcName] || emptyData), action.payload.dataItem]
+        })
+        .addCase(bcSaveDataSuccess, (state, action) => {
             const nextDataItem = action.payload.dataItem
-            return {
-                ...state,
-                [action.payload.bcName]: (state[action.payload.bcName] || emptyData).map(item =>
-                    item.id === nextDataItem.id ? nextDataItem : item
-                )
-            }
-        }
-        case types.bcFetchRowMetaSuccess: {
+            const index = state[action.payload.bcName].findIndex(item => item.id === nextDataItem.id)
+            state[action.payload.bcName][index] = nextDataItem
+        })
+        .addCase(bcFetchRowMetaSuccess, (state, action) => {
             const cursor = action.payload.cursor
             if (!cursor) {
-                return state
+                return
             }
             const prevDataItem = (state[action.payload.bcName] || emptyData).find(item => item.id === cursor)
             const nextDataItem: DataItem = {
@@ -67,7 +33,7 @@ export function data(state = initialState, action: AnyAction) {
             // BC is unable to update value from row meta if id is null
             const valueUpdateUnsupported = action.payload.rowMeta.fields.find(item => item.key === 'id' && !item.currentValue)
             if (valueUpdateUnsupported) {
-                return state
+                return
             }
             action.payload.rowMeta.fields
                 .filter(field => {
@@ -77,27 +43,14 @@ export function data(state = initialState, action: AnyAction) {
                 .forEach(field => (nextDataItem[field.key] = field.currentValue))
 
             if (!prevDataItem) {
-                return {
-                    ...state,
-                    [action.payload.bcName]: [...(state[action.payload.bcName] || emptyData), nextDataItem]
-                }
+                state[action.payload.bcName] = [...(state[action.payload.bcName] || emptyData), nextDataItem]
+                return
             }
-            return {
-                ...state,
-                [action.payload.bcName]: state[action.payload.bcName].map(item => (item === prevDataItem ? nextDataItem : item))
-            }
-        }
-        case types.changeAssociations:
-            return {
-                ...state,
-                [`${action.payload.bcName}Delta`]: action.payload.records
-            }
-        case types.selectView: {
-            return initialState
-        }
-        default:
-            return state
-    }
-}
-
-export default data
+            state[action.payload.bcName] = state[action.payload.bcName].map(item => (item === prevDataItem ? nextDataItem : item))
+        })
+        .addCase(changeAssociations, (state, action) => {
+            state[`${action.payload.bcName}Delta`] = action.payload.records || []
+        })
+        .addCase(selectView, state => {
+            state = {}
+        })
