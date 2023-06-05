@@ -29,6 +29,25 @@ export interface UserRole {
     cacheLoaderName: string
 }
 
+export type DefaultNotificationType = 'success' | 'error' | 'info' | 'warning'
+
+export interface Notification {
+    key: string
+    type: DefaultNotificationType | string
+    message: string
+    description?: string
+    options?: {
+        messageOptions?: { [key: string]: string | number }
+        buttonWarningNotificationOptions?: {
+            buttonText: string
+            actionsForClick?: Array<Record<string, any>>
+        }
+    }
+    duration?: number
+}
+
+export type NotificationKeys = string[]
+
 export interface Session {
     /**
      * Whether dev tools panel is shown
@@ -49,10 +68,13 @@ export interface Session {
     lastName?: string
     login?: string
     active: boolean
+    logout: boolean
     screens: SessionScreen[]
     loginSpin: boolean
     errorMsg?: string
     pendingRequests?: PendingRequest[]
+    notifications: Notification[]
+    isMetaRefreshing: boolean
 }
 
 export interface LoginResponse extends CxboxResponse {

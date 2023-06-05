@@ -15,10 +15,10 @@
  */
 
 import { WidgetMeta } from '../interfaces/widget'
-import { $do } from '../actions/actions'
 import { OperationTypeCrud } from '../interfaces/operation'
 import { Store as CoreStore } from '../interfaces/store'
-import { AnyAction, Dispatch, MiddlewareAPI } from 'redux'
+import { AnyAction, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit'
+import { sendOperation } from '../actions'
 
 /**
  * Performs mechanism of autosave
@@ -60,14 +60,14 @@ export function autosaveRoutine(action: AnyAction, store: MiddlewareAPI<Dispatch
          * Save all BCs except `baseBcName`
          */
         bcList.forEach(bcName => {
-            const widget = state.view.widgets.find((v: WidgetMeta) => v.bcName === bcName)
+            const widget = state.view.widgets?.find((v: WidgetMeta) => v.bcName === bcName)
             const cursor = state.screen.bo.bc[bcName]?.cursor
             if (bcHasPendingAutosaveChanges(state, bcName, cursor)) {
                 dispatch(
-                    $do.sendOperation({
+                    sendOperation({
                         bcName: bcName,
                         operationType: OperationTypeCrud.save,
-                        widgetName: widget.name
+                        widgetName: widget?.name as string
                     })
                 )
             }
@@ -75,12 +75,12 @@ export function autosaveRoutine(action: AnyAction, store: MiddlewareAPI<Dispatch
         /**
          * save `baseBcName`'s BC
          */
-        const baseWidget = state.view.widgets.find((v: WidgetMeta) => v.bcName === baseBcName)
+        const baseWidget = state.view.widgets?.find((v: WidgetMeta) => v.bcName === baseBcName)
         return next(
-            $do.sendOperation({
+            sendOperation({
                 bcName: baseBcName,
                 operationType: OperationTypeCrud.save,
-                widgetName: baseWidget.name,
+                widgetName: baseWidget?.name as string,
                 onSuccessAction: action
             })
         )
@@ -97,13 +97,13 @@ export function autosaveRoutine(action: AnyAction, store: MiddlewareAPI<Dispatch
  */
 export function bcHasPendingAutosaveChanges(store: CoreStore, bcName: string, cursor: string) {
     const pendingChanges = store.view.pendingDataChanges
-    const cursorChanges = pendingChanges[bcName]?.[cursor]
+    const cursorChanges = pendingChanges[bcName]?.[cursor as string]
     const result = cursorChanges && !Object.keys(cursorChanges).includes('_associate') && Object.values(cursorChanges).length > 0
     return result
 }
 
 /**
- * Checks presence of unsaved data for specified BC
+ * Checks presence of unsaved data.ts for specified BC
  *
  * @param store
  * @param bcName

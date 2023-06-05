@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { store as globalStore } from '../Provider'
 import { Store } from '../interfaces/store'
-import moment from 'moment'
 import { DataItem } from '../interfaces/data'
 
 /**
@@ -41,12 +39,11 @@ export function getTemplate(literals: TemplateStringsArray, ...placeholders: any
  *
  * @param bcName Business component name
  * @param includeSelf If result hierarchy should include target bc or only ancestors
- * @param store
+ * @param state
  * @category Utils
  */
-export function buildBcUrl(bcName: string, includeSelf = false, store?: Store) {
-    const storeInstance = store || globalStore.getState()
-    const bcMap = storeInstance.screen.bo.bc
+export function buildBcUrl(bcName: string, includeSelf = false, state: Store) {
+    const bcMap = state.screen.bo.bc
     const bc = bcMap[bcName]
     if (!bc) {
         return null
@@ -55,10 +52,25 @@ export function buildBcUrl(bcName: string, includeSelf = false, store?: Store) {
     let nextBc = bc
     while (nextBc.parentName) {
         nextBc = bcMap[nextBc.parentName]
-        url.push(`${nextBc.name}/${nextBc.cursor}`)
+        url.push(`${nextBc.name}/${nextBc.cursor ?? null}`)
     }
     const bcUrl = url.reverse().join('/')
     return bcUrl
+}
+
+export function splitBcUrl(bcUrl: string) {
+    const bcUrlItems = bcUrl.split('/')
+    const result = []
+
+    for (let i = 0; i < bcUrlItems.length; i += 2) {
+        const bcName = bcUrlItems[i]
+        const bcCursor = bcUrlItems[i + 1]
+        const includeSelf = bcName && bcCursor
+
+        result.push(includeSelf ? `${bcName}/${bcCursor}` : bcName)
+    }
+
+    return result
 }
 
 // Token format: '${fieldName:defaultValue}'
@@ -83,8 +95,9 @@ const formatString = (templatedString: string, item: DataItem): string => {
     return templatedString.replace(TAG_PLACEHOLDER, (token, varName) => {
         const [key, defaultValue] = varName.split(':')
         const result = String(item?.[key] || defaultValue || '')
-        const date = moment(result, moment.ISO_8601)
-        return !date.isValid() ? result : date.format('DD.MM.YYYY')
+        // const date = moment(result, moment.ISO_8601)
+        // return !date.isValid() ? result : date.format('DD.MM.YYYY')
+        return result
     })
 }
 

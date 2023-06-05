@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-module.exports = {
+export default {
     printWidth: 140,
     semi: false,
     arrowParens: 'avoid',

@@ -18,7 +18,9 @@ import { DrillDownType } from './router'
 import { AppNotificationType } from './objectMap'
 import { DataItem } from './data'
 import { OperationTypeCrud, OperationType } from '@cxbox-ui/schema'
-export { OperationTypeCrud, OperationType, OperationInclusionDescriptor } from '@cxbox-ui/schema'
+export type { OperationType, OperationInclusionDescriptor } from '@cxbox-ui/schema'
+
+export { OperationTypeCrud }
 
 export const coreOperations = [
     OperationTypeCrud.create,
@@ -88,6 +90,11 @@ export interface Operation {
      * this flag can be specified and will be used instead of real `type`
      */
     actionRole?: OperationType
+    /**
+     * Subtype for association popup, used for calling multiFileUploadPopup,
+     * else has default behaviour of assoc popup
+     */
+    subtype?: 'bc' | 'multiFileUpload'
 }
 
 /**
@@ -165,7 +172,7 @@ export enum OperationPreInvokeType {
  */
 export enum OperationPostInvokeType {
     /**
-     * BC's refresh. It leads to cursor dropping, data refresh of current BC and its children
+     * BC's refresh. It leads to cursor dropping, data.ts refresh of current BC and its children
      */
     refreshBC = 'refreshBC',
     /**
@@ -272,7 +279,7 @@ export interface OperationPostInvoke {
 }
 
 /**
- * BC's refresh. It leads to cursor dropping, data refresh of current BC and its children
+ * BC's refresh. It leads to cursor dropping, data.ts refresh of current BC and its children
  */
 export interface OperationPostInvokeRefreshBc extends OperationPostInvoke {
     /**

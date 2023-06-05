@@ -17,10 +17,8 @@
 /**
  * Utilities for urls and browser history
  */
-import { Location } from 'history'
-import { Route, RouteType } from '../interfaces/router'
+import { Route, RouteType } from '../interfaces'
 import { getTemplate } from './strings'
-import qs from 'query-string'
 
 /**
  * Appends '/' in front of `absoluteUrl` argument.
@@ -89,13 +87,13 @@ export function buildUrl(literals: TemplateStringsArray, ...placeholders: Array<
  * - {@link RouteType.router | RouteType.router}, i.e. an url without information about entity that should be handled on server side. Example: `/router/server-entity`
  * - {@link RouteType.default | RouteType.default}, i.e. an url that leads to default entity of the application. Example: `/`
  *
- * Reverse function is {@link defaultBuildLocation}.
+ * Reverse function is {@link defaultBuildURL}.
  *
- * @param loc Location compatible with `history` module
  * @category Utils
  */
-export function defaultParseLocation(loc: Location<any>): Route {
-    let path: string = loc.pathname
+export function defaultParseURL(url: URL): Route {
+    let path: string = url.pathname
+
     if (path.startsWith('/')) {
         path = path.substring(1)
     }
@@ -105,7 +103,8 @@ export function defaultParseLocation(loc: Location<any>): Route {
     if (path?.includes('&') && !path?.includes('?')) {
         path = path.substring(0, path.indexOf('&'))
     }
-    const params = qs.parse(loc.search)
+    const params: Record<string, unknown> = {}
+    url.searchParams.forEach((value, key) => (params[key] = value))
     const tokens = path.split('/').map(decodeURIComponent)
 
     let type = RouteType.unknown
@@ -130,7 +129,8 @@ export function defaultParseLocation(loc: Location<any>): Route {
 
     return {
         type: type,
-        path,
+        path: path.length !== 0 && !path.startsWith('/') ? `/${path}` : path,
+        search: url.search,
         params,
         screenName,
         viewName,
@@ -141,11 +141,17 @@ export function defaultParseLocation(loc: Location<any>): Route {
 /**
  * Transform {@link Route | Cxbox UI route} to string url.
  *
- * Reverse function is {@link defaultParseLocation}.
+ * Reverse function is {@link defaultParseURL}.
  *
  * @param route Cxbox UI route
  * @category Utils
  */
-export function defaultBuildLocation(route: Route) {
+export function defaultBuildURL(route: Route) {
     return `/screen/${route.screenName}/view/${route.viewName}/${route.bcPath}`
+}
+
+export const getRouteFromString = (ulrString: string) => {
+    const url = new URL(ulrString, window.location.origin)
+
+    return defaultParseURL(url)
 }

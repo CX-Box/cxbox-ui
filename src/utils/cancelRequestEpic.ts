@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
-import { ActionPayloadTypes, ActionsObservable, AnyAction, types } from '../actions/actions'
-import { Observable } from 'rxjs'
+import { filter, mergeMap, Observable, of, take } from 'rxjs'
+import { logout, selectView } from '../actions'
+import { AnyAction } from 'redux'
+import { isAnyOf } from '@reduxjs/toolkit'
+
+/**
+ * Type tweak for backward @reduxjs/toolkit compatibility
+ */
+type TypeGuard<T> = (value: any) => value is T
+interface HasMatchFunction<T> {
+    match: TypeGuard<T>
+}
+/** @public */
+type Matcher<T> = HasMatchFunction<T> | TypeGuard<T>
 
 /**
  * Default list of action types which are triggers for request cancel
  */
-export const cancelRequestActionTypes = [types.selectView, types.logout]
+export const cancelRequestActionTypes = [selectView, logout] as [Matcher<any>, ...Array<Matcher<any>>]
 
 /**
  * Creator of request cancel epic
@@ -32,20 +44,21 @@ export const cancelRequestActionTypes = [types.selectView, types.logout]
  * @param filterFn a callback function which filters come actions
  */
 export function cancelRequestEpic(
-    action$: ActionsObservable<AnyAction>,
-    actionTypes: Array<keyof ActionPayloadTypes>,
-    cancelFn: () => void,
+    action$: Observable<AnyAction>,
+    actionTypes: Parameters<typeof isAnyOf>,
+    cancelFn: (() => void) | undefined,
     cancelActionCreator: AnyAction,
     filterFn: (actions: AnyAction) => boolean = item => {
         return true
     }
 ) {
-    return action$
-        .ofType(...actionTypes)
-        .filter(filterFn)
-        .mergeMap(() => {
-            cancelFn()
-            return Observable.of(cancelActionCreator)
-        })
-        .take(1)
+    return action$.pipe(
+        filter(isAnyOf(...actionTypes)),
+        filter(filterFn),
+        mergeMap(() => {
+            cancelFn?.()
+            return of(cancelActionCreator)
+        }),
+        take(1)
+    )
 }
