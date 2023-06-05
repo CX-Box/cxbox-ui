@@ -19,6 +19,14 @@ import { RowOperationsButtonInstance } from '../components/RowOperations/RowOper
 import { DataItem } from '@cxbox-ui/schema'
 
 /**
+ * {@link RowOperationsButton | RowOperationsButton} instance
+ */
+export interface RowOperationsButtonInstance {
+    setRow: (record: DataItem, e: React.MouseEvent<HTMLElement>) => void
+    containerRef: MutableRefObject<HTMLElement>
+}
+
+/**
  * Handles interactions between `<RowOperationsButton />` and antd `<Table />`
  *
  * Initializes references to both components and prepares a hover configuration for table.
