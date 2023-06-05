@@ -21,7 +21,7 @@
 import { FilterGroup } from './filters'
 
 /**
- * Meta data for Business Component
+ * Meta data.ts for Business Component
  */
 export interface BcMeta {
     /**
@@ -81,7 +81,7 @@ export interface BcMetaState extends BcMeta {
      */
     limit?: number
     /**
-     * There is an addional pages of data to fetch
+     * There is an addional pages of data.ts to fetch
      */
     hasNext?: boolean
     /**

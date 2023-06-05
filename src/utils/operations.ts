@@ -17,7 +17,7 @@
 import { Operation, isOperationGroup, OperationGroup, OperationTypeCrud, coreOperations } from '../interfaces/operation'
 import { buildBcUrl } from './strings'
 import { Store } from '../interfaces/store'
-import { ActionPayloadTypes } from '../actions/actions'
+import { sendOperation } from '../actions'
 
 /**
  * Extract operations from all operations groups and return them as an array of flat operations
@@ -50,7 +50,11 @@ export function flattenOperations(operations: Array<Operation | OperationGroup>)
  * @param store Store instance
  * @category Utils
  */
-export function matchOperationRole(role: OperationTypeCrud | 'none' | string, payload: ActionPayloadTypes['sendOperation'], store: Store) {
+export function matchOperationRole(
+    role: OperationTypeCrud | 'none' | string,
+    payload: ReturnType<typeof sendOperation>['payload'],
+    store: Store
+) {
     if (payload.operationType === role) {
         return true
     }

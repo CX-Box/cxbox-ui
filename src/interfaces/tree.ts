@@ -43,7 +43,7 @@ export interface DataNode extends BaseDataNode {
 }
 
 /**
- * Cxbox-specific data item that classifies as tree node
+ * Cxbox-specific data.ts item that classifies as tree node
  */
 export type DataItemNode = DataNode & DataItem
 

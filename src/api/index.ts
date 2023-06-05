@@ -14,16 +14,4 @@
  * limitations under the License.
  */
 
-export {
-    loginByRoleRequest,
-    refreshMeta,
-    fetchBcData,
-    fetchBcDataAll,
-    fetchRowMeta,
-    newBcData,
-    saveBcData,
-    deleteBcData,
-    customAction,
-    associate,
-    getRmByForceActive
-} from './api'
+export { Api } from './ObservableApi'

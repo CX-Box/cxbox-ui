@@ -15,10 +15,10 @@
  */
 
 import { WidgetMeta } from '../interfaces/widget'
-import { $do } from '../actions/actions'
 import { OperationTypeCrud } from '../interfaces/operation'
 import { Store as CoreStore } from '../interfaces/store'
 import { AnyAction, Dispatch, MiddlewareAPI } from 'redux'
+import { sendOperation } from '../actions'
 
 /**
  * Performs mechanism of autosave
@@ -64,7 +64,7 @@ export function autosaveRoutine(action: AnyAction, store: MiddlewareAPI<Dispatch
             const cursor = state.screen.bo.bc[bcName]?.cursor
             if (bcHasPendingAutosaveChanges(state, bcName, cursor)) {
                 dispatch(
-                    $do.sendOperation({
+                    sendOperation({
                         bcName: bcName,
                         operationType: OperationTypeCrud.save,
                         widgetName: widget.name
@@ -77,7 +77,7 @@ export function autosaveRoutine(action: AnyAction, store: MiddlewareAPI<Dispatch
          */
         const baseWidget = state.view.widgets.find((v: WidgetMeta) => v.bcName === baseBcName)
         return next(
-            $do.sendOperation({
+            sendOperation({
                 bcName: baseBcName,
                 operationType: OperationTypeCrud.save,
                 widgetName: baseWidget.name,
@@ -103,7 +103,7 @@ export function bcHasPendingAutosaveChanges(store: CoreStore, bcName: string, cu
 }
 
 /**
- * Checks presence of unsaved data for specified BC
+ * Checks presence of unsaved data.ts for specified BC
  *
  * @param store
  * @param bcName

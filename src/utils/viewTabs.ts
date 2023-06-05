@@ -95,7 +95,9 @@ export function getReferencedView(navigationItem: Readonly<Exclude<MenuItem, Vie
     }
     // Search condition: defaultView or first available
     const predicate = (node: ViewNavigationItem) => {
-        return navigationItem.defaultView ? node.viewName === navigationItem.defaultView : !!node.viewName
+        return (navigationItem as ViewNavigationGroup).defaultView
+            ? node.viewName === (navigationItem as ViewNavigationGroup).defaultView
+            : !!node.viewName
     }
     const result = breadthFirstSearch(navigationItem, predicate)?.node as ViewNavigationItem
     return result?.viewName
