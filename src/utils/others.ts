@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FieldType, MultivalueFieldMeta, PickListFieldMeta } from '@tesler-ui/schema'
+import { FieldType, MultivalueFieldMeta, PickListFieldMeta } from '@cxbox-ui/schema'
 
 export function isMultivalueField(fieldType: FieldType) {
     const isPickList = fieldType === FieldType.pickList

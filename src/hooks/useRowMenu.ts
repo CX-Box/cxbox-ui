@@ -15,7 +15,6 @@
  */
 
 import React, { MutableRefObject } from 'react'
-import { RowOperationsButtonInstance } from '../components/RowOperations/RowOperationsButton'
 import { DataItem } from '@cxbox-ui/schema'
 
 /**

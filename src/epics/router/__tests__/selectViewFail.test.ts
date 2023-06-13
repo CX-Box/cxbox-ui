@@ -20,7 +20,6 @@ import { ActionsObservable } from 'redux-observable'
 import { mockStore } from '../../../tests/mockStore'
 import { Store } from 'redux'
 import { Store as CoreStore } from '../../../interfaces/store'
-import { notification } from 'antd'
 import { selectViewFail } from '../selectViewFail'
 import i18n from 'i18next'
 
@@ -29,7 +28,6 @@ const i18nMock = jest.fn().mockImplementation((token, variable) => {
     return `View ${variable.viewName} is missing or unavailable for your role`
 })
 
-jest.spyOn(notification, 'error').mockImplementation(notificationMock)
 jest.spyOn(i18n, 't').mockImplementation(i18nMock)
 
 describe('selectViewFail', () => {

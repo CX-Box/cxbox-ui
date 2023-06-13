@@ -16,7 +16,7 @@
   "author": "cxbox",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "webpack --mode=production",
+    "build": "webpack --mode=production --jsx",
     "start": "webpack --watch",
     "start:progress": "yarn start --progress --profile",
     "build:stats": "webpack --env production --json > stats.json",
@@ -63,6 +63,7 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-redux": "7.2.1",
+    "reselect": "^4.1.7",
     "redux": "^4.0.5",
     "redux-observable": "0.14.1",
     "rxjs": "5.5.12",
@@ -86,7 +87,6 @@
     "marked": "0.8.0",
     "query-string": "5.1.0",
     "react-i18next": "11.2.5",
-    "reselect": "^4.1.7",
     "uuid": "3.4.0"
   },
   "peerDependencies": {
@@ -97,6 +97,7 @@
     "react-redux": "^7.2.1",
     "redux": "^4.0.5",
     "redux-observable": "^0.14.1",
-    "rxjs": "^5.5.12"
+    "rxjs": "^5.5.12",
+    "reselect": "^4.1.7"
   }
 }

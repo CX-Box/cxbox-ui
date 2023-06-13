@@ -21,12 +21,10 @@ import { ActionsObservable } from 'redux-observable'
 import { mockStore } from '../../tests/mockStore'
 import { Store } from 'redux'
 import { Store as CoreStore } from '../../interfaces/store'
-import { notification } from 'antd'
 import { Observable } from 'rxjs'
 
 const notificationMock = jest.fn()
 const customImplementation = jest.fn()
-jest.spyOn(notification, 'error').mockImplementation(notificationMock)
 
 describe('combineEpics', () => {
     let store: Store<CoreStore> = null

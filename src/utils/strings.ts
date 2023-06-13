@@ -16,7 +16,6 @@
 
 import { store as globalStore } from '../Provider'
 import { Store } from '../interfaces/store'
-import moment from 'moment'
 import { DataItem } from '../interfaces/data'
 
 /**
@@ -98,8 +97,9 @@ const formatString = (templatedString: string, item: DataItem): string => {
     return templatedString.replace(TAG_PLACEHOLDER, (token, varName) => {
         const [key, defaultValue] = varName.split(':')
         const result = String(item?.[key] || defaultValue || '')
-        const date = moment(result, moment.ISO_8601)
-        return !date.isValid() ? result : date.format('DD.MM.YYYY')
+        // const date = moment(result, moment.ISO_8601)
+        // return !date.isValid() ? result : date.format('DD.MM.YYYY')
+        return result
     })
 }
 

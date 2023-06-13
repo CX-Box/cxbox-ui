@@ -22,7 +22,7 @@ import { getFilterType, parseFilters } from '../../utils/filters'
 import { Store } from '../../interfaces/store'
 import { WidgetField, WidgetListField } from '../../interfaces/widget'
 import { BcFilter, FilterType } from '../../interfaces/filters'
-import { FieldType } from '@tesler-ui/schema'
+import { FieldType } from '@cxbox-ui/schema'
 
 function useFilterGroupName({ filtersExist }: any) {
     const [filterGroupName, setFilterGroupName] = React.useState(null)
