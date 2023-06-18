@@ -19,7 +19,7 @@ import { Observable } from 'rxjs/Observable'
 import { refreshMeta } from '../../api'
 
 /**
- * Performed on refresh meta data process.
+ * Performed on refresh meta data.ts process.
  *
  * @param action$ This epic will fire on {@link ActionPayloadTypes.refreshMeta | refreshMeta} action
  * @param store Redux store instance

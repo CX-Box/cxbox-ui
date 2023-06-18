@@ -323,7 +323,7 @@ const bcExample = {
 }
 
 /**
- * Full hierarchy data from the store
+ * Full hierarchy data.ts from the store
  */
 function getData() {
     return [

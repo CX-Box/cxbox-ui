@@ -31,13 +31,13 @@ import { BcMetaState } from '../../interfaces/bc'
 /**
  *
  *
- * Loads BC's data.
+ * Loads BC's data.ts.
  * In case successful download:
  * - dispatches action to store
  * - initializes rowMeta load
- * - initializes child BCs data load
+ * - initializes child BCs data.ts load
  *
- * @param action.payload.bcName BC's name for data load
+ * @param action.payload.bcName BC's name for data.ts load
  * @category Epics
  */
 export const bcFetchDataEpic: Epic = (action$, store) =>
@@ -69,7 +69,7 @@ export function bcFetchDataImpl(
      */
     const widget = widgets.find(item => item.name === widgetName) ?? widgets.find(item => item.bcName === action.payload.bcName)
     /**
-     * Missing widget means the view or screen were changed and data request is no longer relevant
+     * Missing widget means the view or screen were changed and data.ts request is no longer relevant
      */
     if (!widget) {
         return [Observable.empty()]
@@ -80,7 +80,7 @@ export function bcFetchDataImpl(
     const limit = widgets.find(i => i.bcName === bcName)?.limit || bc.limit
     const sorters = state.screen.sorters[bcName]
     /**
-     * If popup has the same bc as initiator no data fetching required, it will be
+     * If popup has the same bc as initiator no data.ts fetching required, it will be
      * handled by initiator widget instead
      */
     if (action.type === types.showViewPopup && bcName === action.payload.calleeBCName) {
@@ -203,14 +203,14 @@ export function bcFetchDataImpl(
 
 /**
  *
- * @param data Response data for business component
- * @param action Action that initiated data fetch
+ * @param data Response data.ts for business component
+ * @param action Action that initiated data.ts fetch
  * @param prevCursor Previous cursor for affected business component
  * @param isHierarchy Fetch performed for the hierarchy widget
  */
 function getCursorChange(data: DataItem[], action: ActionType, prevCursor: string, isHierarchy: boolean) {
     const { bcName } = action.payload
-    const { keepDelta } = (action as ActionsMap[typeof types.bcFetchDataRequest]).payload
+    const { keepDelta } = action.payload
     const newCursor = data[0]?.id
     const changeCurrentCursor = Observable.of<AnyAction>(
         $do.bcChangeCursors({
@@ -238,8 +238,8 @@ function getChildrenData(
     showConditionCheck: (widget: WidgetMeta) => boolean
 ) {
     const { bcName } = action.payload
-    const { ignorePageLimit } = (action as ActionsMap[typeof types.bcFetchDataRequest]).payload
-    const { keepDelta } = (action as ActionsMap[typeof types.bcFetchDataRequest]).payload
+    const { ignorePageLimit } = action.payload
+    const { keepDelta } = action.payload
     return Observable.concat(
         ...Object.entries(getBcChildren(bcName, widgets, bcDictionary))
             .filter(([childBcName, widgetNames]) => {

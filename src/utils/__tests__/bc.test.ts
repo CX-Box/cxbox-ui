@@ -78,7 +78,7 @@ describe('checkShowCondition', () => {
     const matchingData: DataItem[] = [{ id: '50', vstamp: 0, test: '9' }]
     const notMatchingData: DataItem[] = [{ id: '50', vstamp: 0, test: '8' }]
 
-    it('should return false when data value of active record does not match the condition', () => {
+    it('should return false when data.ts value of active record does not match the condition', () => {
         const pendingDataChanges = {}
         expect(checkShowCondition(showCondition, '50', matchingData, pendingDataChanges)).toBe(true)
         expect(checkShowCondition(showCondition, '50', notMatchingData, pendingDataChanges)).toBe(false)
@@ -96,7 +96,7 @@ describe('checkShowCondition', () => {
         expect(checkShowCondition(showCondition, '50', matchingData, pendingDataChanges)).toBe(false)
     })
 
-    it('should return true when pending value is matching even if data value is not', () => {
+    it('should return true when pending value is matching even if data.ts value is not', () => {
         expect(checkShowCondition(showCondition, '50', notMatchingData, null)).toBe(false)
         const pendingDataChanges = {
             bcExample: {
@@ -114,7 +114,7 @@ describe('checkShowCondition', () => {
         expect(checkShowCondition([] as any, '50', notMatchingData, null)).toBe(true)
     })
 
-    it('does not crash if no data or active record present', () => {
+    it('does not crash if no data.ts or active record present', () => {
         expect(checkShowCondition(null, '50', null, null)).toBe(true)
         expect(checkShowCondition([] as any, '50', notMatchingData, null)).toBe(true)
         expect(checkShowCondition(showCondition, '50', null, null)).toBe(false)

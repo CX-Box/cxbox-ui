@@ -21,13 +21,13 @@ import { PopupWidgetTypes, WidgetMeta } from '../../interfaces/widget'
 import { Observable } from 'rxjs'
 
 /**
- * Schedules data fetch for every widget on the view
+ * Schedules data.ts fetch for every widget on the view
  *
- * After selecting a view, this epic schedules a data fetch for every widget present on the view.
- * If business componenet for the widget has a parent, then root ancestor BC is scheduled for data fetch instead
- * and data for its descendants will be scheduled after ancestor data fetch resolved.
+ * After selecting a view, this epic schedules a data.ts fetch for every widget present on the view.
+ * If business componenet for the widget has a parent, then root ancestor BC is scheduled for data.ts fetch instead
+ * and data.ts for its descendants will be scheduled after ancestor data.ts fetch resolved.
  *
- * @see {@link src/epics/data/bcFetchDataEpic.ts} for details how descendants resolved
+ * @see {@link src/epics/data.ts/bcFetchDataEpic.ts} for details how descendants resolved
  * @param action `selectView` action
  * @param store Store instance
  */
@@ -44,13 +44,13 @@ export const selectView: Epic = (action$, store) =>
 /**
  * Default implementation for `selectView` epic.
  *
- * Schedules data fetch for every widget on the view
+ * Schedules data.ts fetch for every widget on the view
  *
- * After selecting a view, this epic schedules a data fetch for every widget present on the view.
- * If business componenet for the widget has a parent, then root ancestor BC is scheduled for data fetch instead
- * and data for its descendants will be scheduled after ancestor data fetch resolved.
+ * After selecting a view, this epic schedules a data.ts fetch for every widget present on the view.
+ * If business componenet for the widget has a parent, then root ancestor BC is scheduled for data.ts fetch instead
+ * and data.ts for its descendants will be scheduled after ancestor data.ts fetch resolved.
  *
- * @see {@link src/epics/data/bcFetchDataEpic.ts} for details how descendants resolved
+ * @see {@link src/epics/data.ts/bcFetchDataEpic.ts} for details how descendants resolved
  * @param action `selectView` action
  * @param store Store instance
  * @category Epics

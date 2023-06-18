@@ -18,7 +18,7 @@ import { DataItem } from '@cxbox-ui/schema'
 import { $do } from '../../actions/actions'
 import { data } from '../data'
 
-describe('data reducer', () => {
+describe('data.ts reducer', () => {
     it('puts new record in the store for specified business component on `bcNewDataSuccess` action', () => {
         const existingDataItem = { id: '8', vstamp: -1 }
         const dataItem = { id: '9', vstamp: -1 }

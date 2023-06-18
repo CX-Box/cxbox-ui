@@ -27,7 +27,7 @@ import i18n from 'i18next'
 import { saveBcData } from '../../api/api'
 
 /**
- * Post record's pending changes to `save data` API endpoint.
+ * Post record's pending changes to `save data.ts` API endpoint.
  * Pending changes for fields disabled through row meta are not send; pleace notice that fields are
  * disabled by default.
  *
@@ -62,7 +62,7 @@ export const bcSaveDataEpic: Epic = (action$, store) =>
 /**
  * Default implementation for `bcSaveData` epic
  *
- * Post record's pending changes to `save data` API endpoint.
+ * Post record's pending changes to `save data.ts` API endpoint.
  * Pending changes for fields disabled through row meta are not send; pleace notice that fields are
  * disabled by default.
  *

@@ -70,7 +70,7 @@ describe('bcFetchDataEpic', () => {
         })
     })
 
-    it('bcForceUpdate (with widgetName param) calls data from first page for infiniteWidgets widgets', () => {
+    it('bcForceUpdate (with widgetName param) calls data.ts from first page for infiniteWidgets widgets', () => {
         store.getState().view.widgets[0] = { ...getWidgetMeta() }
         store.getState().view.infiniteWidgets[0] = 'widget-example'
         const action = $do.bcForceUpdate({
@@ -83,7 +83,7 @@ describe('bcFetchDataEpic', () => {
         })
     })
 
-    it('bcForceUpdate (without widgetName param) call data from first page for infiniteWidgets widgets', () => {
+    it('bcForceUpdate (without widgetName param) call data.ts from first page for infiniteWidgets widgets', () => {
         store.getState().view.widgets[0] = { ...getWidgetMeta() }
         store.getState().view.infiniteWidgets[0] = 'widget-example'
         const action = $do.bcForceUpdate({
@@ -95,7 +95,7 @@ describe('bcFetchDataEpic', () => {
         })
     })
 
-    it('bcFetchDataPages call data of custom page range', () => {
+    it('bcFetchDataPages call data.ts of custom page range', () => {
         store.getState().view.widgets[0] = { ...getWidgetMeta() }
         const action = $do.bcFetchDataPages({
             bcName: 'bcExample',
@@ -109,7 +109,7 @@ describe('bcFetchDataEpic', () => {
         })
     })
 
-    it('bcFetchDataPages call data to current page', () => {
+    it('bcFetchDataPages call data.ts to current page', () => {
         store.getState().view.widgets[0] = { ...getWidgetMeta() }
         store.getState().screen.bo.bc[bcExample.name].page = 5
         const action = $do.bcFetchDataPages({
@@ -279,7 +279,7 @@ describe('bcFetchDataEpic', () => {
         })
     })
 
-    it('should load data of hierarchy of BCs', () => {
+    it('should load data.ts of hierarchy of BCs', () => {
         store.getState().screen.bo.bc.bcChild = bcChild
         store.getState().screen.bo.bc.bcChildOfChild = bcChildOfChild
         store.getState().screen.bo.bc.lastChild = lastChild

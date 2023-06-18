@@ -43,11 +43,11 @@ describe('selectScreenFail', () => {
     })
 
     it('Sends a requst to Cxbox API router endpoint', () => {
-        const action = $do.handleRouter({ path: '/data', params: { someParam: 3 } })
+        const action = $do.handleRouter({ path: '/data.ts', params: { someParam: 3 } })
         const epic = handleRouter(ActionsObservable.of(action), store)
         testEpic(epic, res => {
             expect(res.length).toBe(0)
-            expect(routerMock).toBeCalledWith('/data', expect.objectContaining({ someParam: 3 }))
+            expect(routerMock).toBeCalledWith('/data.ts', expect.objectContaining({ someParam: 3 }))
         })
     })
 

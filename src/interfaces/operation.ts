@@ -165,7 +165,7 @@ export enum OperationPreInvokeType {
  */
 export enum OperationPostInvokeType {
     /**
-     * BC's refresh. It leads to cursor dropping, data refresh of current BC and its children
+     * BC's refresh. It leads to cursor dropping, data.ts refresh of current BC and its children
      */
     refreshBC = 'refreshBC',
     /**
@@ -272,7 +272,7 @@ export interface OperationPostInvoke {
 }
 
 /**
- * BC's refresh. It leads to cursor dropping, data refresh of current BC and its children
+ * BC's refresh. It leads to cursor dropping, data.ts refresh of current BC and its children
  */
 export interface OperationPostInvokeRefreshBc extends OperationPostInvoke {
     /**

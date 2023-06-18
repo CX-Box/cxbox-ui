@@ -24,7 +24,7 @@ import { postOperationRoutine } from '../view'
 import { OperationTypeCrud } from '../../interfaces/operation'
 
 /**
- * It sends customAction request for `file-upload-save` endpoint with `bulkIds` data
+ * It sends customAction request for `file-upload-save` endpoint with `bulkIds` data.ts
  * containing ids of uploaded files.
  * On success it fires `sendOperationSuccess`, `bcForceUpdate` and `closeViewPopup` actions
  * to refresh business component and close popup.
@@ -42,7 +42,7 @@ export const fileUploadConfirm: Epic = (action$, store) =>
 /**
  * Default implementation for `fileUploadConfirm` epic
  *
- * It sends customAction request for `file-upload-save` endpoint with `bulkIds` data
+ * It sends customAction request for `file-upload-save` endpoint with `bulkIds` data.ts
  * containing ids of uploaded files.
  * On success it fires `sendOperationSuccess`, `bcForceUpdate` and `closeViewPopup` actions
  * to refresh business component and close popup.

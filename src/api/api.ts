@@ -36,7 +36,7 @@ export function routerRequest(path: string, params: Record<string, unknown>) {
 }
 
 /**
- * Send request for BC data
+ * Send request for BC data.ts
  *
  * @param screenName
  * @param bcUrl
@@ -90,7 +90,7 @@ export function fetchRowMeta(screenName: string, bcUrl: string, params?: GetPara
 }
 
 /**
- * Request to create a new data record
+ * Request to create a new data.ts record
  *
  * @param screenName Screen name
  * @param bcUrl Business component cursors hierarchy
@@ -103,7 +103,7 @@ export function newBcData(screenName: string, bcUrl: string, context: ApiCallCon
 }
 
 /**
- * Request to save a data record
+ * Request to save a data.ts record
  *
  * @param screenName Screen name
  * @param bcUrl Business component cursors hierarchy
@@ -124,7 +124,7 @@ export function saveBcData(
 }
 
 /**
- * Request to delete a data record
+ * Request to delete a data.ts record
  *
  * @param screenName Screen name
  * @param bcUrl Business component cursors hierarchy

@@ -135,7 +135,7 @@ export function useFilter({ widgetName, fieldKey }: FilterProps) {
             dispatch($do.bcAddFilter({ bcName, filter: newFilter, widgetName }))
         }
 
-        // FullHierarchy has its own implementation of data search without backend query filtered data
+        // FullHierarchy has its own implementation of data.ts search without backend query filtered data.ts
         if (!widget.options?.hierarchyFull) {
             dispatch($do.bcForceUpdate({ bcName }))
         }

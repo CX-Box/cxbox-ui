@@ -28,7 +28,7 @@ import { DataItem } from '../../interfaces/data'
  * Access `row-meta-new` API endpoint for business component endpoint; response will contain
  * row meta where `currentValue` of `id` field will contain an id for newly created record.
  *
- * `bcNewDataSuccess` action dispatched with new data item draft (vstamp = -1).
+ * `bcNewDataSuccess` action dispatched with new data.ts item draft (vstamp = -1).
  * `bcFetchRowMetaSuccess` action dispatched to set BC cursor to this new id.
  * `changeDataItem` action dispatched to add this new item to pending changes.
  * `processPostInvoke` dispatched to handle possible post invokes.
@@ -52,7 +52,7 @@ export const bcNewDataEpic: Epic = (action$, store) =>
  * Access `row-meta-new` API endpoint for business component endpoint; response will contain
  * row meta where `currentValue` of `id` field will contain an id for newly created record.
  *
- * `bcNewDataSuccess` action dispatched with new data item draft (vstamp = -1).
+ * `bcNewDataSuccess` action dispatched with new data.ts item draft (vstamp = -1).
  * `bcFetchRowMetaSuccess` action dispatched to set BC cursor to this new id.
  * `changeDataItem` action dispatched to add this new item to pending changes.
  * `processPostInvoke` dispatched to handle possible post invokes.

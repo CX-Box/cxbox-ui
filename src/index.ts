@@ -82,15 +82,15 @@ const buildLocation = getBuildLocationInstance
  *
  * TODO: 2.0.0 should do better job at instantiating utilities (class?)
  */
-export {
-    // Stable
-    Provider,
-    // Unstable
-    connect,
-    store,
-    getStoreInstance,
-    combineReducers
-}
+// export {
+//     // Stable
+//     Provider,
+//     // Unstable
+//     connect,
+//     store,
+//     getStoreInstance,
+//     combineReducers
+// }
 
 /**
  * Hooks

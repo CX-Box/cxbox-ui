@@ -79,7 +79,7 @@ describe('buildSearchResultTree', () => {
 })
 
 describe('presort', () => {
-    it('sorts data so that every parent followed by its descendant', () => {
+    it('sorts data.ts so that every parent followed by its descendant', () => {
         const sample = getUnsortedSample()
         const unsorted = assignTreeLinks(sample)
         const sorted = presort(unsorted)

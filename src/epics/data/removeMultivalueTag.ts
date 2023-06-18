@@ -74,7 +74,7 @@ export function removeMultivalueTagImpl(
     const { bcName, cursor, popupBcName, associateFieldKey } = action.payload
     const widget = state.view.widgets.find(item => item.bcName === popupBcName && PopupWidgetTypes.includes(item.type))
     const storeData = ((state?.data[popupBcName] || []) as unknown) as TreeAssociatedRecord[]
-    // Merge store data with pending changes
+    // Merge store data.ts with pending changes
     let data: TreeAssociatedRecord[] = storeData.map(item => {
         const pendingChanges = state.view.pendingDataChanges[popupBcName]?.[item.id]
         return { ...item, ...pendingChanges }
@@ -162,7 +162,7 @@ export function removeMultivalueTagImpl(
                     dataItem: { [associateFieldKey]: action.payload.dataItem }
                 })
             )
-        ) as Observable<AnyAction>
+        )
     }
     // Non hierarchies drops removed item's `_associate` flag` from popup BC
     // And also updates source record value

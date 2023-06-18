@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { $do, AnyAction, types } from '../actions/actions'
-import { createHashHistory, parsePath } from 'history'
 import { Route, RouteType } from '../interfaces/router'
 import { shallowCompare } from '../utils/redux'
 import { parseLocation, store } from '../Provider'
@@ -40,16 +38,6 @@ export function changeLocation(href: string) {
 /**
  * TODO
  */
-export function initHistory() {
-    historyObj.listen((loc, action) => {
-        const prevState = store.getState().router
-        const nextState = parseLocation(historyObj.location)
-        const diff = shallowCompare(prevState, nextState)
-        if (diff.length) {
-            store.dispatch($do.changeLocation({ location: nextState, action }))
-        }
-    })
-}
 
 const initialState: Route = { type: RouteType.default, path: '/', params: null, screenName: null }
 
@@ -81,5 +69,3 @@ export function router(state: Route = initialState, action: AnyAction): Route {
             return state
     }
 }
-
-export default router

@@ -155,7 +155,7 @@ describe('`bcSaveData` epic', () => {
         })
     })
 
-    it('on success schedules data fetch for children business components', () => {
+    it('on success schedules data.ts fetch for children business components', () => {
         store.getState().view.widgets = [widgetMeta, widgetChild1, widgetChild2]
         const action = $do.sendOperation({
             operationType: OperationTypeCrud.save,

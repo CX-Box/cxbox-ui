@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-import { AnyAction, types } from '../actions/actions'
 import { DepthDataState } from '../interfaces/data'
-
-const initialState: DepthDataState = {}
+import { createReducer } from '@reduxjs/toolkit'
+import { bcFetchDataSuccess, selectView } from '../actions'
 
 /**
  * TODO
  */
-export function depthData(state = initialState, action: AnyAction) {
-    switch (action.type) {
-        case types.bcFetchDataSuccess: {
-            return !action.payload.depth || action.payload.depth < 2
-                ? state
-                : {
-                      ...state,
-                      [action.payload.depth]: {
-                          ...state[action.payload.depth],
-                          [action.payload.bcName]: action.payload.data
-                      }
-                  }
-        }
-        case types.selectView: {
-            return initialState
-        }
-        default:
-            return state
-    }
-}
-
-export default depthData
+export default createReducer({} as DepthDataState, builder =>
+    builder
+        .addCase(bcFetchDataSuccess, (state, action) => {
+            if (!action.payload.depth || action.payload.depth < 2) {
+                return
+            }
+            state[action.payload.depth][action.payload.bcName] = action.payload.data
+        })
+        .addCase(selectView, state => {
+            state = {}
+        })
+)

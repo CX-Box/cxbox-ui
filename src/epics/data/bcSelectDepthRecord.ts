@@ -24,13 +24,13 @@ export const bcSelectDepthRecord: Epic = action$ =>
 
 /**
  * Set a cursor when expanding a record in hierarchy widgets builded around single business components
- * and fetch the data for children of expanded record.
+ * and fetch the data.ts for children of expanded record.
  *
  * {@link ActionPayloadTypes.bcChangeDepthCursor | bcChangeDepthCursor} action is dispatched to set the cursor
  * for expanded record; only one expanded record is allowed per hierarchy depth level.
  *
- * {@link ActionPayloadTypes.bcFetchDataRequest | bcFetchDataRequest} action is dispatched to fetch children data
- * for expanded record. `ignorePageLimit`` is set as there are no controls for navigating between data pages
+ * {@link ActionPayloadTypes.bcFetchDataRequest | bcFetchDataRequest} action is dispatched to fetch children data.ts
+ * for expanded record. `ignorePageLimit`` is set as there are no controls for navigating between data.ts pages
  * in nested levels of hierarchy so instead all records are fetched.
  *
  * TODO: There is no apparent reason why `widgetName` is empty; probably will be mandatory and replace `bcName` in 2.0.0.

@@ -408,7 +408,7 @@ export const changeAssociation: Epic = (action$, store) =>
                     return (
                         deltaValue._associate === true &&
                         deltaValue.id !== action.payload.dataItem.id &&
-                        // Filter by data records, because delta can contain records from another hierarchy branch, but data always contains
+                        // Filter by data.ts records, because delta can contain records from another hierarchy branch, but data.ts always contains
                         // only target branch records, that we see in widget
                         data.find(dataValue => dataValue.id === deltaValue.id)
                     )

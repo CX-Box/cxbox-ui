@@ -103,7 +103,7 @@ export function bcHasPendingAutosaveChanges(store: CoreStore, bcName: string, cu
 }
 
 /**
- * Checks presence of unsaved data for specified BC
+ * Checks presence of unsaved data.ts for specified BC
  *
  * @param store
  * @param bcName
