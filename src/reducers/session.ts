@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Session } from '../interfaces/session'
-import { createReducer } from '@reduxjs/toolkit'
+import { Session } from '../interfaces'
+import { ActionReducerMapBuilder } from '@reduxjs/toolkit'
 import {
     addNotification,
     addPendingRequest,
@@ -28,7 +28,7 @@ import {
     switchDebugMode
 } from '../actions'
 
-export const initialState: Session = {
+export const initialSessionState: Session = {
     devPanelEnabled: false,
     activeRole: null,
     roles: null,
@@ -51,12 +51,8 @@ export const initialState: Session = {
  *
  * Stores information about currently active session and data.ts that should be persistent during all period of
  * user interaction with application.
- *
- * @param state Session branch of Redux store
- * @param action Redux action
- * @param store Store instance for read-only access of different branches of Redux store
  */
-export default createReducer(initialState, builder =>
+export const sessionReducerBuilder = (builder: ActionReducerMapBuilder<Session>) =>
     builder
         .addCase(login, state => {
             state.loginSpin = true
@@ -93,4 +89,3 @@ export default createReducer(initialState, builder =>
             const closingKeys = action.payload
             state.notifications = state.notifications.filter(notification => !closingKeys.includes(notification.key))
         })
-)

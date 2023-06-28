@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import { AnyAction, types } from '../actions/actions'
-import { PendingValidationFails, PendingValidationFailsFormat, ViewState } from '../interfaces/view'
-import { PendingDataItem } from '../interfaces/data'
-import { Store } from '../interfaces/store'
-import { OperationTypeCrud } from '../interfaces/operation'
-import { buildBcUrl } from '../utils/strings'
-import i18n from 'i18next'
+import { PendingValidationFails, PendingValidationFailsFormat, ViewState, PendingDataItem, Store } from '../interfaces'
+import { OperationTypeCrud } from '@cxbox-ui/schema'
+import { buildBcUrl } from '../utils'
 
 export const initialState: ViewState = {
     id: null,

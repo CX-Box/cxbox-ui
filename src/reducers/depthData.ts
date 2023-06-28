@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { DepthDataState } from '../interfaces/data'
-import { createReducer } from '@reduxjs/toolkit'
+import { DepthDataState } from '../interfaces'
+import { ActionReducerMapBuilder } from '@reduxjs/toolkit'
 import { bcFetchDataSuccess, selectView } from '../actions'
 
-/**
- * TODO
- */
-export default createReducer({} as DepthDataState, builder =>
+export const initialDepthDataState: DepthDataState = {}
+
+export const depthDataReducerBuilder = (builder: ActionReducerMapBuilder<DepthDataState>) =>
     builder
         .addCase(bcFetchDataSuccess, (state, action) => {
             if (!action.payload.depth || action.payload.depth < 2) {
@@ -32,4 +31,3 @@ export default createReducer({} as DepthDataState, builder =>
         .addCase(selectView, state => {
             state = {}
         })
-)

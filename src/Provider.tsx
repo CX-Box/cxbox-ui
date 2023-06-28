@@ -30,6 +30,7 @@ import { defaultBuildLocation, defaultParseLocation } from './utils/history'
 import { configureStore } from './utils/configureStore'
 import { CustomWidgetDescriptor } from './interfaces/widget'
 import extendPopupWidgetTypes from './utils/extendPopupWidgetTypes'
+import { screenReducerBuilder } from './reducers'
 
 export interface ProviderProps<ClientState, ClientActions> {
     children: React.ReactNode
@@ -119,5 +120,7 @@ const Provider = <ClientState extends Partial<CoreStore>, ClientActions extends 
     }
     return <ReduxProvider store={store}>{props.children}</ReduxProvider>
 }
+
+const ass = screenReducerBuilder()
 
 export default Provider

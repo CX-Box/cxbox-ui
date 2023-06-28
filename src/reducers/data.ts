@@ -1,19 +1,11 @@
-import { DataState, DataItem } from '../interfaces/data'
-import { createReducer } from '@reduxjs/toolkit'
+import { DataState, DataItem } from '../interfaces'
+import { ActionReducerMapBuilder } from '@reduxjs/toolkit'
 import { bcFetchDataSuccess, bcFetchRowMetaSuccess, bcNewDataSuccess, bcSaveDataSuccess, changeAssociations, selectView } from '../actions'
 
 const emptyData: DataItem[] = []
 
-/**
- * Data reducer
- *
- * Stores data.ts (i.e. records, rows) for Business Components
- *
- * @param state Data branch of Redux store
- * @param action Redux action
- * @param store Store instance for read-only access of different branches of Redux store
- */
-export default createReducer({} as DataState, builder =>
+export const dataInitialState: DataState = {}
+export const dataReducerBuilder = (builder: ActionReducerMapBuilder<DataState>) =>
     builder
         .addCase(bcFetchDataSuccess, (state, action) => {
             state[action.payload.bcName] = action.payload.data
@@ -62,4 +54,3 @@ export default createReducer({} as DataState, builder =>
         .addCase(selectView, state => {
             state = {}
         })
-)

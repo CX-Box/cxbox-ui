@@ -14,58 +14,69 @@
  * limitations under the License.
  */
 
-import { Route, RouteType } from '../interfaces/router'
-import { shallowCompare } from '../utils/redux'
-import { parseLocation, store } from '../Provider'
+import { Route, RouteType } from '../interfaces'
+import { ActionReducerMapBuilder } from '@reduxjs/toolkit'
+import { loginDone, changeLocation } from '../actions'
 
 /**
  * Global instance
  *
  * @category Utils
  */
-export const historyObj = createHashHistory()
+// export const historyObj = createHashHistory()
+//
+// /**
+//  * TODO
+//  *
+//  * @param href
+//  * @category Utils
+//  */
+// export function changeLocation(href: string) {
+//     historyObj.push(href)
+// }
 
 /**
  * TODO
- *
- * @param href
- * @category Utils
- */
-export function changeLocation(href: string) {
-    historyObj.push(href)
-}
-
-/**
- * TODO
  */
 
-const initialState: Route = { type: RouteType.default, path: '/', params: null, screenName: null }
+export const initialRouterState: Route = { type: RouteType.default, path: '/', params: null, screenName: null }
 
 /**
  * Router reducer
  *
  * Stores information about currently active route
- *
- * @param state Router branch of Redux store
- * @param action Redux action
- * @param store Store instance for read-only access of different branches of Redux store
  */
-export function router(state: Route = initialState, action: AnyAction): Route {
-    switch (action.type) {
-        case types.loginDone:
-            return parseLocation(historyObj?.location)
-        case types.changeLocation:
-            const rawLocation = action.payload.rawLocation
-            if (rawLocation != null) {
-                const newState = parseLocation(parsePath(rawLocation))
-                return newState
+export const routerReducerBuilder = (builder: ActionReducerMapBuilder<Route>) =>
+    builder
+        .addCase(loginDone, (state, action) => {
+            //TODO: implement parse location of history object
+        })
+        .addCase(changeLocation, (state, action) => {
+            const { rawLocation, location } = action.payload
+            if (rawLocation !== null) {
+                //TODO: implement
             }
-            const parsedLocation = action.payload.location
-            if (parsedLocation != null) {
-                return parsedLocation
+            if (location !== null) {
+                state = location
             }
-            throw new Error('location reducer: action.payload.rawLocation == null & action.payload.location == null')
-        default:
-            return state
-    }
-}
+        })
+
+// {
+//     switch (action.type) {
+//         case types.loginDone:
+//             return parseLocation(historyObj?.location)
+//         case types.changeLocation:
+//             const rawLocation = action.payload.rawLocation
+//             if (rawLocation != null) {
+//                 const newState = parseLocation(parsePath(rawLocation))
+//                 return newState
+//             }
+//             const parsedLocation = action.payload.location
+//             if (parsedLocation != null) {
+//                 return parsedLocation
+//             }
+//             throw new Error('location reducer: action.payload.rawLocation == null & action.payload.location == null')
+//         default:
+//             return state
+//     }
+// }
