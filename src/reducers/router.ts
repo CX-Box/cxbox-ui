@@ -18,27 +18,6 @@ import { Route, RouteType } from '../interfaces'
 import { ActionReducerMapBuilder } from '@reduxjs/toolkit'
 import { loginDone, changeLocation } from '../actions'
 
-/**
- * Global instance
- *
- * @category Utils
- */
-// export const historyObj = createHashHistory()
-//
-// /**
-//  * TODO
-//  *
-//  * @param href
-//  * @category Utils
-//  */
-// export function changeLocation(href: string) {
-//     historyObj.push(href)
-// }
-
-/**
- * TODO
- */
-
 export const initialRouterState: Route = { type: RouteType.default, path: '/', params: null, screenName: null }
 
 /**
@@ -49,7 +28,7 @@ export const initialRouterState: Route = { type: RouteType.default, path: '/', p
 export const routerReducerBuilder = (builder: ActionReducerMapBuilder<Route>) =>
     builder
         .addCase(loginDone, (state, action) => {
-            //TODO: implement parse location of history object
+            state = action.payload
         })
         .addCase(changeLocation, (state, action) => {
             const { rawLocation, location } = action.payload

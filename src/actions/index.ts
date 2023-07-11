@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { LoginResponse, SessionScreen, PendingRequest, NotificationKeys } from '../interfaces/session'
+import { SessionScreen, PendingRequest, NotificationKeys } from '../interfaces'
 import { Action as HistoryAction } from 'history'
 import { DrillDownType, Route } from '../interfaces/router'
-import { ViewMetaResponse, ApplicationError, PopupType } from '../interfaces/view'
+import { ViewMetaResponse, ApplicationError, PopupType } from '../interfaces'
 import { DataItem, MultivalueSingleValue, PendingDataItem, PickMap } from '../interfaces/data'
-import { RowMeta } from '../interfaces/rowMeta'
-import { AppNotificationType } from '../interfaces/objectMap'
+import { RowMeta } from '../interfaces'
+import { AppNotificationType } from '../interfaces'
 import {
     OperationPostInvokeAny,
     OperationTypeCrud,
@@ -28,10 +28,10 @@ import {
     OperationErrorEntity,
     OperationPostInvokeConfirm,
     OperationPreInvoke
-} from '../interfaces/operation'
-import { BcFilter, BcSorter } from '../interfaces/filters'
+} from '../interfaces'
+import { BcFilter, BcSorter } from '../interfaces'
 import { AxiosError } from 'axios'
-import { ApiCallContext } from '../utils/api'
+import { ApiCallContext } from '../utils'
 import { Notification } from '../interfaces'
 import { createAction, AnyAction } from '@reduxjs/toolkit'
 
@@ -74,7 +74,7 @@ export const login = createAction<{
 /**
  * Login was successful
  */
-export const loginDone = createAction<LoginResponse>('loginDone')
+export const loginDone = createAction<Route>('loginDone')
 
 /**
  * Login was unsuccesful
