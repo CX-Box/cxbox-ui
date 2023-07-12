@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: '10.x'
           always-auth: true
+          registry-url: https://registry.npmjs.org/
       - name: install
         run: yarn install
       - name: linter
@@ -26,7 +27,7 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
           cd dist
-          yarn publish --access public
+          npm publish --access public
           cd ..
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
