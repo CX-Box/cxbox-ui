@@ -33,6 +33,10 @@ jobs:
     if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/alpha') && needs.check-commentator.outputs.output1 > 0
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+          always-auth: true
       - name: Get PR
         id: get_pr
         run: |
