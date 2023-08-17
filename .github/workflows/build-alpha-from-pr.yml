@@ -13,15 +13,15 @@ jobs:
     name: Check if commentator is a member of cxbox-team
     runs-on: ubuntu-latest
     env:
-      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TOKEN: ${{ secrets.cxboxgithub_token }}
+      USER: cxboxgithub
     outputs:
       output1: ${{ steps.step1.outputs.member_check }}
     steps:
       - name: Grep commentator
         id: step1
         run: |
-          https://github.com/orgs/CX-Box/teams/cxbox-team/edit
-          result=`curl -request GET --url "https://api.github.com/orgs/CX-Box/teams/cxbox-team/members" --header "Authorization: Bearer $TOKEN" | grep -Eo "(\"login\": \"${{ github.event.comment.user.login }}\")" | wc -l`;
+          result=`curl -u $USER:$TOKEN https://api.github.com/orgs/CX-Box/teams/cxbox-team/members | grep -Eo "(\"login\": \"${{ github.event.comment.user.login }}\")" | wc -l`;
           echo "number of entries: $result";
           echo "##[set-output name=member_check;]$result"
 
@@ -29,19 +29,15 @@ jobs:
     name: Build alpha package
     needs: check-commentator
     env:
-      TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
+      TOKEN: ${{ secrets.cxboxgithub_token }}
     if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/alpha') && needs.check-commentator.outputs.output1 > 0
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '10.x'
-          always-auth: true
       - name: Get PR
         id: get_pr
         run: |
           echo "github.event.issue.pull_request.url=${{ github.event.issue.pull_request.url }}"
-          result=`curl -request GET --url ${{ github.event.issue.pull_request.url }} --header "Authorization: Bearer $TOKEN" | tr '\n' ' '`
+          pr=`curl -u cxboxgithub:$TOKEN ${{ github.event.issue.pull_request.url }} | tr '\n' ' '`
           echo "##[set-output name=pr_data;]$pr"
 
       - name: Get branch
