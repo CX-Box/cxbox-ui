@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+        always-auth: true
     - uses: actions/checkout@v2
     - name: install
       run: yarn install
