@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      USER: ${{ secrets.GITHUB_TOKEN}}
     outputs:
       output1: ${{ steps.step1.outputs.member_check }}
     steps:
@@ -22,7 +21,7 @@ jobs:
         id: step1
         run: |
           https://github.com/orgs/CX-Box/teams/cxbox-team/edit
-          result=`curl -u $USER:$TOKEN https://api.github.com/orgs/CX-Box/teams/cxbox-team/members | grep -Eo "(\"login\": \"${{ github.event.comment.user.login }}\")" | wc -l`;
+          result=`curl -request GET --url "https://api.github.com/orgs/CX-Box/teams/cxbox-team/members" --header "Authorization: Bearer $TOKEN" | grep -Eo "(\"login\": \"${{ github.event.comment.user.login }}\")" | wc -l`;
           echo "number of entries: $result";
           echo "##[set-output name=member_check;]$result"
 
@@ -42,7 +41,7 @@ jobs:
         id: get_pr
         run: |
           echo "github.event.issue.pull_request.url=${{ github.event.issue.pull_request.url }}"
-          pr=`curl -u drite:$TOKEN ${{ github.event.issue.pull_request.url }} | tr '\n' ' '`
+          result=`curl -request GET --url ${{ github.event.issue.pull_request.url }} --header "Authorization: Bearer $TOKEN" | tr '\n' ' '`
           echo "##[set-output name=pr_data;]$pr"
 
       - name: Get branch
