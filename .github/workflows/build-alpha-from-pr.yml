@@ -13,14 +13,15 @@ jobs:
     name: Check if commentator is a member of cxbox-team
     runs-on: ubuntu-latest
     env:
-      TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
-      USER: ${{ secrets.READ_MEMBERS_USER}}
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      USER: ${{ secrets.GITHUB_TOKEN}}
     outputs:
       output1: ${{ steps.step1.outputs.member_check }}
     steps:
       - name: Grep commentator
         id: step1
         run: |
+          https://github.com/orgs/CX-Box/teams/cxbox-team/edit
           result=`curl -u $USER:$TOKEN https://api.github.com/orgs/CX-Box/teams/cxbox-team/members | grep -Eo "(\"login\": \"${{ github.event.comment.user.login }}\")" | wc -l`;
           echo "number of entries: $result";
           echo "##[set-output name=member_check;]$result"
