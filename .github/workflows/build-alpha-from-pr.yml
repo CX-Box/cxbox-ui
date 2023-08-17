@@ -13,8 +13,8 @@ jobs:
     name: Check if commentator is a member of cxbox-team
     runs-on: ubuntu-latest
     env:
-      TOKEN: ${{ secrets.cxboxgithub_token }}
-      USER: cxboxgithub
+      TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
+      USER: ${{ secrets.READ_MEMBERS_USER}}
     outputs:
       output1: ${{ steps.step1.outputs.member_check }}
     steps:
@@ -29,7 +29,7 @@ jobs:
     name: Build alpha package
     needs: check-commentator
     env:
-      TOKEN: ${{ secrets.cxboxgithub_token }}
+      TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
     if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/alpha') && needs.check-commentator.outputs.output1 > 0
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +37,7 @@ jobs:
         id: get_pr
         run: |
           echo "github.event.issue.pull_request.url=${{ github.event.issue.pull_request.url }}"
-          pr=`curl -u cxboxgithub:$TOKEN ${{ github.event.issue.pull_request.url }} | tr '\n' ' '`
+          pr=`curl -u drite:$TOKEN ${{ github.event.issue.pull_request.url }} | tr '\n' ' '`
           echo "##[set-output name=pr_data;]$pr"
 
       - name: Get branch
@@ -75,9 +75,14 @@ jobs:
 
       - name: Increase version
         run: |
-          git config --global user.name "github"
-          git config --global user.email "dergachev@hotmail.com"
+          git config --global user.name "cxbox"
+          git config --global user.email "cxbox.mail@gmail.com"
           yarn version --new-version ${{ steps.bump_version.outputs.next-version }}
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+          always-auth: true
 
       - name: install
         run: yarn install
