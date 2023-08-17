@@ -13,8 +13,8 @@ jobs:
     name: Check if commentator is a member of cxbox-team
     runs-on: ubuntu-latest
     env:
-      TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
-      USER: ${{ secrets.READ_MEMBERS_USER}}
+      TOKEN: ${{ secrets.cxboxgithub_token }}
+      USER: cxboxgithub
     outputs:
       output1: ${{ steps.step1.outputs.member_check }}
     steps:
@@ -29,7 +29,7 @@ jobs:
     name: Build alpha package
     needs: check-commentator
     env:
-      TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
+      TOKEN: ${{ secrets.cxboxgithub_token }}
     if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/alpha') && needs.check-commentator.outputs.output1 > 0
     runs-on: ubuntu-latest
     steps:
@@ -37,7 +37,7 @@ jobs:
         id: get_pr
         run: |
           echo "github.event.issue.pull_request.url=${{ github.event.issue.pull_request.url }}"
-          pr=`curl -u drite:$TOKEN ${{ github.event.issue.pull_request.url }} | tr '\n' ' '`
+          pr=`curl -u cxboxgithub:$TOKEN ${{ github.event.issue.pull_request.url }} | tr '\n' ' '`
           echo "##[set-output name=pr_data;]$pr"
 
       - name: Get branch
