@@ -30,15 +30,20 @@ export const refreshMetaEpic: Epic = (action$, store): Observable<any> =>
         const state = store.getState()
         const { router } = state
         const { activeRole } = state.session
+
         console.log('refreshMetaEpic')
-        return refreshMeta().switchMap(() => {
-            return Observable.concat([
-                $do.logoutDone(null),
-                $do.login({ login: null, password: null, role: activeRole }),
-                $do.changeLocation({
-                    location: router,
-                    action: 'PUSH'
-                })
-            ]).catch(error => Observable.of($do.loginFail(error)))
-        })
+
+        return refreshMeta()
+            .switchMap(() => {
+                return Observable.concat([
+                    $do.refreshMetaDone(null),
+                    $do.logoutDone(null),
+                    $do.login({ login: null, password: null, role: activeRole }),
+                    $do.changeLocation({
+                        location: router,
+                        action: 'PUSH'
+                    })
+                ]).catch(error => Observable.of($do.loginFail(error)))
+            })
+            .catch(() => Observable.of($do.refreshMetaFail(null)))
     })
