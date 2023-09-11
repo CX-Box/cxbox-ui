@@ -1191,6 +1191,16 @@ export class ActionPayloadTypes {
     refreshMeta: null = z
 
     /**
+     * refresh refreshMeta was successful
+     */
+    refreshMetaDone: null = z
+
+    /**
+     * refresh refreshMeta was unsuccessful
+     */
+    refreshMetaFail: null = z
+
+    /**
      * Refresh meta data (see action above) and reload page
      */
     refreshMetaAndReloadPage: null = z
