@@ -16,6 +16,12 @@ jobs:
       with:
         node-version: '10.x'
         always-auth: true
+    - name: yarn v
+      run: yarn -v
+    - name: node v
+      run: node -v
+    - name: npm v
+      run: npm -v
     - uses: actions/checkout@v2
     - name: install
       run: yarn install
