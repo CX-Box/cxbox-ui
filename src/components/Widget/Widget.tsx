@@ -68,7 +68,17 @@ export const Widget: FunctionComponent<WidgetProps> = props => {
     const skipCardWrapping = PopupWidgetTypes.includes(props.meta.type)
 
     if (skipCardWrapping) {
-        return <> {chooseWidgetType(props.meta, props.customWidgets, props.children)} </>
+        return (
+            <div
+                data-test="WIDGET"
+                data-test-widget-type={props.meta.type}
+                data-test-widget-position={props.meta.position}
+                data-test-widget-title={props.meta.title}
+                data-test-widget-name={props.meta.name}
+            >
+                {chooseWidgetType(props.meta, props.customWidgets, props.children)}
+            </div>
+        )
     }
 
     const showSpinner = !!(props.loading && (props.rowMetaExists || props.dataExists))
@@ -93,7 +103,17 @@ export const Widget: FunctionComponent<WidgetProps> = props => {
 
     if (customWidget && !isCustomWidget(customWidget)) {
         if (customWidget.card === null) {
-            return WidgetParts
+            return (
+                <div
+                    data-test="WIDGET"
+                    data-test-widget-type={props.meta.type}
+                    data-test-widget-position={props.meta.position}
+                    data-test-widget-title={props.meta.title}
+                    data-test-widget-name={props.meta.name}
+                >
+                    {WidgetParts}
+                </div>
+            )
         }
 
         if (customWidget.card) {
@@ -107,7 +127,14 @@ export const Widget: FunctionComponent<WidgetProps> = props => {
         return <Card meta={props.meta}>{WidgetParts}</Card>
     }
     return (
-        <div className={styles.container} data-widget-type={props.meta.type}>
+        <div
+            className={styles.container}
+            data-test="WIDGET"
+            data-test-widget-type={props.meta.type}
+            data-test-widget-position={props.meta.position}
+            data-test-widget-title={props.meta.title}
+            data-test-widget-name={props.meta.name}
+        >
             <h2 className={styles.title}>{props.meta.title}</h2>
             {WidgetParts}
         </div>
