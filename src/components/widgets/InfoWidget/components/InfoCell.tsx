@@ -70,14 +70,21 @@ export const InfoCell: React.FunctionComponent<ValueCellProps> = ({ flattenWidge
     )
 
     return (
-        <InfoValueWrapper key={field.key} row={row} col={col}>
-            {field.label?.length !== 0 && (
-                <div className={styles.labelArea}>
-                    <TemplatedTitle widgetName={meta.name} title={field.label} />
-                </div>
-            )}
-            <div className={styles.fieldData}>{ResultField}</div>
-        </InfoValueWrapper>
+        <div
+            data-test="FIELD"
+            data-test-field-type={field.type}
+            data-test-field-title={field.label || field.title}
+            data-test-field-key={field.key}
+        >
+            <InfoValueWrapper key={field.key} row={row} col={col}>
+                {field.label?.length !== 0 && (
+                    <div className={styles.labelArea}>
+                        <TemplatedTitle widgetName={meta.name} title={field.label} />
+                    </div>
+                )}
+                <div className={styles.fieldData}>{ResultField}</div>
+            </InfoValueWrapper>
+        </div>
     )
 }
 

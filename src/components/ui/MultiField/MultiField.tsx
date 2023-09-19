@@ -39,13 +39,21 @@ const MultiField: React.FunctionComponent<MultiFieldProps> = props => {
     const valuesStyle = props.style === 'list' ? styles.listValues : styles.inlineValues
     const valueStyle = props.style === 'list' ? styles.listValue : styles.inlineValue
     const multiValueStyle = props.style !== 'list' && styles.inlineMultiValue
+
     return (
         <div className={valuesStyle}>
             {props.fields.map(fieldMeta => {
                 const data = props.data?.[fieldMeta.key]
 
                 return data || data === 0 ? (
-                    <div key={fieldMeta.key} className={valueStyle}>
+                    <div
+                        key={fieldMeta.key}
+                        className={valueStyle}
+                        data-test="FIELD"
+                        data-test-field-type={fieldMeta.type}
+                        data-test-field-title={fieldMeta.label || fieldMeta.title}
+                        data-test-field-key={fieldMeta.key}
+                    >
                         <Field
                             bcName={props.bcName}
                             cursor={props.cursor}

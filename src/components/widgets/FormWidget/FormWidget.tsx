@@ -71,6 +71,7 @@ export const FormWidget: FunctionComponent<FormWidgetProps> = ({ meta, fields, m
                                     const field = flattenWidgetFields.find(item => item.key === col.fieldKey)
                                     const disabled = fields?.find(item => item.key === field.key && item.disabled)
                                     const error = (!disabled && missingFields?.[field.key]) || metaErrors?.[field.key]
+
                                     return (
                                         <Col
                                             key={colIndex}
@@ -78,6 +79,10 @@ export const FormWidget: FunctionComponent<FormWidgetProps> = ({ meta, fields, m
                                             className={cn({ [styles.colWrapper]: row.cols.length > 1 || col.span !== 24 })}
                                         >
                                             <Form.Item
+                                                data-test="FIELD"
+                                                data-test-field-type={field.type}
+                                                data-test-field-title={field.label || field.title}
+                                                data-test-field-key={field.key}
                                                 label={
                                                     field.type === 'checkbox' ? null : (
                                                         <TemplatedTitle widgetName={meta.name} title={field.label} />

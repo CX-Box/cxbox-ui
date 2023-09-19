@@ -200,7 +200,12 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
                             dataItem.id === selectedCell.rowId &&
                             cursor === selectedCell.rowId
                         return (
-                            <div>
+                            <div
+                                data-test="FIELD"
+                                data-test-field-type={item.type}
+                                data-test-field-title={item.label || item.title}
+                                data-test-field-key={item.key}
+                            >
                                 <Field
                                     data={dataItem}
                                     bcName={widgetBcName}
