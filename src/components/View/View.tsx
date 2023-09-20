@@ -32,6 +32,7 @@ export interface ViewProps {
     customWidgets?: Record<string, CustomWidgetDescriptor>
     customLayout?: (props: any) => React.ReactElement<any>
     customFields?: Record<string, CustomWidget>
+    disableDebugMode?: boolean
 }
 
 export const CustomizationContext: React.Context<{
@@ -46,7 +47,7 @@ export const CustomizationContext: React.Context<{
  * @category Components
  */
 export const View: FunctionComponent<ViewProps> = props => {
-    const { debugMode, widgets, skipWidgetTypes, card, customSpinner, customWidgets, customLayout, customFields } = props
+    const { debugMode, widgets, skipWidgetTypes, card, customSpinner, customWidgets, customLayout, customFields, disableDebugMode } = props
     let layout: React.ReactNode = null
     const fileUploadPopup = useSelector((state: Store) => state.view.popupData?.type === 'file-upload')
     if (customLayout) {
@@ -57,6 +58,7 @@ export const View: FunctionComponent<ViewProps> = props => {
                 customWidgets={customWidgets}
                 card={card}
                 skipWidgetTypes={skipWidgetTypes}
+                disableDebugMode={disableDebugMode}
             />
         )
     } else {
@@ -67,16 +69,19 @@ export const View: FunctionComponent<ViewProps> = props => {
                 customWidgets={customWidgets}
                 card={card}
                 skipWidgetTypes={skipWidgetTypes}
+                disableDebugMode={disableDebugMode}
             />
         )
     }
 
     return (
         <CustomizationContext.Provider value={{ customFields: customFields }}>
-            {debugMode && <ViewInfoLabel />}
+            {!disableDebugMode && debugMode && <ViewInfoLabel />}
             {fileUploadPopup && <FileUploadPopup />}
             {layout}
-            {debugMode && widgets.filter(i => PopupWidgetTypes.includes(i.type)).map(i => <DebugPanel key={i.name} widgetMeta={i} />)}
+            {!disableDebugMode &&
+                debugMode &&
+                widgets.filter(i => PopupWidgetTypes.includes(i.type)).map(i => <DebugPanel key={i.name} widgetMeta={i} />)}
         </CustomizationContext.Provider>
     )
 }

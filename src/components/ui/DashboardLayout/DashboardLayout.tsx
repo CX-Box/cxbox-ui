@@ -26,6 +26,7 @@ export interface DashboardLayoutProps {
     skipWidgetTypes?: string[]
     customSpinner?: (props: any) => React.ReactElement<any>
     card?: (props: any) => React.ReactElement<any>
+    disableDebugMode?: boolean
 }
 
 /**
@@ -50,6 +51,7 @@ export function DashboardLayout(props: DashboardLayoutProps) {
                                     card={props.card}
                                     customWidgets={props.customWidgets}
                                     customSpinner={props.customSpinner}
+                                    disableDebugMode={props.disableDebugMode}
                                 />
                             </WidgetErrorBoundary>
                         </Col>

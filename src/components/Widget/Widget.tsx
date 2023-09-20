@@ -38,6 +38,7 @@ interface WidgetOwnProps {
     card?: (props: any) => React.ReactElement<any>
     customSpinner?: (props: any) => React.ReactElement<any>
     children?: React.ReactNode
+    disableDebugMode?: boolean
 }
 
 interface WidgetProps extends WidgetOwnProps {
@@ -86,7 +87,7 @@ export const Widget: FunctionComponent<WidgetProps> = props => {
         <>
             {showSkeleton && <Skeleton loading paragraph={skeletonParams} />}
             {!showSkeleton && spinnerElement}
-            {props.debugMode && <DebugPanel widgetMeta={props.meta} />}
+            {!props.disableDebugMode && props.debugMode && <DebugPanel widgetMeta={props.meta} />}
         </>
     )
 
