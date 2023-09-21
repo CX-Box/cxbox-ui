@@ -97,6 +97,13 @@ export const PickListPopup: FunctionComponent<PickListPopupProps & PickListPopup
                 dataIndex: item.key,
                 render: (text, dataItem) => {
                     return text
+                },
+                onHeaderCell: () => {
+                    return {
+                        'data-test-widget-list-header-column-title': item?.title,
+                        'data-test-widget-list-header-column-type': item?.type,
+                        'data-test-widget-list-header-column-key': item?.key
+                    }
                 }
             }
         })
@@ -146,6 +153,20 @@ export const PickListPopup: FunctionComponent<PickListPopupProps & PickListPopup
     )
     const footer = components?.footer === undefined ? defaultFooter : components.footer
 
+    const handleRow = (record: DataItem) => {
+        return {
+            ...onRow(record),
+            'data-test-widget-list-row-id': record.id,
+            'data-test-widget-list-row-type': 'Row'
+        }
+    }
+
+    const onHeaderRow = () => {
+        return {
+            'data-test-widget-list-header': true
+        }
+    }
+
     const defaultTable =
         widget.options?.hierarchy || widget.options?.hierarchyFull ? (
             widget.options.hierarchyFull ? (
@@ -156,7 +177,15 @@ export const PickListPopup: FunctionComponent<PickListPopupProps & PickListPopup
         ) : (
             <div>
                 {/* TODO: Replace with TableWidget */}
-                <Table className={styles.table} columns={columns} dataSource={data} rowKey="id" onRow={onRow} pagination={false} />
+                <Table
+                    className={styles.table}
+                    columns={columns}
+                    dataSource={data}
+                    rowKey="id"
+                    onRow={handleRow}
+                    pagination={false}
+                    onHeaderRow={onHeaderRow}
+                />
             </div>
         )
     const table = bcLoading ? (

@@ -61,7 +61,14 @@ export const ColumnSort: FunctionComponent<ColumnSortProps> = props => {
         props.onSort(props.bcName, sorter, props.page, props.widgetName, props.infinitePagination)
     }
 
-    return <Icon className={cn(styles.icon, props.className, { [styles.forceShow]: props.sorter })} type={icon} onClick={handleSort} />
+    return (
+        <Icon
+            className={cn(styles.icon, props.className, { [styles.forceShow]: props.sorter })}
+            type={icon}
+            data-test-widget-list-header-column-sort={true}
+            onClick={handleSort}
+        />
+    )
 }
 
 function mapStateToProps(store: Store, ownProps: ColumnSortOwnProps) {

@@ -92,7 +92,7 @@ const RadioButton: React.FunctionComponent<RadioButtonProps> = ({
                 <Radio value={index.toString()} key={index}>
                     <span>
                         {el.icon && getIconByParams(el.icon)}
-                        <span>{el.value}</span>
+                        <span data-test-field-radiobutton-item={true}>{el.value}</span>
                     </span>
                 </Radio>
             ))}

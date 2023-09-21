@@ -59,6 +59,7 @@ export const ColumnFilterControl: React.FC<ColumnFilterControlProps> = props => 
         case FieldType.checkbox: {
             return (
                 <Checkbox
+                    data-test-filter-popup-select-value={true}
                     onChange={(e: CheckboxChangeEvent) => {
                         props.onChange(e.target.checked)
                     }}
@@ -78,6 +79,7 @@ export const ColumnFilterControl: React.FC<ColumnFilterControlProps> = props => 
             }
             return (
                 <DatePicker
+                    data-test-filter-popup-value={true}
                     autoFocus
                     onChange={(date: Moment, dateString: string) => {
                         props.onChange(date?.toISOString())
@@ -100,6 +102,7 @@ export const ColumnFilterControl: React.FC<ColumnFilterControlProps> = props => 
             }
             return (
                 <DatePicker
+                    data-test-filter-popup-value={true}
                     autoFocus
                     onChange={(date: Moment, dateString: string) => {
                         props.onChange(date?.toISOString())
@@ -122,6 +125,7 @@ export const ColumnFilterControl: React.FC<ColumnFilterControlProps> = props => 
             }
             return (
                 <DatePicker
+                    data-test-filter-popup-value={true}
                     autoFocus
                     onChange={(date: Moment, dateString: string) => {
                         props.onChange(date?.toISOString())
@@ -137,6 +141,7 @@ export const ColumnFilterControl: React.FC<ColumnFilterControlProps> = props => 
         default: {
             return (
                 <Input
+                    data-test-filter-popup-value={true}
                     autoFocus
                     value={props.value as string}
                     suffix={<Icon type="search" />}

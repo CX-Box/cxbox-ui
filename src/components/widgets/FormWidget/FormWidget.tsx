@@ -89,7 +89,7 @@ export const FormWidget: FunctionComponent<FormWidgetProps> = ({ meta, fields, m
                                                     )
                                                 }
                                                 validateStatus={error ? 'error' : undefined}
-                                                help={error}
+                                                help={error ? <div data-test-error-text={true}>{error}</div> : undefined}
                                             >
                                                 <Field
                                                     bcName={bcName}

@@ -226,6 +226,13 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
                                       processCellClick(record.id, item.key)
                                   }
                               }
+                    },
+                    onHeaderCell: () => {
+                        return {
+                            'data-test-widget-list-header-column-title': item?.title,
+                            'data-test-widget-list-header-column-type': item?.type,
+                            'data-test-widget-list-header-column-key': item?.key
+                        }
                     }
                 }
             })
@@ -308,6 +315,20 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
     }, [filterGroups, filterGroupName, filtersExist, props.limitBySelf, t, handleAddFilters, handleRemoveFilters, handleShowAll])
 
     const [operationsRef, parentRef, onRow] = useRowMenu() // NOSONAR(S6440) hook is called conditionally, fix later
+    const handleRow = (record: DataItem) => {
+        return {
+            ...onRow(record),
+            'data-test-widget-list-row-id': record.id,
+            'data-test-widget-list-row-type': 'Row'
+        }
+    }
+
+    const onHeaderRow = () => {
+        return {
+            'data-test-widget-list-header': true
+        }
+    }
+
     return (
         <div className={styles.tableContainer} ref={parentRef}>
             {props.header ?? defaultHeader}
@@ -318,7 +339,8 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
                 rowKey="id"
                 rowSelection={props.rowSelection}
                 pagination={false}
-                onRow={onRow}
+                onRow={handleRow}
+                onHeaderRow={onHeaderRow}
                 {...rest}
             />
             {!props.disablePagination && (

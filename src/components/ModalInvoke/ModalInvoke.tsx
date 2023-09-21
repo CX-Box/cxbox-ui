@@ -127,6 +127,19 @@ const ModalInvoke: React.FunctionComponent<ModalInvokeProps> = props => {
                     title={props.confirmOperation?.messageContent || t('Are you sure?')}
                     okText={okLabel}
                     cancelText={cancelLabel}
+                    wrapProps={{
+                        'data-test-confirm-popup': true
+                    }}
+                    okButtonProps={
+                        {
+                            'data-test-confirm-popup-button-ok': true
+                        } as any
+                    }
+                    cancelButtonProps={
+                        {
+                            'data-test-confirm-popup-button-cancel': true
+                        } as any
+                    }
                     onOk={() => {
                         props.onOk(props.bcName, props.operationType, props.widgetName, value || 'ok')
                     }}

@@ -67,9 +67,13 @@ export const ErrorPopup: FunctionComponent<ErrorPopupProps> = props => {
             destroyOnClose
             onCancel={props.onClose}
             footer={null}
+            closeIcon={<Icon className="ant-modal-close-icon" data-test-error-popup-button-close={true} type="close" />}
+            wrapProps={{
+                'data-test-error-popup': true
+            }}
         >
             <Form layout="vertical">
-                <Form.Item>
+                <Form.Item data-test-error-popup-text={props.error.type !== ApplicationErrorType.SystemError ? true : undefined}>
                     {props.error.type === ApplicationErrorType.BusinessError && businessError.message}
                     {props.error.type === ApplicationErrorType.SystemError && t('System error has been occurred')}
                     {props.error.type === ApplicationErrorType.NetworkError && t('There is no connection to the server')}
@@ -87,6 +91,7 @@ export const ErrorPopup: FunctionComponent<ErrorPopupProps> = props => {
                                         </Button>
                                         <textarea
                                             className={cn(styles.detailsArea)}
+                                            data-test-error-popup-text={true}
                                             readOnly={true}
                                             ref={errorRef}
                                             value={JSON.stringify(systemError.error.response, undefined, 2)}

@@ -83,6 +83,7 @@ const MultivalueTag: React.FunctionComponent<MultivalueTagProps> = ({
                 {(value || []).map(val => {
                     return (
                         <Tag
+                            data-test-field-multivalue-current-item={true}
                             onClick={e => {
                                 e.stopPropagation()
                             }}
@@ -100,7 +101,7 @@ const MultivalueTag: React.FunctionComponent<MultivalueTagProps> = ({
                 })}
             </div>
             <div className={cn(styles.iconContainer, { [styles.disabled]: disabled })}>
-                <Icon type={loading ? 'loading' : 'folder-open'} spin={loading} />
+                <Icon data-test-field-multivalue-popup={true} type={loading ? 'loading' : 'folder-open'} spin={loading} />
             </div>
         </div>
     )

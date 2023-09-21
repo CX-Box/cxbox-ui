@@ -182,14 +182,14 @@ const FileUpload: React.FunctionComponent<FileUploadOwnProps & FileUploadProps &
 
     const controls: { [key: string]: React.ReactNode } = {
         deleteButton: (
-            <div className={styles.deleteButton} onClick={onFileDelete} key="delete-btn">
+            <div className={styles.deleteButton} data-test-field-fileupload-clear={true} onClick={onFileDelete} key="delete-btn">
                 <Icon type="delete" title={t('Delete')} />
             </div>
         ),
 
         uploadButton: (
             <Upload {...uploadProps} className={cn(styles.uploadButton, { [styles.error]: metaError })} key="upload-btn">
-                <span title={t('select file')} className={styles.uploadButtonText}>
+                <span data-test-field-fileupload-popup={true} title={t('select file')} className={styles.uploadButtonText}>
                     ...
                 </span>
             </Upload>

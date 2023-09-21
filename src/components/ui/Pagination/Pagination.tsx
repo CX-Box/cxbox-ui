@@ -114,13 +114,19 @@ const Pagination: React.FunctionComponent<PaginationAllProps> = ({ bcName: props
     }
 
     return mode === PaginationMode.page ? (
-        <div className={styles.paginationContainer}>
-            <Button className={styles.prevButton} disabled={page < 2} onClick={onPrevPage} icon="left" />
-            <Button disabled={!hasNext} onClick={onNextPage} icon="right" />
+        <div className={styles.paginationContainer} data-test-widget-list-pagination={true}>
+            <Button
+                className={styles.prevButton}
+                disabled={page < 2}
+                icon="left"
+                data-test-widget-list-pagination-prev={true}
+                onClick={onPrevPage}
+            />
+            <Button disabled={!hasNext} icon="right" data-test-widget-list-pagination-next={true} onClick={onNextPage} />
         </div>
     ) : (
-        <div className={styles.paginationContainer}>
-            <Button onClick={onLoadMore} disabled={loading} loading={loading}>
+        <div className={styles.paginationContainer} data-test-widget-list-pagination={true}>
+            <Button onClick={onLoadMore} disabled={loading} loading={loading} data-test-widget-list-pagination-load-more={true}>
                 {t('Load more')}
             </Button>
         </div>

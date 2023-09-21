@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, useCallback } from 'react'
 import { Table, Icon } from 'antd'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
@@ -35,6 +35,7 @@ interface SameBcHierarchyTableOwnProps {
     assocValueKey?: string
     depth?: number
     selectable?: boolean
+    parentId?: string
     onRow?: (record: DataItem, index: number) => TableEventListeners
 }
 
@@ -86,6 +87,7 @@ export const SameBcHierarchyTable: FunctionComponent<SameBcHierarchyTableProps> 
     assocValueKey,
     cursor,
     loading,
+    parentId,
     onDeselectAll,
     onSelectAll,
     onSelect,
@@ -171,6 +173,7 @@ export const SameBcHierarchyTable: FunctionComponent<SameBcHierarchyTableProps> 
                 onDrillDown={null}
                 depth={depth + 1}
                 onRow={onRow}
+                parentId={record.id}
             />
         )
     }
@@ -225,13 +228,41 @@ export const SameBcHierarchyTable: FunctionComponent<SameBcHierarchyTableProps> 
                             {test}
                         </span>
                     )
+                },
+                onHeaderCell: () => {
+                    return {
+                        'data-test-widget-list-header-column-title': item?.title,
+                        'data-test-widget-list-header-column-type': item?.type,
+                        'data-test-widget-list-header-column-key': item?.key
+                    }
                 }
             }))
         ]
     }, [indentColumn, processedFields, widgetName, bcName])
 
+    const handleRow = useCallback(
+        (record: DataItem, index: number) => {
+            return {
+                ...(!(hierarchyDisableRoot && depth === 1) ? onRow?.(record, index) : undefined),
+                'data-test-widget-list-row-id': record.id,
+                'data-test-widget-list-row-type': 'Row'
+            }
+        },
+        [hierarchyDisableRoot, depth, onRow]
+    )
+
+    const onHeaderRow = () => {
+        return {
+            'data-test-widget-list-header': true
+        }
+    }
+
     return (
-        <div className={styles.container}>
+        <div
+            className={styles.container}
+            data-test-widget-list-row-id={parentId || undefined}
+            data-test-widget-list-row-type={parentId ? 'InlineForm' : undefined}
+        >
             <Table
                 className={styles.table}
                 rowSelection={rowSelection}
@@ -248,7 +279,8 @@ export const SameBcHierarchyTable: FunctionComponent<SameBcHierarchyTableProps> 
                 expandIconAsCell={false}
                 expandIconColumnIndex={onRow ? 0 : 1}
                 loading={loading}
-                onRow={!(hierarchyDisableRoot && depth === 1) && onRow}
+                onRow={handleRow}
+                onHeaderRow={onHeaderRow}
             />
         </div>
     )
