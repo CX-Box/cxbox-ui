@@ -30,7 +30,7 @@ describe('`loginDone` epic', () => {
     })
 
     it('does nothing', () => {
-        const action = $do.login({ login: 'bruce', password: 'qwerty' })
+        const action = $do.login({ login: 'bruce', password: 'qwerty' }) // NOSONAR(S2068) fake password
         const epic = loginEpic(ActionsObservable.of(action), store)
 
         testEpic(epic, result => {

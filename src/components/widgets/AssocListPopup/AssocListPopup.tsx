@@ -113,7 +113,7 @@ export const AssocListPopup: FunctionComponent<IAssocListProps & IAssocListActio
     ...rest
 }) => {
     const pendingBcNames = widget.options?.hierarchy
-        ? [widget.bcName, ...widget.options?.hierarchy.map(item => item.bcName)]
+        ? [widget.bcName, ...(widget.options?.hierarchy.map(item => item.bcName) || [])]
         : [widget.bcName]
 
     const selectedRecords = useAssocRecords(data, pendingDataChanges)

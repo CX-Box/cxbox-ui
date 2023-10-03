@@ -22,7 +22,7 @@ describe('session reducer', () => {
     it('sets login spinner and clears session error message on `login` action', () => {
         const state = { ...initialState, errorMsg: 'Your password is incorrect' }
         expect(state.loginSpin).toBe(false)
-        const nextState = session(state, $do.login({ login: 'kevin', password: 'weatherman' }))
+        const nextState = session(state, $do.login({ login: 'kevin', password: 'weatherman' })) // NOSONAR(S2068) fake password
         expect(nextState.loginSpin).toBe(true)
         expect(nextState.errorMsg).toBeFalsy()
     })

@@ -254,7 +254,7 @@ export const FullHierarchyTable: React.FunctionComponent<FullHierarchyTableAllPr
         () =>
             fields?.map(item => {
                 return item.type === FieldType.multivalue ? { ...item, type: FieldType.multivalueHover } : item
-            }),
+            }) || [],
         [fields]
     )
 
@@ -262,7 +262,7 @@ export const FullHierarchyTable: React.FunctionComponent<FullHierarchyTableAllPr
         return [
             indentColumn,
             ...processedFields
-                ?.filter(item => item.type !== FieldType.hidden && !item.hidden)
+                .filter(item => item.type !== FieldType.hidden && !item.hidden)
                 .map(item => ({
                     title: (
                         <ColumnTitle widgetName={widgetName} widgetMeta={item} rowMeta={rowMetaFields?.find(rm => rm.key === item.key)}>

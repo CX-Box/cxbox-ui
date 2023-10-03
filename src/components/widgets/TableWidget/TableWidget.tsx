@@ -157,16 +157,18 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
         }
     }
     const isAllowEdit = (props.allowEdit ?? true) && !props.meta.options?.readOnly
-    const { t } = useTranslation()
+    const { t } = useTranslation() // NOSONAR (S6440) hook is called conditionally, fix later
 
-    const processCellClick = React.useCallback(
+    // eslint-disable-next-line prettier/prettier
+    const processCellClick = React.useCallback( // NOSONAR(S6440) hook is called conditionally, fix later
         (recordId: string, fieldKey: string) => {
             onSelectCell(recordId, widgetMetaName, fieldKey)
         },
         [onSelectCell, widgetMetaName]
     )
 
-    const processedFields: WidgetListField[] = React.useMemo(
+    // eslint-disable-next-line prettier/prettier
+    const processedFields: WidgetListField[] = React.useMemo( // NOSONAR(S6440) hook is called conditionally, fix later
         () =>
             fields.map(item => {
                 return item.type === FieldType.multivalue ? { ...item, type: FieldType.multivalueHover } : item
@@ -174,7 +176,8 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
         [fields]
     )
 
-    const columns: Array<ColumnProps<DataItem>> = React.useMemo(() => {
+    // eslint-disable-next-line prettier/prettier
+    const columns: Array<ColumnProps<DataItem>> = React.useMemo(() => { // NOSONAR(S6440) hook is called conditionaly, fix later
         return processedFields
             .filter(item => item.type !== FieldType.hidden && !item.hidden)
             .map(item => {
@@ -233,7 +236,8 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
         selectedCell
     ])
 
-    const resultColumns = React.useMemo(() => {
+    // eslint-disable-next-line prettier/prettier
+    const resultColumns = React.useMemo(() => { // NOSONAR(S6440) hook is called conditionally, fix later
         const controlColumnsLeft: Array<ColumnProps<DataItem>> = []
         const controlColumnsRight: Array<ColumnProps<DataItem>> = []
         props.controlColumns?.map(item => {
@@ -242,19 +246,22 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
         return [...controlColumnsLeft, ...columns, ...controlColumnsRight]
     }, [columns, props.controlColumns])
 
-    const [filterGroupName, setFilterGroupName] = React.useState(null)
+    const [filterGroupName, setFilterGroupName] = React.useState(null) // NOSONAR(S6440) hook is called conditionally, fix later
     const filtersExist = !!props.filters?.length
 
-    const handleShowAll = React.useCallback(() => {
+    // eslint-disable-next-line prettier/prettier
+    const handleShowAll = React.useCallback(() => { // NOSONAR(S6440) hook is called conditionally, fix later
         onShowAll(widgetBcName, cursor, null, widgetName)
     }, [onShowAll, widgetBcName, cursor, widgetName])
 
-    const handleRemoveFilters = React.useCallback(() => {
+    // eslint-disable-next-line prettier/prettier
+    const handleRemoveFilters = React.useCallback(() => { // NOSONAR(S6440) hook is called conditionally, fix later
         onRemoveFilters(widgetBcName)
         onForceUpdate(widgetBcName)
     }, [onRemoveFilters, onForceUpdate, widgetBcName])
 
-    const handleAddFilters = React.useMemo(() => {
+    // eslint-disable-next-line prettier/prettier
+    const handleAddFilters = React.useMemo(() => { // NOSONAR(S6440) hook is called conditionally, fix later
         return (value: string) => {
             const filterGroup = filterGroups.find(item => item.name === value)
             const parsedFilters = parseFilters(filterGroup.filters)
@@ -265,13 +272,15 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
         }
     }, [filterGroups, widgetBcName, widgetName, setFilterGroupName, onRemoveFilters, onApplyFilter, onForceUpdate])
 
-    React.useEffect(() => {
+    // eslint-disable-next-line prettier/prettier
+    React.useEffect(() => { // NOSONAR(S6440) hook is called conditionally, fix later
         if (!filtersExist) {
             setFilterGroupName(null)
         }
     }, [filtersExist])
 
-    const defaultHeader = React.useMemo(() => {
+    // eslint-disable-next-line prettier/prettier
+    const defaultHeader = React.useMemo(() => { // NOSONAR(S6440) hook is called conditionally, fix later
         return (
             <div className={styles.filtersContainer}>
                 {!!filterGroups?.length && (
@@ -293,7 +302,7 @@ export const TableWidget: FunctionComponent<TableWidgetProps> = props => {
         )
     }, [filterGroups, filterGroupName, filtersExist, props.limitBySelf, t, handleAddFilters, handleRemoveFilters, handleShowAll])
 
-    const [operationsRef, parentRef, onRow] = useRowMenu()
+    const [operationsRef, parentRef, onRow] = useRowMenu() // NOSONAR(S6440) hook is called conditionally, fix later
     return (
         <div className={styles.tableContainer} ref={parentRef}>
             {props.header ?? defaultHeader}

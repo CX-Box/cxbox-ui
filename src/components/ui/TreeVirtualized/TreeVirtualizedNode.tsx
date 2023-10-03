@@ -100,7 +100,7 @@ export function TreeVirtualizedNode<T extends TreeNodeBidirectional>(props: Tree
                 </div>
             )}
             <div className={styles.controls}>
-                {item.children?.length && (
+                {!!item.children?.length && (
                     <button className={styles.button} onClick={() => data.onToggle(item.id)}>
                         <Icon className={styles.icon} type={expanded ? 'minus-square' : 'plus-square'} />
                     </button>
