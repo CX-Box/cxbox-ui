@@ -89,7 +89,7 @@
     "webpack-rxjs-externals": "1.1.0"
   },
   "dependencies": {
-    "@cxbox-ui/schema": "0.6.1",
+    "@cxbox-ui/schema": "0.7.1",
     "classnames": "2.2.6",
     "core-js": "3.1.4",
     "diff": "4.0.2",

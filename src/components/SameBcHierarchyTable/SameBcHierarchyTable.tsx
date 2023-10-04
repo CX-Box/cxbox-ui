@@ -204,9 +204,27 @@ export const SameBcHierarchyTable: FunctionComponent<SameBcHierarchyTableProps> 
                 dataIndex: item.key,
                 render: (text: string, dataItem: any) => {
                     if ([FieldType.multifield, FieldType.multivalueHover].includes(item.type)) {
-                        return <Field bcName={bcName} cursor={dataItem.id} widgetName={widgetName} widgetFieldMeta={item} readonly />
+                        return (
+                            <div
+                                data-test="FIELD"
+                                data-test-field-type={item.type}
+                                data-test-field-title={item.label || item.title}
+                                data-test-field-key={item.key}
+                            >
+                                <Field bcName={bcName} cursor={dataItem.id} widgetName={widgetName} widgetFieldMeta={item} readonly />
+                            </div>
+                        )
                     }
-                    return text
+                    return (
+                        <span
+                            data-test="FIELD"
+                            data-test-field-type={item.type}
+                            data-test-field-title={item.label || item.title}
+                            data-test-field-key={item.key}
+                        >
+                            {test}
+                        </span>
+                    )
                 }
             }))
         ]

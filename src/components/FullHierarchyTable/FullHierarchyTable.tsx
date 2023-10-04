@@ -278,7 +278,13 @@ export const FullHierarchyTable: React.FunctionComponent<FullHierarchyTableAllPr
                              * Column width problems
                              * https://github.com/ant-design/ant-design/issues/13825
                              */
-                            <div style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}>
+                            <div
+                                data-test="FIELD"
+                                data-test-field-type={item.type}
+                                data-test-field-title={item.label || item.title}
+                                data-test-field-key={item.key}
+                                style={{ wordWrap: 'break-word', wordBreak: 'break-word' }}
+                            >
                                 <Field bcName={bcName} cursor={dataItem.id} widgetName={widgetName} widgetFieldMeta={item} readonly />
                             </div>
                         )
