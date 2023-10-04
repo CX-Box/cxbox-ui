@@ -60,6 +60,7 @@ export interface HierarchyTableProps extends HierarchyTableOwnProps {
     loading: boolean
     selectable?: boolean
     pendingChanges: Record<string, PendingDataItem>
+    parentId?: string
     onDeselectAll?: (bcNames: string[]) => void
     onSelect?: (bcName: string, dataItem: AssociatedItem, widgetName: string, assocValueKey: string) => void
     onSelectAll?: (bcName: string, assocValueKey: string, selected: boolean) => void
@@ -99,6 +100,7 @@ export const HierarchyTable: FunctionComponent<HierarchyTableProps> = ({
     rowMetaFields,
     loading,
     showPagination,
+    parentId,
     onRow,
     onSelect,
     onSelectAll,
@@ -241,6 +243,7 @@ export const HierarchyTable: FunctionComponent<HierarchyTableProps> = ({
                 nestedByBc={nestedBcName}
                 onDrillDown={null}
                 onRow={onRow}
+                parentId={record.id}
             />
         )
     }
@@ -319,6 +322,13 @@ export const HierarchyTable: FunctionComponent<HierarchyTableProps> = ({
                                     {node}
                                 </span>
                             )
+                        },
+                        onHeaderCell: () => {
+                            return {
+                                'data-test-widget-list-header-column-title': item?.title,
+                                'data-test-widget-list-header-column-type': item?.type,
+                                'data-test-widget-list-header-column-key': item?.key
+                            }
                         }
                     }
                 })
@@ -341,13 +351,29 @@ export const HierarchyTable: FunctionComponent<HierarchyTableProps> = ({
         (record: DataItem, index: number) => {
             const basicHandlers = !(hierarchyDisableRoot && !indentLevel) && onRow?.(record, index)
             const hoverHandlers = showOperations && onHover?.(record)
-            return { ...basicHandlers, ...hoverHandlers }
+            return {
+                ...basicHandlers,
+                ...hoverHandlers,
+                'data-test-widget-list-row-id': record.id,
+                'data-test-widget-list-row-type': 'Row'
+            }
         },
         [onHover, showOperations, hierarchyDisableRoot, indentLevel, onRow]
     )
 
+    const onHeaderRow = () => {
+        return {
+            'data-test-widget-list-header': true
+        }
+    }
+
     return (
-        <div className={styles.container} ref={tableRef}>
+        <div
+            className={styles.container}
+            ref={tableRef}
+            data-test-widget-list-row-id={parentId || undefined}
+            data-test-widget-list-row-type={parentId ? 'InlineForm' : undefined}
+        >
             <Table
                 className={styles.table}
                 rowSelection={rowSelection}
@@ -364,6 +390,7 @@ export const HierarchyTable: FunctionComponent<HierarchyTableProps> = ({
                 expandIconAsCell={false}
                 expandIconColumnIndex={rowSelection ? 1 : 0}
                 loading={loading}
+                onHeaderRow={onHeaderRow}
                 onRow={handleRow}
             />
             {showPagination && <Pagination bcName={bcName} mode={PaginationMode.page} onChangePage={resetCursor} widgetName={meta.name} />}

@@ -32,9 +32,23 @@ function NavigationTabs({ navigationLevel }: NavigationTabsProps) {
 
     return (
         <nav className={styles.container}>
-            <Tabs activeKey={tabs?.find(item => item.selected)?.url} tabBarGutter={24} size="large" onChange={handleChange}>
+            <Tabs
+                data-test-widget-tabs={true}
+                data-test-widget-tabs-depth={navigationLevel}
+                activeKey={tabs?.find(item => item.selected)?.url}
+                tabBarGutter={24}
+                size="large"
+                onChange={handleChange}
+            >
                 {tabs?.map(item => (
-                    <Tabs.TabPane key={item.url} tab={<span className={styles.item}>{item.title}</span>} />
+                    <Tabs.TabPane
+                        key={item.url}
+                        tab={
+                            <span className={styles.item} data-test-navigation-tabs-item={true}>
+                                {item.title}
+                            </span>
+                        }
+                    />
                 ))}
             </Tabs>
         </nav>

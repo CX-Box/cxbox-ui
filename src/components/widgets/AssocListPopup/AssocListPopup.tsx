@@ -235,6 +235,13 @@ export const AssocListPopup: FunctionComponent<IAssocListProps & IAssocListActio
             widgetName={widget.name}
             disablePagination={widget.options?.hierarchyFull}
             footer={components?.footer}
+            wrapProps={
+                isFilter
+                    ? {
+                          'data-test-filter-popup': true
+                      }
+                    : undefined
+            }
             {...rest}
         >
             {bcLoading ? <Skeleton loading paragraph={{ rows: 5 }} /> : { ...table }}

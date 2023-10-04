@@ -69,7 +69,10 @@ export const AssocTable: FunctionComponent<AssocTableProps> = props => {
                     _associate: selected
                 }))
             )
-        }
+        },
+        getCheckboxProps: () => ({
+            'data-test-widget-list-column-select': true
+        })
     }
 
     return (

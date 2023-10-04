@@ -288,6 +288,13 @@ export const FullHierarchyTable: React.FunctionComponent<FullHierarchyTableAllPr
                                 <Field bcName={bcName} cursor={dataItem.id} widgetName={widgetName} widgetFieldMeta={item} readonly />
                             </div>
                         )
+                    },
+                    onHeaderCell: () => {
+                        return {
+                            'data-test-widget-list-header-column-title': item?.title,
+                            'data-test-widget-list-header-column-type': item?.type,
+                            'data-test-widget-list-header-column-key': item?.key
+                        }
                     }
                 }))
         ]
@@ -295,13 +302,18 @@ export const FullHierarchyTable: React.FunctionComponent<FullHierarchyTableAllPr
 
     const handleRow = React.useCallback(
         (record: ChildrenAwaredHierarchyItem, index: number) => {
-            if (hierarchyDisableRoot && depth === 1) {
-                return undefined
+            const testAttributes = {
+                'data-test-widget-list-row-id': record.id,
+                'data-test-widget-list-row-type': 'Row'
             }
-            if (hierarchyDisableParent && !record.noChildren) {
-                return undefined
+
+            if ((hierarchyDisableRoot && depth === 1) || (hierarchyDisableParent && !record.noChildren)) {
+                return testAttributes
             }
-            return onRow?.(record, index)
+            return {
+                ...onRow?.(record, index),
+                ...testAttributes
+            }
         },
         [onRow, hierarchyDisableRoot, hierarchyDisableParent, depth]
     )
@@ -309,7 +321,11 @@ export const FullHierarchyTable: React.FunctionComponent<FullHierarchyTableAllPr
     return loading ? (
         <Skeleton loading paragraph={{ rows: 5 }} />
     ) : (
-        <div className={styles.container}>
+        <div
+            className={styles.container}
+            data-test-widget-list-row-id={parentId || undefined}
+            data-test-widget-list-row-type={parentId ? 'InlineForm' : undefined}
+        >
             <Table
                 className={styles.table}
                 rowSelection={rowSelection}

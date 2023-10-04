@@ -84,7 +84,9 @@ const Dictionary: React.FunctionComponent<DictionaryProps> = props => {
         onChange: handleOnChange,
         dropdownMatchSelectWidth: false,
         getPopupContainer: trigger => trigger.parentElement,
-        forwardedRef: selectRef
+        forwardedRef: selectRef,
+        suffixIcon: <Icon type="down" data-test-field-dictionary-popup={true} />,
+        clearIcon: <Icon type="close-circle" theme="filled" data-test-field-dictionary-item-clear={true} />
     }
 
     const options = React.useMemo(() => {
@@ -96,7 +98,7 @@ const Dictionary: React.FunctionComponent<DictionaryProps> = props => {
                 return (
                     <Select.Option key={item.value} title={item.value}>
                         {item.options?.icon && getIconByParams(item.options.icon)}
-                        <span>{item.value}</span>
+                        <span data-test-field-dictionary-item={true}>{item.value}</span>
                     </Select.Option>
                 )
             })
@@ -106,7 +108,7 @@ const Dictionary: React.FunctionComponent<DictionaryProps> = props => {
                 <Select.Option key={value as string} title={value as string}>
                     {metaIcon}
                     {valueIcon && getIconByParams(valueIcon)}
-                    <span>{value}</span>
+                    <span data-test-field-dictionary-item={true}>{value}</span>
                 </Select.Option>
             )
         }
@@ -114,7 +116,7 @@ const Dictionary: React.FunctionComponent<DictionaryProps> = props => {
             return (
                 <Select.Option key={item.value} title={item.value}>
                     {item.icon && getIconByParams(item.icon)}
-                    <span>{item.value}</span>
+                    <span data-test-field-dictionary-item={true}>{item.value}</span>
                 </Select.Option>
             )
         })

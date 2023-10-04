@@ -63,7 +63,12 @@ const CheckboxPicker: React.FC<CheckboxPickerProps> = ({ metaField, bcName, curs
     return (
         <div className={styles.container}>
             {
-                <Checkbox checked={value as boolean} disabled={metaField?.disabled || readonly} onChange={handleChange}>
+                <Checkbox
+                    data-test-field-checkbox-item={true}
+                    checked={value as boolean}
+                    disabled={metaField?.disabled || readonly}
+                    onChange={handleChange}
+                >
                     {fieldLabel}
                 </Checkbox>
             }

@@ -141,7 +141,7 @@ export const RowOperationsButton: React.ForwardRefRenderFunction<RowOperationsBu
                 getPopupContainer={handlePopupContainer}
             >
                 {/*<Icon type="ellipsis" className={styles.dots} onClick={handleFetchMeta} />*/}
-                <Button icon="ellipsis" className={styles.dots} onClick={handleFetchMeta} />
+                <Button className={styles.dots} data-test-widget-list-row-action={true} icon="ellipsis" onClick={handleFetchMeta} />
             </Dropdown>
         </div>
     )

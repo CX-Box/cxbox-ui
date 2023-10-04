@@ -77,7 +77,7 @@ export const RowOperationsMenu: React.FC<RowOperationsMenuProps> = ({ meta, bcNa
 
     const menuItem = React.useCallback(
         (item: Operation) => (
-            <Menu.Item key={item.type} onClick={handleClick}>
+            <Menu.Item key={item.type} data-test-widget-list-row-action-item={true} onClick={handleClick}>
                 {item.icon && <Icon type={item.icon} />}
                 {item.text}
             </Menu.Item>

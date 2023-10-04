@@ -154,6 +154,7 @@ export function ColumnFilter({ widgetName, widgetMeta, rowMeta, components }: Co
             <div
                 className={cn(styles.icon, { [styles.active]: filter?.value?.toString()?.length > 0 })}
                 dangerouslySetInnerHTML={{ __html: filterIcon }}
+                data-test-widget-list-header-column-filter={true}
             />
         </Popover>
     )
