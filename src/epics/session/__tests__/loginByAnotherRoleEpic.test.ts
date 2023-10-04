@@ -100,7 +100,7 @@ describe('loginByAnotherRoleEpic test', () => {
         historyObjMock.mockRestore()
     })
     it('should skip login without role', () => {
-        const action = $do.login({ login: 'sss', password: 'sss' })
+        const action = $do.login({ login: 'sss', password: 'sss' }) // NOSONAR(S2068) fake password
         const epic = loginByAnotherRoleEpic(ActionsObservable.of(action), store)
         testEpic(epic, result => {
             expect(result.length).toBe(0)
