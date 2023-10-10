@@ -16,12 +16,18 @@
 
 .tableContainer {
     position: relative;
+
+    :global {
+        .ant-table-header-column {
+            width: 100%;
+        }
+    }
 }
 
 .table {
     overflow-x: auto;
 
-    :global{
+    :global {
         .ant-table .ant-table-thead > tr > th {
             padding: 11px 16px;
             font-weight: 500;
@@ -60,7 +66,8 @@
         .ant-select-selection {
             border: none;
 
-            &:focus, &:active{
+            &:focus,
+            &:active {
                 box-shadow: none;
             }
 

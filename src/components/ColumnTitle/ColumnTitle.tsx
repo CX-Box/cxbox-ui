@@ -62,9 +62,18 @@ export const ColumnTitle: FunctionComponent<ColumnTitle> = props => {
     if (!props.widgetMeta && !props.rowMeta) {
         return null
     }
+
     const title = <TemplatedTitle widgetName={props.widgetName} title={props.widgetMeta.title} />
     if (!props.rowMeta) {
-        return <div>{title}</div>
+        return (
+            <div
+                className={cn({
+                    [styles.numberInputContainer]: props.widgetMeta.type === FieldType.number
+                })}
+            >
+                {title}
+            </div>
+        )
     }
 
     const sort = !notSortableFields.includes(props.widgetMeta.type) && (
@@ -78,8 +87,11 @@ export const ColumnTitle: FunctionComponent<ColumnTitle> = props => {
         ) : (
             <ColumnFilter widgetName={props.widgetName} widgetMeta={props.widgetMeta} rowMeta={props.rowMeta} />
         ))
+
     return (
-        <div className={cn(styles.container, props.className)}>
+        <div
+            className={cn(styles.container, props.className, { [styles.numberInputContainer]: props.widgetMeta.type === FieldType.number })}
+        >
             {title}
             {filter}
             {sort}
