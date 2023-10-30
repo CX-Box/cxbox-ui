@@ -64,14 +64,23 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          registry-url: https://registry.npmjs.org
           always-auth: true
 
       - name: install
         run: yarn install
 
+      - name: linter
+        run: yarn lint
+
+      - name: build
+        run: yarn build
+
       - name: Publish dist to NPM
-        run: yarn npm publish --tag alpha --access public
+        run: |
+          echo 'npmAuthToken: "${NODE_AUTH_TOKEN}"' > ~/.yarnrc.yaml
+          cd dist
+          yarn publish --tag alpha --access public
+          cd ..
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
