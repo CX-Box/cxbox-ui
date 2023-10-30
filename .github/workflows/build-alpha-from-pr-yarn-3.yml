@@ -80,7 +80,8 @@ jobs:
         run: |
           ls
           cp .yarnrc.yml ./dist/.yarnrc.yml
-          cat ~/.yarnrc.yml 
+          cat ./dist/.yarnrc.yml
           cd dist
+          ls
           yarn npm publish --tag alpha --access public
           cd ..
