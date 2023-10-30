@@ -77,8 +77,9 @@ jobs:
 
       - name: Publish dist to NPM
         run: |
-          cp .yarnrc-ci.yaml  ~/.yarnrc.yaml 
-          cat ~/.yarnrc.yaml 
+          cp .yarnrc-ci.yml  ~/.yarnrc.yml 
+          chown 777 ~/.yarnrc.yml 
+          cat ~/.yarnrc.yml 
           cd dist
           yarn npm publish --tag alpha --access public
           cd ..
