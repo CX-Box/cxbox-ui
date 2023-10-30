@@ -75,7 +75,7 @@ jobs:
       - name: Publish dist to NPM
         run: |
           echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-          yarn publish --tag alpha --access public
+          yarn npm publish --tag alpha --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
