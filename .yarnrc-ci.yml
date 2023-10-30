@@ -1,0 +1,6 @@
+npmAlwaysAuth: true
+npmAuthToken: "${NODE_AUTH_TOKEN}"
+npmRegistryServer: "https://registry.npmjs.org"
+npmRegistries:
+  "https://registry.npmjs.org":
+    npmAuthToken: "${NODE_AUTH_TOKEN}"
