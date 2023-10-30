@@ -69,18 +69,13 @@ jobs:
       - name: install
         run: yarn install
 
-      - name: linter
-        run: yarn lint
-
       - name: build
-        run: yarn build
+        run: yarn run build-ci
 
       - name: Publish dist to NPM
         run: |
           echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-          cd dist
           yarn publish --tag alpha --access public
-          cd ..
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
