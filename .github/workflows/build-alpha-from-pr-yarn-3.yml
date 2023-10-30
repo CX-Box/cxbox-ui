@@ -1,0 +1,85 @@
+# This is a basic workflow to help you get started with Actions
+
+name: build-alpha-from-pr-yarn-3
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  issue_comment:
+    types: [created]
+    paths:
+      - ".github/workflows/build-alpha-from-pr-yarn-3.yml"
+
+jobs:
+  check-commentator:
+    name: Check if commentator is a member of cxbox-team
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
+      USER: ${{ secrets.READ_MEMBERS_USER}}
+    outputs:
+      output1: ${{ steps.step1.outputs.member_check }}
+    steps:
+      - name: Grep commentator
+        id: step1
+        run: |
+          result=`curl -u $USER:$TOKEN https://api.github.com/orgs/CX-Box/teams/cxbox-team/members | grep -Eo "(\"login\": \"${{ github.event.comment.user.login }}\")" | wc -l`;
+          echo "number of entries: $result";
+          echo "##[set-output name=member_check;]$result"
+
+  build-alpha:
+    name: Build alpha3 package
+    needs: check-commentator
+    env:
+      TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
+      USER: ${{ secrets.READ_MEMBERS_USER}}
+    if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/3alpha') && needs.check-commentator.outputs.output1 > 0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR
+        id: get_pr
+        run: |
+          echo "github.event.issue.pull_request.url=${{ github.event.issue.pull_request.url }}"
+          pr=`curl -u $USER:$TOKEN ${{ github.event.issue.pull_request.url }} | tr '\n' ' '`
+          echo "##[set-output name=pr_data;]$pr"
+
+      - name: Get branch
+        id: get_branch
+        run: |
+          echo "branch_name=${{ fromJson(steps.get_pr.outputs.pr_data).head.ref }}"
+          echo "##[set-output name=branch_name;]${{ fromJson(steps.get_pr.outputs.pr_data).head.ref }}"
+
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.get_branch.outputs.branch_name }}
+
+      - name: Increase version
+        run: |
+          git config --global user.name "cxbox"
+          git config --global user.email "cxbox.mail@gmail.com"
+          yarn version prerelease
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          always-auth: true
+
+      - name: install
+        run: yarn install
+
+      - name: linter
+        run: yarn lint
+
+      - name: build
+        run: yarn build
+
+      - name: Publish dist to NPM
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          cd dist
+          yarn publish --tag alpha --access public
+          cd ..
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
