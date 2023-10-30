@@ -79,7 +79,7 @@ jobs:
         run: |
           echo 'npmAuthToken: "${NODE_AUTH_TOKEN}"' > ~/.yarnrc.yaml
           cd dist
-          yarn publish --tag alpha --access public
+          yarn npm publish --tag alpha --access public
           cd ..
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
