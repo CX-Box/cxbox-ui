@@ -77,9 +77,10 @@ jobs:
 
       - name: Publish dist to NPM
         run: |
-          echo "npmAuthToken: ${{ secrets.NPM_TOKEN }}" > ~/.yarnrc.yaml
-          cat ~/.yarnrc.yaml
+          cp .yarnrc-ci.yaml  ~/.yarnrc.yaml 
+          cat ~/.yarnrc.yaml 
           cd dist
           yarn npm publish --tag alpha --access public
           cd ..
-
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
