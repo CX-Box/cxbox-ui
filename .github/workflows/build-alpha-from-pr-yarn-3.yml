@@ -33,6 +33,7 @@ jobs:
     env:
       TOKEN: ${{ secrets.READ_MEMBERS_TOKEN }}
       USER: ${{ secrets.READ_MEMBERS_USER}}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/3alpha') && needs.check-commentator.outputs.output1 > 0
     runs-on: ubuntu-latest
     steps:
@@ -55,16 +56,16 @@ jobs:
           ref: ${{ steps.get_branch.outputs.branch_name }}
           fetch-depth: 0
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          always-auth: true
+
       - name: Increase version
         run: |
           git config --global user.name "cxbox"
           git config --global user.email "cxbox.mail@gmail.com"
           yarn version prerelease
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          always-auth: true
 
       - name: install
         run: yarn install
@@ -83,5 +84,3 @@ jobs:
           cd dist
           yarn npm publish --tag alpha --access public
           cd ..
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
