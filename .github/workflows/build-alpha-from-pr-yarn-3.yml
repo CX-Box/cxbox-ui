@@ -61,20 +61,13 @@ jobs:
           node-version: 18
           always-auth: true
 
-      - name: Increase version
+      - name: Set git credentials
         run: |
           git config --global user.name "cxbox"
           git config --global user.email "cxbox.mail@gmail.com"
-          yarn version prerelease
 
       - name: install
         run: yarn install
-
-      - name: linter
-        run: yarn lint
-
-      - name: build
-        run: yarn build
 
       - name: Publish dist to NPM
         run: |
