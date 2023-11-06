@@ -25,9 +25,9 @@ interface TypedActionCreator<Type extends string> {
 type TypeGuard<T> = (value: any) => value is T
 
 export class ReducerBuilderManager<State> {
-    reducers: Array<[TypedActionCreator<string>, CaseReducer<State, AnyAction>]> = []
-    matchers: Array<[TypeGuard<any> | ((action: AnyAction) => boolean), CaseReducer<State, AnyAction>]> = []
-    defaultCaseReducer: CaseReducer<State, AnyAction> | undefined = undefined
+    private reducers: Array<[TypedActionCreator<string>, CaseReducer<State, AnyAction>]> = []
+    private matchers: Array<[TypeGuard<any> | ((action: AnyAction) => boolean), CaseReducer<State, AnyAction>]> = []
+    private defaultCaseReducer: CaseReducer<State, AnyAction> | undefined = undefined
 
     addCase<ActionCreator extends TypedActionCreator<string>>(
         action: ActionCreator,
@@ -57,9 +57,11 @@ export class ReducerBuilderManager<State> {
         return this
     }
 
-    addDefaultCase(reducer: CaseReducer<State, AnyAction>) {
+    addDefaultCase(
+        reducer: CaseReducer<State, AnyAction>
+    ): Omit<ReducerBuilderManager<State>, 'addCase' | 'addMatcher' | 'addDefaultCase'> {
         this.defaultCaseReducer = reducer
-        return {}
+        return this
     }
 
     get builder() {
