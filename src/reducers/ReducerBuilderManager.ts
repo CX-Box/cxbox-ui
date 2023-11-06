@@ -52,7 +52,7 @@ export class ReducerBuilderManager<State> {
     addMatcher<A>(
         matcher: TypeGuard<A> | ((action: any) => boolean),
         reducer: CaseReducer<State, A extends AnyAction ? A : A & AnyAction>
-    ): Omit<ActionReducerMapBuilder<State>, 'addCase'> {
+    ): Omit<ReducerBuilderManager<State>, 'addCase'> {
         this.matchers.push([matcher, reducer])
         return this
     }
