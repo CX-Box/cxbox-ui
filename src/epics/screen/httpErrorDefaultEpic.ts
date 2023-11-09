@@ -17,9 +17,10 @@
 import { ApplicationErrorType, CXBoxEpic } from '../../interfaces'
 import { filter, map } from 'rxjs'
 import { httpError, showViewError } from '../../actions'
-import { knownHttpErrors } from './apiErrorEpic'
 
-export const httpErrorDefaultEpic: CXBoxEpic = (action$, store) =>
+const knownHttpErrors = [401, 409, 418, 500]
+
+export const httpErrorDefaultEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
         filter(httpError.match),
         filter(action => !knownHttpErrors.includes(action.payload.statusCode)),

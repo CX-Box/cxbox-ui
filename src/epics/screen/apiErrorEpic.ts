@@ -19,8 +19,6 @@ import { ApplicationErrorType, CXBoxEpic } from '../../interfaces'
 import { EMPTY, filter, mergeMap, of } from 'rxjs'
 import { apiError, httpError, showViewError } from '../../actions'
 
-export const knownHttpErrors = [401, 409, 418, 500]
-
 export const apiErrorEpic: CXBoxEpic = action$ =>
     action$.pipe(
         filter(apiError.match),
