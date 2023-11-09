@@ -17,14 +17,12 @@
 import { WidgetShowCondition, WidgetTypes, WidgetOptions, WidgetFormField, WidgetListField, WidgetInfoField } from '@cxbox-ui/schema'
 import { ComponentType } from 'react'
 export type {
-    WidgetShowCondition,
-    WidgetTypes,
     WidgetOptions,
+    WidgetShowCondition,
     LayoutRow,
     LayoutCol,
     WidgetOperations,
     TableOperations,
-    PositionTypes,
     WidgetTableHierarchy,
     WidgetFieldBase,
     WidgetListFieldBase,
@@ -51,6 +49,7 @@ export type {
     WidgetInfoField
 } from '@cxbox-ui/schema'
 
+export { WidgetTypes, PositionTypes } from '@cxbox-ui/schema'
 /**
  * Different widget types that are considered `tables` in nature for purposes of applying some shared features.
  * For example, autofocus on missing required field should work for tables but not forms.
