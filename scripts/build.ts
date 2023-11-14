@@ -131,7 +131,7 @@ async function bundle(options: BuildOptions & EntryPointOptions) {
         sourcemap: 'inline',
         bundle: true,
         format: format === 'umd' ? 'esm' : format,
-        platform: 'node',
+        platform: 'neutral',
         mainFields: ['browser', 'module', 'main'],
         conditions: ['browser'],
         define: env
