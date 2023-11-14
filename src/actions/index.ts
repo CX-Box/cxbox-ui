@@ -368,7 +368,7 @@ export const bcNewDataFail = createAction<{
      * Business component for which record creation failed
      */
     bcName: string
-}>('bcNewDataSuccess')
+}>('bcNewDataFail')
 
 /**
  * Delete record request was
