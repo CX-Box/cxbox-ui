@@ -610,7 +610,7 @@ export const changeDataItems = createAction<{
     bcName: string
     cursors: string[]
     dataItems: PendingDataItem[]
-}>('changeDataItem')
+}>('changeDataItems')
 
 /**
  * TODO
