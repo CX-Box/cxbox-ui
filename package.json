@@ -23,7 +23,7 @@
     "format:check": "prettier --list-different \"(src|examples)/**/*.{ts,tsx}\" \"docs/*/**.md\"",
     "lint": "eslint src",
     "test": "jest --runInBand",
-    "type-tests": "yarn tsc -p src/tests/tsconfig.typetests.jsonn",
+    "type-tests": "yarn tsc -p src/tests/tsconfig.typetests.json",
     "prepack": "npm run build-prepare",
     "gen:schema": "node ./node_modules/@cxbox-ui/schema/bin/build-schema"
   },
