@@ -48,7 +48,7 @@ export const bcCancelCreateDataEpic: CXBoxEpic = (action$, state$, { api }) =>
             const state = state$.value
             const screenName = state.screen.screenName
             const bcName = action.payload.bcName
-            const bcUrl = buildBcUrl(bcName, true)
+            const bcUrl = buildBcUrl(bcName, true, state)
             const bc = state.screen.bo.bc[bcName]
             const cursor = bc?.cursor
             const context = { widgetName: action.payload.widgetName }

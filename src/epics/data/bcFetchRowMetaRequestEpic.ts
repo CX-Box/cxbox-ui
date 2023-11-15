@@ -59,7 +59,7 @@ export const bcFetchRowMetaRequestEpic: CXBoxEpic = (action$, state$, { api }) =
             const screenName = state.screen.screenName
             const bcName = action.payload.bcName
             const cursor = state.screen.bo.bc[bcName].cursor
-            const bcUrl = buildBcUrl(bcName, true)
+            const bcUrl = buildBcUrl(bcName, true, state)
             const canceler = api.createCanceler()
             const cancelFlow = cancelRequestEpic(action$, cancelRequestActionTypes, canceler.cancel, bcFetchRowMetaFail({ bcName }))
             const cancelByParentBc = cancelRequestEpic(

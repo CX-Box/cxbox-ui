@@ -48,7 +48,7 @@ export const userDrillDownEpic: CXBoxEpic = (action$, state$, { api }) =>
 
             const state = state$.value
             const { bcName, fieldKey, cursor } = action.payload
-            const bcUrl = buildBcUrl(bcName, true)
+            const bcUrl = buildBcUrl(bcName, true, state)
             return api.fetchRowMeta(state.screen.screenName, bcUrl).pipe(
                 mergeMap(rowMeta => {
                     const drillDownField = rowMeta.fields.find(field => field.key === fieldKey)

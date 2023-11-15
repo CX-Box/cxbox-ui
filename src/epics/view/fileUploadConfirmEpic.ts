@@ -46,7 +46,7 @@ export const fileUploadConfirmEpic: CXBoxEpic = (action$, state$, { api }) =>
              */
             const state = state$.value
             const bcName = state.view.popupData.bcName
-            const bcUrl = buildBcUrl(bcName, true)
+            const bcUrl = buildBcUrl(bcName, true, state)
             const widgetName = state.view.widgets.find(item => item.bcName === bcName)?.name
             const data = {
                 bulkIds: action.payload.fileIds

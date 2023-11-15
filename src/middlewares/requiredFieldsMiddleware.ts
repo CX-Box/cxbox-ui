@@ -51,7 +51,7 @@ const requiredFields =
             const { bcName, operationType, widgetName } = action.payload
             const cursor = state.screen.bo.bc[bcName]?.cursor
             if (cursor) {
-                const bcUrl = buildBcUrl(bcName, true, getState())
+                const bcUrl = buildBcUrl(bcName, true, state)
                 const record = state.data[bcName]?.find(item => item.id === cursor)
                 const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
                 const pendingValues = state.view.pendingDataChanges[bcName]?.[cursor]

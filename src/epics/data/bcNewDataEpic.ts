@@ -53,7 +53,7 @@ export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
              */
             const state = state$.value
             const bcName = action.payload.bcName
-            const bcUrl = buildBcUrl(bcName)
+            const bcUrl = buildBcUrl(bcName, false, state)
             const context = { widgetName: action.payload.widgetName }
             const params = { _action: action.payload.operationType }
             return api.newBcData(state.screen.screenName, bcUrl, context, params).pipe(

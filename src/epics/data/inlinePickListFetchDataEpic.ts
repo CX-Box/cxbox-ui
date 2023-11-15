@@ -25,7 +25,8 @@ export const inlinePickListFetchDataEpic: CXBoxEpic = (action$, state$, { api })
         filter(inlinePickListFetchDataRequest.match),
         mergeMap(action => {
             const { bcName, searchSpec, searchString } = action.payload
-            const bcUrl = buildBcUrl(bcName, false)
+            const state = state$.value
+            const bcUrl = buildBcUrl(bcName, false, state)
             const canceler = api.createCanceler()
             const cancelFlow = cancelRequestEpic(action$, cancelRequestActionTypes, canceler.cancel, bcFetchDataFail({ bcName, bcUrl }))
             const normalFlow = api

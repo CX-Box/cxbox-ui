@@ -47,7 +47,7 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
             const { bcName, operationType, widgetName } = action.payload
             // TODO: Remove conformOperation n 2.0.0
             const confirm = action.payload.confirmOperation?.type || action.payload.confirm
-            const bcUrl = buildBcUrl(bcName, true)
+            const bcUrl = buildBcUrl(bcName, true, state)
             const bc = state.screen.bo.bc[bcName]
             const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
             const fields = rowMeta?.fields

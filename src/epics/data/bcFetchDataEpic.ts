@@ -140,7 +140,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                 })
 
                 const limitBySelfCursor = state.router.bcPath?.includes(`${bcName}/${cursor}`)
-                const bcUrl = buildBcUrl(bcName, limitBySelfCursor)
+                const bcUrl = buildBcUrl(bcName, limitBySelfCursor, state)
 
                 // Hierarchy widgets has own filter implementation
                 const fetchParams: Record<string, any> = {

@@ -29,7 +29,7 @@ export const bcDeleteDataEpic: CXBoxEpic = (action$, store$, { api }) =>
             const state = store$.value
             const bcName = action.payload.bcName
             const cursor = state.screen.bo.bc[bcName].cursor
-            const bcUrl = buildBcUrl(bcName, true)
+            const bcUrl = buildBcUrl(bcName, true, state)
             const context = { widgetName: action.payload.widgetName }
             const isTargetFormatPVF = state.view.pendingValidationFailsFormat === PendingValidationFailsFormat.target
             return api.deleteBcData(state.screen.screenName, bcUrl, context).pipe(

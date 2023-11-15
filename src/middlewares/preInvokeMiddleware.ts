@@ -31,7 +31,7 @@ const preInvokeAction =
             const state = getState()
             const { operationType, widgetName, confirm } = action.payload
             const bcName = state.view.widgets.find(widgetItem => widgetItem.name === widgetName)?.bcName
-            const bcUrl = buildBcUrl(bcName, true)
+            const bcUrl = buildBcUrl(bcName, true, state)
             const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
             const actions = rowMeta && flattenOperations(rowMeta.actions)
             const preInvoke = actions?.find(item => item.type === operationType)?.preInvoke

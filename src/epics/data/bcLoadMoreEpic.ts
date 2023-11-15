@@ -31,7 +31,7 @@ export const bcLoadMoreEpic: CXBoxEpic = (action$, state$, { api }) =>
             const { cursor, page } = bc
             const limit = state.view.widgets.find(i => i.bcName === bcName)?.limit || bc.limit
             const limitBySelfCursor = state.router.bcPath?.includes(`${bcName}/${cursor}`)
-            const bcUrl = buildBcUrl(bcName, limitBySelfCursor)
+            const bcUrl = buildBcUrl(bcName, limitBySelfCursor, state)
             const filters = state.screen.filters[bcName] || []
             const sorters = state.screen.sorters[bcName]
 

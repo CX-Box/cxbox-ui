@@ -35,7 +35,7 @@ export const saveAssociationsActiveEpic: CXBoxEpic = (action$, state$, { api }) 
             const calleeBCName = state.view.popupData.calleeBCName
             const calleeWidgetName = state.view.popupData.calleeWidgetName
             const bcNames = action.payload.bcNames
-            const bcUrl = buildBcUrl(calleeBCName, true)
+            const bcUrl = buildBcUrl(calleeBCName, true, state)
             const pendingChanges = state.view.pendingDataChanges[bcNames[0]] || {}
             const params: Record<string, any> = bcNames.length ? { _bcName: bcNames[bcNames.length - 1] } : {}
             return api
