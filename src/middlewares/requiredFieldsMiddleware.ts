@@ -86,7 +86,7 @@ const requiredFields =
                     if (dataItem && TableLikeWidgetTypes.includes((widget as WidgetTableMeta)?.type)) {
                         dispatch(selectTableCellInit({ widgetName, rowId: cursor, fieldKey: Object.keys(dataItem)[0] }))
                     }
-                    return dataItem ? next(changeDataItem({ bcName, cursor, dataItem })) : next(action)
+                    return dataItem ? next(changeDataItem({ bcName, bcUrl: buildBcUrl(bcName, true, state), cursor, dataItem })) : next(action)
                 }
 
                 // If operation is not validation-sensetive and validation failed, offer to drop pending changes
@@ -132,7 +132,7 @@ export function operationRequiresAutosave(operationType: string, actions: Array<
  *
  * @param record Record to check
  * @param pendingChanges Pending record changes which could override record values
- * @param rowMeta Fields meta to check for 'required' flag
+ * @param fieldsMeta
  */
 export function getRequiredFieldsMissing(record: DataItem, pendingChanges: PendingDataItem, fieldsMeta: RowMetaField[]) {
     const result: PendingDataItem = {}

@@ -18,6 +18,7 @@ import { CXBoxEpic, WidgetTableMeta } from '../../interfaces'
 import { concat, filter, mergeMap, Observable, of } from 'rxjs'
 import { changeAssociationSameBc, changeDataItem } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
+import { buildBcUrl } from '../../utils';
 
 /**
  * @category Epics
@@ -26,18 +27,19 @@ export const changeAssociationSameBcEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
         filter(changeAssociationSameBc.match),
         mergeMap(action => {
+            const state = state$.value
             const bcName = action.payload.bcName
             const result: Array<Observable<AnyAction>> = [
                 of(
                     changeDataItem({
                         bcName: bcName,
+                        bcUrl: buildBcUrl(bcName, true, state),
                         cursor: action.payload.dataItem.id,
                         dataItem: action.payload.dataItem
                     })
                 )
             ]
 
-            const state = state$.value
             const selected = action.payload.dataItem._associate
             const depth = action.payload.depth || 1
             const parentDepth = depth - 1

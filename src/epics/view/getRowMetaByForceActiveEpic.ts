@@ -120,6 +120,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
                                           of(
                                               changeDataItem({
                                                   bcName,
+                                                  bcUrl: buildBcUrl(bcName, true, state),
                                                   cursor,
                                                   dataItem: { [changedFiledKey]: currentRecordData[changedFiledKey] },
                                                   disableRetry: true

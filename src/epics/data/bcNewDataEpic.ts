@@ -70,7 +70,8 @@ export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                         of(bcFetchRowMetaSuccess({ bcName, bcUrl: `${bcUrl}/${cursor}`, rowMeta, cursor })),
                         of(
                             changeDataItem({
-                                bcName: action.payload.bcName,
+                                bcName,
+                                bcUrl: buildBcUrl(bcName, true, state),
                                 cursor: cursor,
                                 dataItem: {
                                     id: cursor

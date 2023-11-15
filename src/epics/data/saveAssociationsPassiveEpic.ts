@@ -18,6 +18,7 @@ import { AssociatedItem, CXBoxEpic } from '../../interfaces'
 import { filter, of, switchMap } from 'rxjs'
 import { changeDataItem, saveAssociations } from '../../actions'
 import { MultivalueSingleValue } from '@cxbox-ui/schema'
+import { buildBcUrl } from '../../utils';
 
 /**
  * Works with assoc-lists, which doesn't call back-end's assoc methods
@@ -70,6 +71,7 @@ export const saveAssociationsPassiveEpic: CXBoxEpic = (action$, state$) =>
             return of(
                 changeDataItem({
                     bcName: calleeBCName,
+                    bcUrl: buildBcUrl(calleeBCName, true, state),
                     cursor: cursor,
                     dataItem: {
                         [associateFieldKey]: result

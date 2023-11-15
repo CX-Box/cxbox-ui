@@ -18,6 +18,7 @@ import { CXBoxEpic, WidgetTableMeta } from '../../interfaces'
 import { concat, filter, mergeMap, Observable, of } from 'rxjs'
 import { changeAssociationFull, changeDataItem, changeDescendantsAssociationsFull } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
+import { buildBcUrl } from '../../utils';
 
 /**
  * Change full hierarchy record association state. Also select/deselect dependent records according to widget options.
@@ -89,6 +90,7 @@ export const changeAssociationFullEpic: CXBoxEpic = (action$, state$) =>
                 of(
                     changeDataItem({
                         bcName: action.payload.bcName,
+                        bcUrl: buildBcUrl(action.payload.bcName, true, state),
                         cursor: action.payload.dataItem.id,
                         dataItem: action.payload.dataItem
                     })

@@ -19,6 +19,7 @@ import { concat, filter, mergeMap, Observable, of } from 'rxjs'
 import { changeAssociation, changeDataItem, dropAllAssociations } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
 import { WidgetTableHierarchy } from '@cxbox-ui/schema'
+import { buildBcUrl } from '../../utils';
 
 export const changeAssociationEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
@@ -26,10 +27,12 @@ export const changeAssociationEpic: CXBoxEpic = (action$, state$) =>
         mergeMap(action => {
             const state = state$.value
             const selected = action.payload.dataItem._associate
+            const bcName = action.payload.bcName
             const result: Array<Observable<AnyAction>> = [
                 of(
                     changeDataItem({
-                        bcName: action.payload.bcName,
+                        bcName,
+                        bcUrl: buildBcUrl(bcName, true, state),
                         cursor: action.payload.dataItem.id,
                         dataItem: action.payload.dataItem
                     })

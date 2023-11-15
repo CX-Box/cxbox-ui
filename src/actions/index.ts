@@ -598,6 +598,7 @@ export const bcChangeDepthCursor = createAction<{
  */
 export const changeDataItem = createAction<{
     bcName: string
+    bcUrl: string
     cursor: string
     dataItem: PendingDataItem
     disableRetry?: boolean

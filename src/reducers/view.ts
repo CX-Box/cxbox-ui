@@ -16,7 +16,6 @@
 
 import { PendingValidationFailsFormat, ViewState, PendingDataItem } from '../interfaces'
 import { OperationTypeCrud } from '@cxbox-ui/schema'
-import { buildBcUrl } from '../utils'
 import {
     bcCancelPendingChanges,
     bcFetchRowMeta,
@@ -156,7 +155,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             const prevCursor = prevBc[action.payload.cursor] || {}
             const prevPending = prevCursor || {}
             const nextPending = { ...prevPending, ...action.payload.dataItem }
-            const bcUrl = buildBcUrl(actionBcName, true)
+            const bcUrl = action.payload.bcUrl
             const rowMeta = state.rowMeta[actionBcName]?.[bcUrl]
             const nextValidationFails: Record<string, string> = {}
             const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
