@@ -87,7 +87,7 @@ export function getSorters(sorters: BcSorter[]) {
  */
 export function parseFilters(defaultFilters: string) {
     const result: BcFilter[] = []
-    const urlParams = new URL(defaultFilters).searchParams
+    const urlParams = new URL(defaultFilters, window.location.origin).searchParams // TODO fix URL
     urlParams.forEach(param => {
         const [fieldName, type] = param.split('.')
         if (fieldName && type && urlParams.get(param)) {
@@ -131,7 +131,7 @@ export function parseSorters(sorters: string) {
         return null
     }
     const result: BcSorter[] = []
-    const dictionary = new URL(sorters).searchParams
+    const dictionary = new URL(sorters, window.location.origin).searchParams // TODO fix URL
     Object.entries(dictionary)
         .map(([sort, fieldKey]) => {
             const [order, direction] = sort.split('.').slice(1)
