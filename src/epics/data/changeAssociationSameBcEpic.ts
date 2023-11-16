@@ -18,7 +18,7 @@ import { CXBoxEpic, WidgetTableMeta } from '../../interfaces'
 import { concat, filter, mergeMap, Observable, of } from 'rxjs'
 import { changeAssociationSameBc, changeDataItem } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
-import { buildBcUrl } from '../../utils';
+import { buildBcUrl } from '../../utils'
 
 /**
  * @category Epics

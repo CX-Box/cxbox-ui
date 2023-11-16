@@ -19,7 +19,7 @@ import { concat, filter, mergeMap, Observable, of } from 'rxjs'
 import { changeAssociation, changeDataItem, dropAllAssociations } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
 import { WidgetTableHierarchy } from '@cxbox-ui/schema'
-import { buildBcUrl } from '../../utils';
+import { buildBcUrl } from '../../utils'
 
 export const changeAssociationEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(

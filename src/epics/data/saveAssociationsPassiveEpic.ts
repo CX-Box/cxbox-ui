@@ -18,7 +18,7 @@ import { AssociatedItem, CXBoxEpic } from '../../interfaces'
 import { filter, of, switchMap } from 'rxjs'
 import { changeDataItem, saveAssociations } from '../../actions'
 import { MultivalueSingleValue } from '@cxbox-ui/schema'
-import { buildBcUrl } from '../../utils';
+import { buildBcUrl } from '../../utils'
 
 /**
  * Works with assoc-lists, which doesn't call back-end's assoc methods

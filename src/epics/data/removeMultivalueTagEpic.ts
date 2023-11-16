@@ -16,7 +16,7 @@
 
 import { concat, filter, mergeMap, of } from 'rxjs'
 import { CXBoxEpic, PopupWidgetTypes, TreeAssociatedRecord } from '../../interfaces'
-import {assignTreeLinks, buildBcUrl, getDescendants} from '../../utils'
+import { assignTreeLinks, buildBcUrl, getDescendants } from '../../utils'
 import { changeDataItem, removeMultivalueTag } from '../../actions'
 
 /**
@@ -126,9 +126,10 @@ export const removeMultivalueTagEpic: CXBoxEpic = (action$, state$) =>
             // Non-full hierarchies drops removed item's `_associate` flag`
             // And also updates source record value
             if (widget.options?.hierarchy) {
-                const hierarchyBcName =  widget.options?.hierarchy?.find(hierarchyData => {
-                    return state.view.pendingDataChanges[hierarchyData.bcName]?.[action.payload.removedItem.id]
-                })?.bcName ?? bcName
+                const hierarchyBcName =
+                    widget.options?.hierarchy?.find(hierarchyData => {
+                        return state.view.pendingDataChanges[hierarchyData.bcName]?.[action.payload.removedItem.id]
+                    })?.bcName ?? bcName
 
                 return concat(
                     of(

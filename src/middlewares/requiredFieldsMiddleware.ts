@@ -86,7 +86,9 @@ const requiredFields =
                     if (dataItem && TableLikeWidgetTypes.includes((widget as WidgetTableMeta)?.type)) {
                         dispatch(selectTableCellInit({ widgetName, rowId: cursor, fieldKey: Object.keys(dataItem)[0] }))
                     }
-                    return dataItem ? next(changeDataItem({ bcName, bcUrl: buildBcUrl(bcName, true, state), cursor, dataItem })) : next(action)
+                    return dataItem
+                        ? next(changeDataItem({ bcName, bcUrl: buildBcUrl(bcName, true, state), cursor, dataItem }))
+                        : next(action)
                 }
 
                 // If operation is not validation-sensetive and validation failed, offer to drop pending changes

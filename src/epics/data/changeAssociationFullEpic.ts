@@ -18,7 +18,7 @@ import { CXBoxEpic, WidgetTableMeta } from '../../interfaces'
 import { concat, filter, mergeMap, Observable, of } from 'rxjs'
 import { changeAssociationFull, changeDataItem, changeDescendantsAssociationsFull } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
-import { buildBcUrl } from '../../utils';
+import { buildBcUrl } from '../../utils'
 
 /**
  * Change full hierarchy record association state. Also select/deselect dependent records according to widget options.
