@@ -129,7 +129,7 @@ export function defaultParseURL(url: URL): Route {
 
     return {
         type: type,
-        path,
+        path: path.length !== 0 && !path.startsWith('/') ? `/${path}` : path,
         params,
         screenName,
         viewName,
