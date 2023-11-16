@@ -53,13 +53,13 @@ export const bcCancelCreateDataEpic: CXBoxEpic = (action$, state$, { api }) =>
             const cursor = bc?.cursor
             const context = { widgetName: action.payload.widgetName }
             const record = state.data[bcName]?.find(item => item.id === bc.cursor)
-            const pendingRecordChange = state.view.pendingDataChanges[bcName]?.[bc.cursor]
+            const pendingRecordChange = state.view.pendingDataChanges[bcName]?.[bc.cursor as string]
             const data = record && { ...pendingRecordChange, vstamp: record.vstamp }
             const params = { _action: action.payload.operationType }
             const cursorsMap: Record<string, string> = { [action.payload.bcName]: null }
-            return api.customAction(screenName, bcUrl, data, context, params).pipe(
+            return api.customAction(screenName, bcUrl as string, data, context, params).pipe(
                 mergeMap(response => {
-                    const postInvoke = response.postActions[0]
+                    const postInvoke = response.postActions?.[0]
                     return concat(
                         of(sendOperationSuccess({ bcName, cursor })),
                         of(bcChangeCursors({ cursorsMap })),

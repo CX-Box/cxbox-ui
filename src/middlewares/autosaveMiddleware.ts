@@ -67,14 +67,14 @@ const saveFormMiddleware =
          * Current changeLocation action as onSuccessAction
          */
         const defaultSaveWidget = state.view.widgets?.find(item => item?.options?.actionGroups?.defaultSave)
-        const defaultCursor = state.screen.bo.bc?.[defaultSaveWidget?.bcName]?.cursor
-        const pendingData = state.view?.pendingDataChanges?.[defaultSaveWidget?.bcName]?.[defaultCursor]
+        const defaultCursor = state.screen.bo.bc?.[defaultSaveWidget?.bcName as string]?.cursor
+        const pendingData = state.view?.pendingDataChanges?.[defaultSaveWidget?.bcName as string]?.[defaultCursor as string]
         const isChangeLocation = defaultSaveWidget && changeLocation.match(action) && Object.keys(pendingData || {}).length > 0
         if (isChangeLocation) {
             return next(
                 sendOperation({
                     bcName: defaultSaveWidget.bcName,
-                    operationType: (defaultSaveWidget.options.actionGroups as WidgetOperations).defaultSave,
+                    operationType: (defaultSaveWidget.options?.actionGroups as WidgetOperations).defaultSave as string,
                     widgetName: defaultSaveWidget.name,
                     onSuccessAction: action
                 })

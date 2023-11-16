@@ -36,7 +36,7 @@ export const cancelRequestActionTypes = [selectView, logout]
 export function cancelRequestEpic(
     action$: Observable<AnyAction>,
     actionTypes: Parameters<typeof isAnyOf>,
-    cancelFn: () => void,
+    cancelFn: (() => void) | undefined,
     cancelActionCreator: AnyAction,
     filterFn: (actions: AnyAction) => boolean = item => {
         return true
@@ -46,7 +46,7 @@ export function cancelRequestEpic(
         filter(isAnyOf(...actionTypes)),
         filter(filterFn),
         mergeMap(() => {
-            cancelFn()
+            cancelFn?.()
             return of(cancelActionCreator)
         }),
         take(1)

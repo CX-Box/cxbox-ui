@@ -85,7 +85,7 @@ export function getSorters(sorters: BcSorter[]) {
  * @param defaultFilters string representation of filters
  * @category Utils
  */
-export function parseFilters(defaultFilters: string) {
+export function parseFilters(defaultFilters: string = '') {
     const result: BcFilter[] = []
     const urlParams = new URL(defaultFilters, window.location.origin).searchParams // TODO fix URL
     urlParams.forEach(param => {
@@ -126,7 +126,7 @@ export function parseFilters(defaultFilters: string) {
  * @param sorters string representation of sorters
  * @category Utils
  */
-export function parseSorters(sorters: string) {
+export function parseSorters(sorters?: string) {
     if (!sorters || !sorters.length) {
         return null
     }

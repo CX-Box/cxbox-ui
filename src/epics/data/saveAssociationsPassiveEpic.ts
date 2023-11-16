@@ -29,12 +29,12 @@ export const saveAssociationsPassiveEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
         filter(saveAssociations.match),
         filter(() => {
-            return !state$.value.view.popupData.active
+            return !state$.value.view.popupData?.active
         }),
         switchMap(action => {
             const state = state$.value
             const { calleeBCName = action.payload.calleeBcName, associateFieldKey = action.payload.associateFieldKey } =
-                state.view.popupData
+                state.view.popupData ?? {}
             const cursor = state.screen.bo.bc[calleeBCName].cursor
             const recordPrevData = (state.data[calleeBCName].find(dataStateRecord => dataStateRecord.id === cursor)[associateFieldKey] ??
                 []) as MultivalueSingleValue[]

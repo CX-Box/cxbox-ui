@@ -28,12 +28,12 @@ export const saveAssociationsActiveEpic: CXBoxEpic = (action$, state$, { api }) 
     action$.pipe(
         filter(saveAssociations.match),
         filter(action => {
-            return state$.value.view.popupData.active
+            return state$.value.view.popupData?.active
         }),
         switchMap(action => {
             const state = state$.value
-            const calleeBCName = state.view.popupData.calleeBCName
-            const calleeWidgetName = state.view.popupData.calleeWidgetName
+            const calleeBCName = state.view.popupData?.calleeBCName
+            const calleeWidgetName = state.view.popupData?.calleeWidgetName
             const bcNames = action.payload.bcNames
             const bcUrl = buildBcUrl(calleeBCName, true, state)
             const pendingChanges = state.view.pendingDataChanges[bcNames[0]] || {}
@@ -50,7 +50,9 @@ export const saveAssociationsActiveEpic: CXBoxEpic = (action$, state$, { api }) 
                         const postInvoke = response.postActions[0]
                         const calleeWidget = state.view.widgets.find(widgetItem => widgetItem.bcName === calleeBCName)
                         return concat(
-                            postInvoke ? of(processPostInvoke({ bcName: calleeBCName, postInvoke, widgetName: calleeWidget.name })) : EMPTY,
+                            postInvoke
+                                ? of(processPostInvoke({ bcName: calleeBCName, postInvoke, widgetName: calleeWidget?.name }))
+                                : EMPTY,
                             of(bcCancelPendingChanges({ bcNames: bcNames })),
                             of(bcForceUpdate({ bcName: calleeBCName, widgetName: calleeWidgetName }))
                         )

@@ -66,7 +66,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
             const fieldsRowMeta = state.view.rowMeta[bcName]?.[bcUrl]?.fields
             let changedFiledKey: string = null
 
-            const closePopup = concat(of(viewClearPickMap(null)), of(closeViewPopup(null)), of(bcRemoveAllFilters({ bcName })))
+            const closePopup = concat(of(closeViewPopup(null)), of(viewClearPickMap(null)), of(bcRemoveAllFilters({ bcName })))
 
             // среди forceActive-полей в дельте ищем то которое изменилось по отношению к обработанным forceActive
             // или не содержится в нем, устанавливаем флаг необходимости отправки запроса если такое поле найдено
@@ -83,7 +83,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
             if (someForceActiveChanged && !disableRetry) {
                 return concat(
                     of(addPendingRequest({ request: { requestId, type: 'force-active' } })),
-                    api.getRmByForceActive(state.screen.screenName, bcUrl, { ...pendingChanges, vstamp: currentRecordData.vstamp }).pipe(
+                    api.getRmByForceActive(state.screen.screenName, bcUrl, { ...pendingChanges, vstamp: currentRecordData?.vstamp }).pipe(
                         mergeMap(data => {
                             const result: Array<Observable<AnyAction>> = [of(removePendingRequest({ requestId }))]
                             if (state.view.url === initUrl) {
@@ -122,7 +122,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
                                                   bcName,
                                                   bcUrl: buildBcUrl(bcName, true, state),
                                                   cursor,
-                                                  dataItem: { [changedFiledKey]: currentRecordData[changedFiledKey] },
+                                                  dataItem: { [changedFiledKey]: currentRecordData?.[changedFiledKey] },
                                                   disableRetry: true
                                               })
                                           ),

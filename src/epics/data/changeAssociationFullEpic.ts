@@ -107,7 +107,7 @@ export const changeAssociationFullEpic: CXBoxEpic = (action$, state$) =>
                             dataItem: {
                                 ...parentItem,
                                 _associate: true,
-                                _value: parentItem[assocValueKey]
+                                _value: parentItem?.[assocValueKey]
                             },
                             assocValueKey
                         })

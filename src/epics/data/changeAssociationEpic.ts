@@ -48,11 +48,11 @@ export const changeAssociationEpic: CXBoxEpic = (action$, state$) =>
             const hierarchy = widget.options?.hierarchy
             const hierarchyDescriptor: WidgetTableHierarchy = isRoot
                 ? rootHierarchyDescriptor
-                : hierarchy.find(item => item.bcName === action.payload.bcName)
+                : hierarchy?.find(item => item.bcName === action.payload.bcName)
             const hierarchyGroupSelection = widget.options?.hierarchyGroupSelection
             const hierarchyTraverse = widget.options?.hierarchyTraverse
             const childrenBc = hierarchy
-                .slice(hierarchy.findIndex(item => item.bcName === action.payload.bcName) + 1)
+                ?.slice(hierarchy.findIndex(item => item.bcName === action.payload.bcName) + 1)
                 .map(item => item.bcName)
             if (hierarchyGroupSelection && hierarchyDescriptor.radio && !selected) {
                 result.push(
@@ -65,7 +65,7 @@ export const changeAssociationEpic: CXBoxEpic = (action$, state$) =>
             }
             const parent: WidgetTableHierarchy = isRoot
                 ? null
-                : hierarchy.find((item, index) => {
+                : hierarchy?.find((item, index) => {
                       return hierarchy[index + 1]?.bcName === action.payload.bcName
                   }) || rootHierarchyDescriptor
             const parentItem = state.data[parent?.bcName]?.find(item => item.id === state.screen.bo.bc[parent?.bcName].cursor)
@@ -87,7 +87,7 @@ export const changeAssociationEpic: CXBoxEpic = (action$, state$) =>
                             dataItem: {
                                 ...parentItem,
                                 _associate: true,
-                                _value: parentItem[parent.assocValueKey || action.payload.assocValueKey]
+                                _value: parentItem?.[parent.assocValueKey || action.payload.assocValueKey]
                             },
                             assocValueKey: action.payload.assocValueKey
                         })

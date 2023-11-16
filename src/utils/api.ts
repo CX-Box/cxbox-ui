@@ -52,7 +52,7 @@ export function addTailControlSequences(url: string) {
  * @param url Url to extend
  * @param qso Query parameters dictionary
  */
-export function applyParams(url: string, qso: QueryParamsMap) {
+export function applyParams(url: string, qso?: QueryParamsMap) {
     if (!qso) {
         return url
     }

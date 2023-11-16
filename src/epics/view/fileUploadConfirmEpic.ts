@@ -45,7 +45,7 @@ export const fileUploadConfirmEpic: CXBoxEpic = (action$, state$, { api }) =>
              * It also launces postOperationRoutine to handle pre and post invokes.
              */
             const state = state$.value
-            const bcName = state.view.popupData.bcName
+            const bcName = state.view.popupData?.bcName
             const bcUrl = buildBcUrl(bcName, true, state)
             const widgetName = state.view.widgets.find(item => item.bcName === bcName)?.name
             const data = {
@@ -53,7 +53,7 @@ export const fileUploadConfirmEpic: CXBoxEpic = (action$, state$, { api }) =>
             }
             return api.customAction(state.screen.screenName, bcUrl, data, null, { _action: 'file-upload-save' }).pipe(
                 mergeMap(response => {
-                    const postInvoke = response.postActions[0]
+                    const postInvoke = response.postActions?.[0]
                     const preInvoke = response.preInvoke
                     return concat(
                         of(sendOperationSuccess({ bcName, cursor: null })),

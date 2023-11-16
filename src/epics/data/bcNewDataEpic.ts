@@ -53,17 +53,17 @@ export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
              */
             const state = state$.value
             const bcName = action.payload.bcName
-            const bcUrl = buildBcUrl(bcName, false, state)
+            const bcUrl = buildBcUrl(bcName, false, state) ?? ''
             const context = { widgetName: action.payload.widgetName }
             const params = { _action: action.payload.operationType }
             return api.newBcData(state.screen.screenName, bcUrl, context, params).pipe(
                 mergeMap(data => {
                     const rowMeta = data.row
-                    const dataItem: DataItem = { id: null, vstamp: -1 }
+                    const dataItem: DataItem = { id: null as any, vstamp: -1 }
                     data.row.fields.forEach(field => {
                         dataItem[field.key] = field.currentValue
                     })
-                    const postInvoke = data.postActions[0]
+                    const postInvoke = data.postActions?.[0]
                     const cursor = dataItem.id
                     return concat(
                         of(bcNewDataSuccess({ bcName, dataItem, bcUrl })),
@@ -71,7 +71,7 @@ export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                         of(
                             changeDataItem({
                                 bcName,
-                                bcUrl: buildBcUrl(bcName, true, state),
+                                bcUrl: buildBcUrl(bcName, true, state) ?? '',
                                 cursor: cursor,
                                 dataItem: {
                                     id: cursor

@@ -26,7 +26,7 @@ export const httpError418Epic: CXBoxEpic = (action$, state$) =>
         mergeMap(action => {
             const { error, callContext } = action.payload
             const result: Array<Observable<AnyAction>> = []
-            const typedError = error.response.data as OperationError
+            const typedError = error.response?.data as OperationError
             if (!typedError.error.popup) {
                 return EMPTY
             }
@@ -37,13 +37,13 @@ export const httpError418Epic: CXBoxEpic = (action$, state$) =>
             result.push(of(showViewError({ error: businessError })))
             if (typedError.error.postActions?.[0]) {
                 const widget = state$.value.view.widgets.find(item => item.name === callContext.widgetName)
-                const bcName = widget.bcName
+                const bcName = widget?.bcName
                 result.push(
                     of(
                         processPostInvoke({
                             bcName,
                             postInvoke: typedError.error.postActions[0],
-                            widgetName: widget.name
+                            widgetName: widget?.name
                         })
                     )
                 )

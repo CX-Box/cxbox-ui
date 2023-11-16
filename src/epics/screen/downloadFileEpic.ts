@@ -17,18 +17,20 @@
 import { CXBoxEpic } from '../../interfaces'
 import { EMPTY, filter, mergeMap, tap } from 'rxjs'
 import { downloadFile } from '../../actions'
+import { getFileUploadEndpoint } from '../../utils'
 
 export const downloadFileEpic: CXBoxEpic = (action$, state$, { api }) =>
     action$.pipe(
         filter(downloadFile.match),
         tap(action => {
-            //TODO: fix href with api injection
-
-            // const { fileId } = action.payload
+            const { fileId } = action.payload
             const anchor = document.createElement('a')
-            // anchor.href = `${api.defaults.baseURL}file?id=${encodeURIComponent(fileId)}`
+
+            anchor.href = `${getFileUploadEndpoint(api.api$.instance)}?id=${encodeURIComponent(fileId)}`
+
             anchor.style.display = 'none'
             document.body.appendChild(anchor)
+
             setTimeout(() => {
                 anchor.click()
                 document.body.removeChild(anchor)

@@ -66,7 +66,7 @@ export const userDrillDownEpic: CXBoxEpic = (action$, state$, { api }) =>
                      */
                     return customDrillDownUrl || drillDownField?.drillDown || drillDownField?.drillDown !== route.path
                         ? concat(
-                              drillDownField.drillDownType !== DrillDownType.inner
+                              drillDownField?.drillDownType !== DrillDownType.inner
                                   ? of(bcFetchRowMetaSuccess({ bcName, rowMeta, bcUrl, cursor }))
                                   : EMPTY,
                               of(userDrillDownSuccess({ bcName, bcUrl, cursor })),

@@ -58,7 +58,7 @@ export function assignTreeLinks<T extends DataNode>(flat: T[]) {
         if (!result[parentIndex].children) {
             result[parentIndex].children = [item]
         } else {
-            result[parentIndex].children.push(item)
+            result[parentIndex]?.children?.push(item)
         }
     })
     if (orphans.length) {

@@ -42,7 +42,7 @@ export function getTemplate(literals: TemplateStringsArray, ...placeholders: any
  * @param state
  * @category Utils
  */
-export function buildBcUrl(bcName: string, includeSelf = false, state?: Store) {
+export function buildBcUrl(bcName: string, includeSelf = false, state: Store) {
     const bcMap = state.screen.bo.bc
     const bc = bcMap[bcName]
     if (!bc) {

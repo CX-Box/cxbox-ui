@@ -50,7 +50,7 @@ export const changeAssociationSameBcEpic: CXBoxEpic = (action$, state$) =>
 
             const parentCursor = parentDepth
                 ? parentDepth > 1
-                    ? state.screen.bo.bc[bcName].depthBc[parentDepth]?.cursor
+                    ? state.screen.bo.bc[bcName].depthBc?.[parentDepth]?.cursor
                     : state.screen.bo.bc[bcName].cursor
                 : null
 
@@ -70,7 +70,7 @@ export const changeAssociationSameBcEpic: CXBoxEpic = (action$, state$) =>
                             dataItem: {
                                 ...parentItem,
                                 _associate: true,
-                                _value: parentItem[action.payload.assocValueKey]
+                                _value: parentItem?.[action.payload.assocValueKey]
                             },
                             assocValueKey: action.payload.assocValueKey
                         })

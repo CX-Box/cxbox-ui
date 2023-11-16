@@ -23,7 +23,7 @@ import { EMPTY, expand, map, reduce } from 'rxjs'
 type GetParamsMap = Record<string, string | number>
 
 export class Api {
-    api$ = new ObservableApiWrapper()
+    api$: ObservableApiWrapper
 
     constructor(instance: AxiosInstance) {
         this.api$ = new ObservableApiWrapper(instance)
@@ -64,7 +64,7 @@ export class Api {
 
     newBcData(screenName: string, bcUrl: string, context: ApiCallContext, params?: GetParamsMap) {
         const url = applyParams(buildUrl`row-meta-new/${screenName}/` + bcUrl, params)
-        return this.api$.get<RowMetaResponse>(url, null, context).pipe(map(response => response.data))
+        return this.api$.get<RowMetaResponse>(url, undefined, context).pipe(map(response => response.data))
     }
 
     saveBcData(
@@ -78,14 +78,14 @@ export class Api {
         return this.api$.put<DataItemResponse>(url, { data }, context).pipe(map(response => response.data))
     }
 
-    deleteBcData(screenName: string, bcUrl: string, context: ApiCallContext, params?: GetParamsMap) {
+    deleteBcData(screenName: string, bcUrl: string = '', context: ApiCallContext, params?: GetParamsMap) {
         const url = applyParams(buildUrl`data/${screenName}/` + bcUrl, params)
         return this.api$.delete<DataItemResponse>(url, context).pipe(map(response => response.data))
     }
 
-    customAction(screenName: string, bcUrl: string, data: Record<string, any>, context: ApiCallContext, params?: GetParamsMap) {
+    customAction(screenName: string, bcUrl: string, data?: Record<string, any>, context?: ApiCallContext, params?: GetParamsMap) {
         const url = applyParams(buildUrl`custom-action/${screenName}/` + bcUrl, params)
-        return this.api$.post<DataItemResponse>(url, { data: data || {} }, null, context).pipe(map(response => response.data))
+        return this.api$.post<DataItemResponse>(url, { data: data || {} }, undefined, context).pipe(map(response => response.data))
     }
 
     associate(screenName: string, bcUrl: string, data: AssociatedItem[] | Record<string, AssociatedItem[]>, params?: GetParamsMap) {
@@ -101,8 +101,8 @@ export class Api {
         return this.api$.post<any>(url, processedData).pipe(map(response => response.data))
     }
 
-    getRmByForceActive(screenName: string, bcUrl: string, data: PendingDataItem & { vstamp: number }, params?: GetParamsMap) {
-        const url = applyParams(buildUrl`row-meta/${screenName}/` + bcUrl, params)
+    getRmByForceActive(screenName: string, bcUrl: string | null, data: PendingDataItem & { vstamp: number }, params?: GetParamsMap) {
+        const url = applyParams(buildUrl`row-meta/${screenName}/` + (bcUrl ?? ''), params)
         return this.api$.post<RowMetaResponse>(url, { data }).pipe(map(response => response.data.row))
     }
 
@@ -115,10 +115,12 @@ export class Api {
     }
 
     createCanceler() {
-        let cancel: () => void
+        let cancel: (() => void) | undefined
+
         const cancelToken = new axios.CancelToken(c => {
             cancel = c
         })
+
         return {
             cancel,
             cancelToken

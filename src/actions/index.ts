@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SessionScreen, PendingRequest, NotificationKeys } from '../interfaces'
+import { SessionScreen, PendingRequest, NotificationKeys, LoginResponse } from '../interfaces'
 import { DrillDownType, Route } from '../interfaces/router'
 import { ViewMetaResponse, ApplicationError, PopupType } from '../interfaces'
 import { DataItem, MultivalueSingleValue, PendingDataItem, PickMap } from '../interfaces/data'
@@ -35,24 +35,7 @@ import { AxiosError } from 'axios'
 import { ApiCallContext } from '../utils'
 import { createAction, AnyAction } from '@reduxjs/toolkit'
 
-/**
- * Browser location change occured (either through history listener or manually)
- */
-export const changeLocation = createAction<{
-    /**
-     * Change was requested to browser url
-     */
-    url?: string
-    /**
-     * Change was requested to precalculated application route
-     */
-    route?: Route
-    /**
-     * History API type, usually 'PUSH'
-     */
-    action: any
-}>('changeLocation')
-
+export const changeLocation = createAction<{ location: Route }>('changeLocation')
 /**
  * Authentication request
  */
@@ -74,7 +57,7 @@ export const login = createAction<{
 /**
  * Login was successful
  */
-export const loginDone = createAction<Route>('loginDone')
+export const loginDone = createAction<LoginResponse>('loginDone')
 
 /**
  * Login was unsuccesful

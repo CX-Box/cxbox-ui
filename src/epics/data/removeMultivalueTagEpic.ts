@@ -73,24 +73,24 @@ export const removeMultivalueTagEpic: CXBoxEpic = (action$, state$) =>
              */
             const associated = action.payload.dataItem.map(item => item.id)
             let removedNodes: string[] = []
-            if (widget.options?.hierarchyGroupDeselection) {
+            if (widget?.options?.hierarchyGroupDeselection) {
                 // Builds a tree to simplify searching of descendants
-                if (widget.options?.hierarchyTraverse) {
+                if (widget?.options?.hierarchyTraverse) {
                     data = assignTreeLinks(data)
                 }
-                const removedItemChildren = data.filter(item => item.parentId === removedItem.id)
-                removedNodes = [removedItem.id, ...removedItemChildren.filter(item => associated.includes(item.id)).map(item => item.id)]
-                if (widget.options?.hierarchyTraverse) {
+                const removedItemChildren = data.filter(item => item.parentId === removedItem?.id)
+                removedNodes = [removedItem?.id, ...removedItemChildren.filter(item => associated.includes(item.id)).map(item => item.id)]
+                if (widget?.options?.hierarchyTraverse) {
                     getDescendants(removedItemChildren, removedNodes)
                     removedNodes = data.filter(item => removedNodes.includes(item.id) && associated.includes(item.id)).map(item => item.id)
                 }
-                const parent = data.find(item => item.id === removedItem.parentId)
+                const parent = data.find(item => item.id === removedItem?.parentId)
                 const siblings = data.filter(item => item.parentId === parent?.id)
                 const parentEmpty = siblings.every(child => removedNodes.includes(child.id) || !associated.includes(child.id))
                 // If last child/descendant removed, parent also should be
                 if (parent && parentEmpty) {
                     // Last descendant
-                    if (widget.options?.hierarchyTraverse) {
+                    if (widget?.options?.hierarchyTraverse) {
                         const parentDescendants: string[] = []
                         getDescendants(siblings, parentDescendants)
                         const parentDeepEmpty = parentDescendants.every(descendant => {
@@ -113,7 +113,7 @@ export const removeMultivalueTagEpic: CXBoxEpic = (action$, state$) =>
                 }
             }
             // Full hierarchies just filter out selected records
-            if (widget.options?.hierarchyFull) {
+            if (widget?.options?.hierarchyFull) {
                 return of(
                     changeDataItem({
                         bcName,
@@ -125,9 +125,9 @@ export const removeMultivalueTagEpic: CXBoxEpic = (action$, state$) =>
             }
             // Non-full hierarchies drops removed item's `_associate` flag`
             // And also updates source record value
-            if (widget.options?.hierarchy) {
+            if (widget?.options?.hierarchy) {
                 const hierarchyBcName =
-                    widget.options?.hierarchy?.find(hierarchyData => {
+                    widget?.options?.hierarchy?.find(hierarchyData => {
                         return state.view.pendingDataChanges[hierarchyData.bcName]?.[action.payload.removedItem.id]
                     })?.bcName ?? bcName
 

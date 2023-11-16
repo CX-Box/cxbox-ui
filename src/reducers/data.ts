@@ -5,6 +5,7 @@ import { ReducerBuilderManager } from './ReducerBuilderManager'
 const emptyData: DataItem[] = []
 
 export const dataInitialState: DataState = {}
+
 export const createDataReducerBuilderManager = (initialState: DataState) =>
     new ReducerBuilderManager<typeof initialState>()
         .addCase(bcFetchDataSuccess, (state, action) => {

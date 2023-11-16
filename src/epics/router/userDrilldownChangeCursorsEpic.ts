@@ -16,7 +16,7 @@
 
 import { CXBoxEpic } from '../../interfaces'
 import { filter, map } from 'rxjs'
-import { bcChangeCursors, userDrillDown } from '../../actions'
+import { bcChangeCursors, emptyAction, userDrillDown } from '../../actions'
 
 export const userDrillDownChangeCursorsEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
@@ -30,6 +30,6 @@ export const userDrillDownChangeCursorsEpic: CXBoxEpic = (action$, state$) =>
                 return bcChangeCursors({ cursorsMap: { [action.payload.bcName]: action.payload.cursor } })
             }
 
-            return undefined
+            return emptyAction
         })
     )

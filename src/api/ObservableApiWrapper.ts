@@ -40,11 +40,11 @@ export class ObservableApiWrapper {
         headers: { Pragma: 'no-cache', 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     })
 
-    constructor(instance?: AxiosInstance) {
+    constructor(instance: AxiosInstance) {
         this.instance = instance
     }
 
-    get<ResponsePayload extends CxboxResponse>(path: string, config: AxiosRequestConfig = {}, callContext?: ApiCallContext) {
+    get<ResponsePayload extends CxboxResponse>(path: string, config?: AxiosRequestConfig, callContext?: ApiCallContext) {
         return from(this.instance.get<ResponsePayload>(path, config)).pipe(
             takeWhile(redirectOccurred),
             map(response => response.data)

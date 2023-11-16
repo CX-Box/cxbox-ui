@@ -34,8 +34,7 @@ export const refreshMetaEpic: CXBoxEpic = (action$, state$, { api }) =>
                         logoutDone(null),
                         login({ login: '', password: '', role: activeRole }),
                         changeLocation({
-                            route: router,
-                            action: 'PUSH'
+                            location: router
                         })
                     ])
                 ),

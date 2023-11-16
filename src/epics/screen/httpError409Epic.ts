@@ -23,7 +23,7 @@ export const httpError409Epic: CXBoxEpic = (action$, state$) =>
         filter(httpError.match),
         filter(action => action.payload.statusCode === 409),
         map(action => {
-            const notificationMessage = (action.payload.error.response.data as Record<string, any>).error?.popup?.[0] || ''
+            const notificationMessage = (action.payload.error.response?.data as Record<string, any>).error?.popup?.[0] || ''
             return addNotification({
                 key: 'action_edit_error',
                 message: notificationMessage,

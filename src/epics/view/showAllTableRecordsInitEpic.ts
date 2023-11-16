@@ -16,8 +16,9 @@
 
 import { CXBoxEpic } from '../../interfaces'
 import { concat, filter, mergeMap, Observable, of } from 'rxjs'
-import { bcChangeCursors, bcForceUpdate, showAllTableRecordsInit } from '../../actions'
+import { bcChangeCursors, bcForceUpdate, changeLocation, showAllTableRecordsInit } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
+import { defaultBuildURL, defaultParseURL } from '../../utils'
 
 export const showAllTableRecordsInitEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
@@ -25,14 +26,17 @@ export const showAllTableRecordsInitEpic: CXBoxEpic = (action$, state$) =>
         mergeMap(action => {
             const resultObservables: Array<Observable<AnyAction>> = []
 
-            const { bcName } = action.payload
-            // const route = state$.value.router
+            const { bcName, cursor } = action.payload
+            const state = state$.value
+            const route = state.router
+
             resultObservables.push(of(bcChangeCursors({ cursorsMap: { [bcName]: null } })))
-            // const bcPath = route.bcPath.slice(0, route.bcPath.indexOf(`${bcName}/${cursor}`))
-            // const url = buildLocation({ ...route, bcPath })
+
+            const bcPath = route.bcPath.slice(0, route.bcPath.indexOf(`${bcName}/${cursor}`))
+            const url = defaultBuildURL({ ...route, bcPath })
 
             resultObservables.push(of(bcForceUpdate({ bcName })))
-            // changeLocation(url)
+            resultObservables.push(of(changeLocation({ location: defaultParseURL(new URL(url, window.location.origin)) })))
 
             return concat(...resultObservables)
         })

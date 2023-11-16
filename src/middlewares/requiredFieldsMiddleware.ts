@@ -64,7 +64,7 @@ const requiredFields =
                     // Form could be split into multiple widgets so we check all widget with the same BC as action initiator.
                     // TODO: use visibleSameBcWidgets instead of state.view.widgets (i.e. widgets showCondition should be respected)
                     state.view.widgets
-                        .filter(item => item.bcName === widget.bcName)
+                        .filter(item => item.bcName === widget?.bcName)
                         .forEach(item => {
                             const itemFieldsCalc = item.fields
                             if (item.fields) {
@@ -75,7 +75,7 @@ const requiredFields =
                                 })
                             }
                             itemFieldsCalc.forEach((widgetField: WidgetField) => {
-                                const matchingRowMeta = rowMeta.fields.find(rowMetaField => rowMetaField.key === widgetField.key)
+                                const matchingRowMeta = rowMeta?.fields?.find(rowMetaField => rowMetaField.key === widgetField.key)
                                 if (!fieldsToCheck[widgetField.key] && matchingRowMeta && !matchingRowMeta.hidden) {
                                     fieldsToCheck[widgetField.key] = matchingRowMeta
                                 }

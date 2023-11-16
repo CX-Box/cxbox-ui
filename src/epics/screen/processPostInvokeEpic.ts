@@ -28,6 +28,7 @@ import {
     bcChangeCursors,
     bcFetchDataPages,
     bcFetchDataRequest,
+    changeLocation,
     downloadFile,
     downloadFileByUrl,
     drillDown,
@@ -35,6 +36,7 @@ import {
     showNotification
 } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
+import { defaultParseURL } from '../../utils'
 
 export const processPostInvokeEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
@@ -53,10 +55,11 @@ export const processPostInvokeEpic: CXBoxEpic = (action$, state$) =>
                 case OperationPostInvokeType.postDelete: {
                     const cursorsMap: Record<string, string> = { [action.payload.bcName]: null }
                     const result: AnyAction[] = [bcChangeCursors({ cursorsMap })]
-                    if (state.router.bcPath.includes(`${action.payload.bcName}/`)) {
-                        // const newBcUrl = state.router.bcPath.split(action.payload.bcName)[0] || ''
-                        // const newUrl = `/screen/${state.router.screenName}/view/${state.router.viewName}/${newBcUrl}`
-                        //historyObj.push(newUrl)
+                    if (state.router.bcPath?.includes(`${action.payload.bcName}/`)) {
+                        const newBcUrl = state.router.bcPath.split(action.payload.bcName)[0] || ''
+                        const newUrl = `/screen/${state.router.screenName}/view/${state.router.viewName}/${newBcUrl}`
+
+                        result.push(changeLocation({ location: defaultParseURL(new URL(newUrl, window.location.origin)) }))
                     } else {
                         result.push(
                             bcFetchDataRequest({

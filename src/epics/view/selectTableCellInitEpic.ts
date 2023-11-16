@@ -29,7 +29,7 @@ export const selectTableCellInitEpic: CXBoxEpic = (action$, state$) =>
             const { rowId: nextRowId, fieldKey } = action.payload
 
             const nextWidget = state.view.widgets.find(widget => widget.name === action.payload.widgetName)
-            const nextBcName = nextWidget.bcName
+            const nextBcName = nextWidget?.bcName
             const nextBcCursor = state.screen.bo.bc[nextBcName]?.cursor
 
             const selectedCell = state.view.selectedCell
@@ -41,9 +41,9 @@ export const selectTableCellInitEpic: CXBoxEpic = (action$, state$) =>
                 !selectedCell ||
                 fieldKey !== selectedCell.fieldKey ||
                 nextRowId !== selectedCell.rowId ||
-                nextWidget.name !== selectedCell.widgetName
+                nextWidget?.name !== selectedCell.widgetName
             ) {
-                resultObservables.push(of(selectTableCell({ widgetName: nextWidget.name, rowId: nextRowId, fieldKey })))
+                resultObservables.push(of(selectTableCell({ widgetName: nextWidget?.name, rowId: nextRowId, fieldKey })))
             }
 
             return concat(...resultObservables)

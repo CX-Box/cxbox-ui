@@ -17,7 +17,6 @@
 import { Route, RouteType } from '../interfaces'
 import { loginDone, changeLocation } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
-import { defaultParseURL } from '../utils'
 
 export const initialRouterState: Route = { type: RouteType.default, path: '/', params: null, screenName: null }
 
@@ -32,12 +31,5 @@ export const createRouterReducerBuilderManager = <S extends Route>(initialState:
             state = { ...state, ...action.payload }
         })
         .addCase(changeLocation, (state, action) => {
-            const { url, route } = action.payload
-            if (url) {
-                const path = new URL(url)
-                state = { ...state, ...defaultParseURL(path) }
-            }
-            if (route !== null) {
-                state = { ...state, ...route }
-            }
+            state = { ...state, ...action.payload.location }
         })

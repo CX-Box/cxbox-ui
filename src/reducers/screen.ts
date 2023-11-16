@@ -46,6 +46,7 @@ import {
     showViewPopup
 } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
+import { DepthBcType } from '@internal/interfaces/bc'
 
 export const initialScreenState: ScreenState = {
     screenName: '',
@@ -71,7 +72,7 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             const bcDictionary: Record<string, BcMeta> = {}
             const bcSorters: Record<string, BcSorter[]> = {}
             const bcFilters: Record<string, BcFilter[]> = {}
-            action.payload.screen.meta.bo.bc.forEach(item => {
+            action.payload.screen.meta?.bo.bc.forEach(item => {
                 bcDictionary[item.name] = item
                 const sorter = parseSorters(item.defaultSort)
                 const filter = parseFilters(item.defaultFilter)
@@ -83,8 +84,8 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
                 }
             })
             state.screenName = action.payload.screen.name
-            state.primaryView = action.payload.screen.meta.primary
-            state.views = action.payload.screen.meta.views
+            state.primaryView = action.payload.screen.meta?.primary ?? state.primaryView
+            state.views = action.payload.screen.meta?.views ?? state.views
             state.bo = { activeBcName: null, bc: bcDictionary }
             state.sorters = { ...state.sorters, ...bcSorters }
             state.filters = { ...state.filters, ...bcFilters }
@@ -94,17 +95,17 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             state.views = []
         })
         .addCase(bcFetchDataRequest, (state, action) => {
-            state.bo.bc[action.payload.bcName].loading = true
+            state.bo.bc[action.payload.bcName as string].loading = true
         })
         .addCase(bcLoadMore, (state, action) => {
             const currentBc = state.bo.bc[action.payload.bcName]
-            currentBc.page += 1
+            currentBc.page = (currentBc.page ?? 1) + 1
             currentBc.loading = true
         })
         .addCase(selectView, (state, action) => {
             const newBcs: Record<string, BcMetaState> = {}
             Array.from(
-                new Set(action.payload.widgets.map(widget => widget.bcName)) // БК которые есть на вьюхе
+                new Set(action.payload.widgets?.map(widget => widget.bcName)) // БК которые есть на вьюхе
             )
                 .filter(bcName => state.bo.bc[bcName])
                 .forEach(bcName => {
@@ -119,9 +120,11 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             state.cachedBc[action.payload.bcName] = action.payload.bcUrl
         })
         .addCase(bcFetchDataFail, (state, action) => {
-            if (Object.values(state.bo.bc).some(bc => bc.name === action.payload.bcName)) {
-                state.bo.bc[action.payload.bcName].loading = false
-                state.cachedBc[action.payload.bcName] = action.payload.bcUrl
+            const bcName = action.payload.bcName as string
+
+            if (Object.values(state.bo.bc).some(bc => bc.name === bcName)) {
+                state.bo.bc[bcName].loading = false
+                state.cachedBc[bcName] = action.payload.bcUrl
             }
         })
         .addCase(sendOperation, (state, action) => {
@@ -157,7 +160,8 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             if (action.payload.depth === 1) {
                 state.bo.bc[action.payload.bcName].cursor = action.payload.cursor
             } else {
-                state.bo.bc[action.payload.bcName].depthBc[action.payload.depth].cursor = action.payload.cursor
+                state.bo.bc[action.payload.bcName].depthBc = state.bo.bc[action.payload.bcName].depthBc ?? {}
+                ;(state.bo.bc[action.payload.bcName].depthBc as DepthBcType)[action.payload.depth].cursor = action.payload.cursor
             }
         })
         .addCase(bcSelectRecord, (state, action) => {

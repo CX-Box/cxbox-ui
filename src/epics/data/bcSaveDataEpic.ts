@@ -84,9 +84,9 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
              */
             const state = state$.value
             const bcName = action.payload.bcName
-            const bcUrl = buildBcUrl(bcName, true, state)
+            const bcUrl = buildBcUrl(bcName, true, state) ?? ''
             const widgetName = action.payload.widgetName
-            const cursor = state.screen.bo.bc[bcName].cursor
+            const cursor = state.screen.bo.bc[bcName].cursor as string
             const dataItem = state.data[bcName].find(item => item.id === cursor)
             const pendingChanges = state.view.pendingDataChanges[bcName]?.[cursor]
             const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
@@ -108,9 +108,9 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
             })
 
             const context = { widgetName: action.payload.widgetName }
-            return api.saveBcData(state.screen.screenName, bcUrl, { ...pendingChanges, vstamp: dataItem.vstamp }, context).pipe(
+            return api.saveBcData(state.screen.screenName, bcUrl, { ...pendingChanges, vstamp: dataItem?.vstamp as number }, context).pipe(
                 mergeMap(data => {
-                    const postInvoke = data.postActions[0]
+                    const postInvoke = data.postActions?.[0]
                     const responseDataItem = data.record
                     return concat(
                         of(bcSaveDataSuccess({ bcName, cursor, dataItem: responseDataItem })),
@@ -149,12 +149,12 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                             })
                         )
                     }
-                    let viewError: string = null
-                    let entityError: OperationErrorEntity = null
+                    let viewError: string = null as any
+                    let entityError: OperationErrorEntity = null as any
                     const operationError = e.response?.data as OperationError
                     if (e.response?.data === Object(e.response?.data)) {
-                        entityError = operationError?.error?.entity
-                        viewError = operationError?.error?.popup?.[0]
+                        entityError = operationError?.error?.entity ?? entityError
+                        viewError = operationError?.error?.popup?.[0] ?? viewError
                     }
                     return concat(of(bcSaveDataFail({ bcName, bcUrl, viewError, entityError })), notification$)
                 })

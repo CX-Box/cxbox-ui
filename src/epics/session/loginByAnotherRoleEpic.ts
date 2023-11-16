@@ -15,9 +15,10 @@
  */
 
 import { CXBoxEpic } from '../../interfaces'
-import { catchError, EMPTY, filter, mergeMap, of, switchMap } from 'rxjs'
-import { login, loginFail } from '../../actions'
+import { catchError, concat, filter, mergeMap, of, switchMap } from 'rxjs'
+import { changeLocation, login, loginDone, loginFail } from '../../actions'
 import { AxiosError } from 'axios'
+import { defaultParseURL } from '../../utils'
 
 const responseStatusMessages: Record<number, string> = {
     401: 'Invalid credentials',
@@ -44,24 +45,27 @@ export const loginByAnotherRoleEpic: CXBoxEpic = (action$, state$, { api }) =>
             const isSwitchRole = role && role !== state$.value.session.activeRole
             return api.loginByRoleRequest(role).pipe(
                 mergeMap(data => {
+                    const result = []
                     if (isSwitchRole) {
-                        // const defaultScreen = data.screens.find(screen => screen.defaultScreen) || data.screens[0]
-                        // const defaultViewName = defaultScreen?.primary ?? defaultScreen.meta.views[0].name
-                        // const defaultView = defaultScreen?.meta.views.find(view => defaultViewName === view.name)
-                        // if (defaultView) changeLocation(defaultView.url)
+                        const defaultScreen = data.screens.find(screen => screen.defaultScreen) || data.screens[0]
+                        const defaultViewName = defaultScreen?.primary ?? defaultScreen.meta.views[0].name
+                        const defaultView = defaultScreen?.meta.views.find(view => defaultViewName === view.name)
+                        if (defaultView)
+                            result.push(changeLocation({ location: defaultParseURL(new URL(defaultView.url, window.location.origin)) }))
                     }
-                    // return of(
-                    //     loginDone({
-                    //         devPanelEnabled: data.devPanelEnabled,
-                    //         activeRole: data.activeRole,
-                    //         roles: data.roles,
-                    //         screens: data.screens,
-                    //         firstName: data.firstName,
-                    //         lastName: data.lastName,
-                    //         login: data.login
-                    //     })
-                    // )
-                    return EMPTY
+
+                    return concat([
+                        ...result,
+                        loginDone({
+                            devPanelEnabled: data.devPanelEnabled,
+                            activeRole: data.activeRole,
+                            roles: data.roles,
+                            screens: data.screens,
+                            firstName: data.firstName,
+                            lastName: data.lastName,
+                            login: data.login
+                        })
+                    ])
                 }),
                 catchError((error: AxiosError) => {
                     console.error(error)

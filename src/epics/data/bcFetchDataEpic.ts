@@ -58,7 +58,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                 return of(
                     bcChangeCursors({
                         cursorsMap: {
-                            [bcName]: data.some(i => i.id === prevCursor) ? prevCursor : newCursor
+                            [bcName as string]: data.some(i => i.id === prevCursor) ? prevCursor : newCursor
                         },
                         keepDelta: isHierarchy || keepDelta
                     })
@@ -76,7 +76,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     ? action.payload
                     : { ignorePageLimit: undefined, keepDelta: undefined }
                 return concat(
-                    ...Object.entries(getBcChildren(bcName, widgets, bcDictionary))
+                    ...Object.entries(getBcChildren(bcName as string, widgets, bcDictionary))
                         .filter(([childBcName, widgetNames]) => {
                             const nonLazyWidget = widgets.find(item => {
                                 return widgetNames.includes(item.name) && !PopupWidgetTypes.includes(item.type) && showConditionCheck(item)
@@ -94,7 +94,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                             return of(
                                 bcFetchDataRequest({
                                     bcName: childBcName,
-                                    widgetName: nonLazyWidget.name,
+                                    widgetName: nonLazyWidget?.name as string,
                                     ignorePageLimit: ignorePageLimit || showViewPopup.match(action),
                                     keepDelta: isHierarchy || keepDelta
                                 })
@@ -105,24 +105,25 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
 
             const bcFetchDataImpl = (): Array<Observable<AnyAction>> => {
                 const state = state$.value
-                const { widgetName } = action.payload
+                const { widgetName = '' } = action.payload
                 const { widgets, infiniteWidgets } = state.view
 
                 /**
                  * TODO: Widget name will be mandatory in 2.0.0 but until then collision-vulnerable fallback is provided
                  * through business component match
                  */
-                const widget = widgets.find(item => item.name === widgetName) ?? widgets.find(item => item.bcName === action.payload.bcName)
+                const widget =
+                    widgets?.find(item => item.name === widgetName) ?? widgets?.find(item => item.bcName === action.payload.bcName)
                 /**
                  * Missing widget means the view or screen were changed and dataEpics.ts request is no longer relevant
                  */
                 if (!widget) {
                     return [EMPTY]
                 }
-                const bcName = action.payload.bcName
+                const bcName = action.payload.bcName as string
                 const bc = state.screen.bo.bc[bcName]
-                const { cursor, page } = bc
-                const limit = widgets.find(i => i.bcName === bcName)?.limit || bc.limit
+                const { cursor, page = 1 } = bc
+                const limit = (widgets?.find(i => i.bcName === bcName)?.limit || bc.limit) ?? 5
                 const sorters = state.screen.sorters[bcName]
                 /**
                  * If popup has the same bc as initiator no dataEpics.ts fetching required, it will be
@@ -132,10 +133,10 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     return [EMPTY]
                 }
 
-                const anyHierarchyWidget = widgets.find(item => {
+                const anyHierarchyWidget = widgets?.find(item => {
                     return item.bcName === widget.bcName && item.type === WidgetTypes.AssocListPopup && isHierarchyWidget(item)
                 })
-                const fullHierarchyWidget = state.view.widgets.find(item => {
+                const fullHierarchyWidget = state.view.widgets?.find(item => {
                     return item.bcName === widget.bcName && item.type === WidgetTypes.AssocListPopup && item.options?.hierarchyFull
                 })
 
@@ -152,8 +153,8 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
 
                 if (bcForceUpdate.match(action)) {
                     const infinityPaginationWidget =
-                        (widgetName && infiniteWidgets.includes(widgetName)) ||
-                        widgets?.filter(item => item.bcName === bcName)?.find(item => infiniteWidgets.includes(item.name))?.name
+                        (widgetName && infiniteWidgets?.includes(widgetName)) ||
+                        widgets?.filter(item => item.bcName === bcName)?.find(item => infiniteWidgets?.includes(item.name))?.name
                     if (infinityPaginationWidget) {
                         fetchParams._page = 1
                         fetchParams._limit = limit * page
@@ -183,7 +184,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                 const normalFlow = api.fetchBcData(state.screen.screenName, bcUrl, fetchParams, canceler.cancelToken).pipe(
                     mergeMap(response => {
                         const cursorChange = getCursorChange(response.data, cursor, !!anyHierarchyWidget)
-                        const parentOfNotLazyWidget = widgets.some(item => {
+                        const parentOfNotLazyWidget = widgets?.some(item => {
                             return state.screen.bo.bc[item.bcName]?.parentName === bcName && !PopupWidgetTypes.includes(item.type)
                         })
 
@@ -201,10 +202,11 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                                     return true
                                 }
                             }
-                            const dataToCheck = bcName === w.showCondition?.bcName ? response.data : state.data[w.showCondition?.bcName]
+                            const dataToCheck =
+                                bcName === w.showCondition?.bcName ? response.data : state.data[w.showCondition?.bcName as string]
                             return checkShowCondition(
                                 w.showCondition,
-                                state.screen.bo.bc[w.showCondition?.bcName]?.cursor,
+                                state.screen.bo.bc[w.showCondition?.bcName as string]?.cursor,
                                 dataToCheck,
                                 state.view.pendingDataChanges
                             )
@@ -236,7 +238,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     }),
                     catchError((error: any) => {
                         console.error(error)
-                        return of(bcFetchDataFail({ bcName: action.payload.bcName, bcUrl }))
+                        return of(bcFetchDataFail({ bcName: action.payload.bcName as string, bcUrl }))
                     })
                 )
                 return [cancelFlow, cancelByParentBc, normalFlow]

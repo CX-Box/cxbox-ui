@@ -145,9 +145,12 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                     handledForceActive[key] = newPendingDataChanges[key]
                 }
             })
-
+            state.handledForceActive[bcName] = state.handledForceActive[bcName] ?? {}
+            state.handledForceActive[bcName][cursor] = state.handledForceActive[bcName][cursor] ?? {}
             Object.assign(state.handledForceActive[bcName][cursor], handledForceActive)
+            state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
             state.pendingDataChanges[bcName][cursor] = newPendingDataChanges
+            state.rowMeta[bcName] = state.rowMeta[bcName] ?? {}
             state.rowMeta[bcName][bcUrl] = rowMeta
         })
         .addCase(changeDataItem, (state, action) => {
@@ -166,14 +169,15 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                     nextPending[fieldKey] === null ||
                     nextPending[fieldKey] === undefined ||
                     nextPending[fieldKey] === '' ||
-                    (Array.isArray(nextPending[fieldKey]) && Object.keys(nextPending[fieldKey]).length === 0)
+                    (Array.isArray(nextPending[fieldKey]) && Object.keys(nextPending[fieldKey] as string).length === 0)
                 if (required && isEmpty) {
                     nextValidationFails[fieldKey] = 'This field is mandatory'
                 }
             })
+            state.pendingDataChanges[action.payload.bcName] = state.pendingDataChanges[action.payload.bcName] ?? {}
             state.pendingDataChanges[action.payload.bcName][action.payload.cursor] = nextPending
             if (isTargetFormatPVF) {
-                ;(state.pendingValidationFails[actionBcName] as { [cursor: string]: Record<string, string> })[action.payload.cursor] =
+                ;(state.pendingValidationFails?.[actionBcName] as { [cursor: string]: Record<string, string> })[action.payload.cursor] =
                     nextValidationFails
             } else {
                 state.pendingValidationFails = nextValidationFails
@@ -201,7 +205,8 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                 pendingDataChanges[bcName] = pendingBcChanges
             })
             const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-            const pendingValidationFails = { ...state.pendingValidationFails }
+            const pendingValidationFails = state.pendingValidationFails ? { ...state.pendingValidationFails } : {}
+
             if (isTargetFormatPVF) {
                 action.payload.bcNames.forEach(i => {
                     pendingValidationFails[i] = {}
@@ -286,6 +291,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                     errors[fieldName] = violation
                 })
             }
+            state.rowMeta[bcName] = state.rowMeta[bcName] ?? {}
             state.rowMeta[bcName][bcUrl].errors = errors
         })
         .addCase(bcSaveDataFail, (state, action) => {
@@ -296,6 +302,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                     errors[fieldName] = violation
                 })
             }
+            state.rowMeta[bcName] = state.rowMeta[bcName] ?? {}
             state.rowMeta[bcName][bcUrl].errors = errors
         })
         .addCase(sendOperationFail, (state, action) => {
@@ -306,28 +313,35 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                     errors[fieldName] = violation
                 })
             }
+            state.rowMeta[bcName] = state.rowMeta[bcName] ?? {}
             state.rowMeta[bcName][bcUrl].errors = errors
         })
         .addCase(sendOperationSuccess, (state, action) => {
-            const { bcName, cursor } = action.payload
+            const bcName = action.payload.bcName
+            const cursor = action.payload.cursor as string
+
             const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
+            state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
             state.pendingDataChanges[bcName][cursor] = {}
             if (isTargetFormatPVF) {
-                ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
+                ;(state.pendingValidationFails?.[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
             } else {
                 state.pendingValidationFails = initialViewState.pendingValidationFails
             }
+            state.handledForceActive[bcName] = state.handledForceActive[bcName] ?? {}
             state.handledForceActive[bcName][cursor] = {}
         })
         .addCase(bcSaveDataSuccess, (state, action) => {
             const { bcName, cursor } = action.payload
             const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
+            state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
             state.pendingDataChanges[bcName][cursor] = {}
             if (isTargetFormatPVF) {
-                ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
+                ;(state.pendingValidationFails?.[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
             } else {
                 state.pendingValidationFails = initialViewState.pendingValidationFails
             }
+            state.handledForceActive[bcName] = state.handledForceActive[bcName] ?? {}
             state.handledForceActive[bcName][cursor] = {}
         })
         .addCase(bcCancelPendingChanges, (state, action) => {
@@ -339,7 +353,8 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                 }
             }
             const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-            let pendingValidationFails = { ...state.pendingValidationFails }
+            let pendingValidationFails = state.pendingValidationFails ? { ...state.pendingValidationFails } : {}
+
             if (isTargetFormatPVF) {
                 if (action.payload?.bcNames?.length > 0) {
                     /**
@@ -352,7 +367,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                     /**
                      * Clear a `pendingValidationFails` completely
                      */
-                    pendingValidationFails = initialViewState.pendingValidationFails
+                    pendingValidationFails = initialViewState.pendingValidationFails as typeof pendingValidationFails
                 }
             }
             state.pendingDataChanges = pendingDataChanges
@@ -364,7 +379,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
         .addCase(showViewPopup, (state, action) => {
             const { bcName, calleeBCName, calleeWidgetName, associateFieldKey, assocValueKey, active, isFilter, type, widgetName } =
                 action.payload
-            // const widgetValueKey = store.view.widgets.find(item => item.bcName === bcName)?.options?.displayedValueKey
+
             state.popupData = {
                 widgetName,
                 type,
@@ -372,13 +387,13 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                 calleeBCName,
                 calleeWidgetName,
                 associateFieldKey,
-                assocValueKey: assocValueKey,
+                assocValueKey,
                 active,
                 isFilter
             }
         })
         .addCase(showFileUploadPopup, (state, action) => {
-            const bcName = state.widgets.find(item => item.name === action.payload.widgetName)?.bcName
+            const bcName = state.widgets?.find(item => item.name === action.payload.widgetName)?.bcName
             state.popupData = {
                 type: 'file-upload',
                 bcName, // should be null
@@ -392,6 +407,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.pickMap = null
         })
         .addCase(closeViewPopup, state => {
+            state.popupData = {}
             state.popupData.bcName = null
         })
         .addCase(selectTableCell, (state, action) => {
@@ -402,13 +418,15 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.selectedCell = initialViewState.selectedCell
         })
         .addCase(showNotification, (state, action) => {
+            state.systemNotifications = state.systemNotifications ?? []
             state.systemNotifications.push({
                 type: action.payload.type,
                 message: action.payload.message,
-                id: state.systemNotifications.length
+                id: state.systemNotifications?.length as number
             })
         })
         .addCase(closeNotification, (state, action) => {
+            state.systemNotifications = state.systemNotifications ?? []
             state.systemNotifications = state.systemNotifications.filter(item => item.id !== action.payload.id)
         })
         .addCase(showViewError, (state, action) => {

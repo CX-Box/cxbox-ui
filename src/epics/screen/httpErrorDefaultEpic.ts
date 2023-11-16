@@ -27,8 +27,8 @@ export const httpErrorDefaultEpic: CXBoxEpic = (action$, state$) =>
         map(action => {
             const businessError = {
                 type: ApplicationErrorType.BusinessError,
-                code: action.payload.error.response.status,
-                details: action.payload.error.response.data
+                code: action.payload.error.response?.status,
+                details: action.payload.error.response?.data
             }
             return showViewError({ error: businessError })
         })

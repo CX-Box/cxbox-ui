@@ -77,10 +77,10 @@ export const createSessionReducerBuilderManager = <S extends Session>(initialSta
             state.debugMode = action.payload
         })
         .addCase(addPendingRequest, (state, action) => {
-            state.pendingRequests.push(action.payload.request)
+            state.pendingRequests?.push(action.payload.request)
         })
         .addCase(removePendingRequest, (state, action) => {
-            state.pendingRequests = state.pendingRequests.filter(item => item.requestId !== action.payload.requestId)
+            state.pendingRequests = state.pendingRequests?.filter(item => item.requestId !== action.payload.requestId)
         })
         .addCase(addNotification, (state, action) => {
             state.notifications.push(action.payload)

@@ -34,7 +34,7 @@ export const bcDeleteDataEpic: CXBoxEpic = (action$, store$, { api }) =>
             const isTargetFormatPVF = state.view.pendingValidationFailsFormat === PendingValidationFailsFormat.target
             return api.deleteBcData(state.screen.screenName, bcUrl, context).pipe(
                 mergeMap(data => {
-                    const postInvoke = data.postActions[0]
+                    const postInvoke = data.postActions?.[0]
                     return concat(
                         isTargetFormatPVF ? of(bcCancelPendingChanges({ bcNames: [bcName] })) : EMPTY,
                         of(bcFetchDataRequest({ bcName, widgetName })),

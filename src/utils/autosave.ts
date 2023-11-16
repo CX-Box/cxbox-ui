@@ -60,14 +60,14 @@ export function autosaveRoutine(action: AnyAction, store: MiddlewareAPI<Dispatch
          * Save all BCs except `baseBcName`
          */
         bcList.forEach(bcName => {
-            const widget = state.view.widgets.find((v: WidgetMeta) => v.bcName === bcName)
+            const widget = state.view.widgets?.find((v: WidgetMeta) => v.bcName === bcName)
             const cursor = state.screen.bo.bc[bcName]?.cursor
             if (bcHasPendingAutosaveChanges(state, bcName, cursor)) {
                 dispatch(
                     sendOperation({
                         bcName: bcName,
                         operationType: OperationTypeCrud.save,
-                        widgetName: widget.name
+                        widgetName: widget?.name as string
                     })
                 )
             }
@@ -75,12 +75,12 @@ export function autosaveRoutine(action: AnyAction, store: MiddlewareAPI<Dispatch
         /**
          * save `baseBcName`'s BC
          */
-        const baseWidget = state.view.widgets.find((v: WidgetMeta) => v.bcName === baseBcName)
+        const baseWidget = state.view.widgets?.find((v: WidgetMeta) => v.bcName === baseBcName)
         return next(
             sendOperation({
                 bcName: baseBcName,
                 operationType: OperationTypeCrud.save,
-                widgetName: baseWidget.name,
+                widgetName: baseWidget?.name as string,
                 onSuccessAction: action
             })
         )
@@ -97,7 +97,7 @@ export function autosaveRoutine(action: AnyAction, store: MiddlewareAPI<Dispatch
  */
 export function bcHasPendingAutosaveChanges(store: CoreStore, bcName: string, cursor: string) {
     const pendingChanges = store.view.pendingDataChanges
-    const cursorChanges = pendingChanges[bcName]?.[cursor]
+    const cursorChanges = pendingChanges[bcName]?.[cursor as string]
     const result = cursorChanges && !Object.keys(cursorChanges).includes('_associate') && Object.values(cursorChanges).length > 0
     return result
 }
