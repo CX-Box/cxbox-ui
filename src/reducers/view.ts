@@ -106,9 +106,8 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             }
         })
         .addCase(bcFetchRowMetaSuccess, (state, action) => {
-            if (state.rowMeta[action.payload.bcName]) {
-                state.rowMeta[action.payload.bcName][action.payload.bcUrl] = action.payload.rowMeta
-            }
+            state.rowMeta[action.payload.bcName] = state.rowMeta[action.payload.bcName] ?? {}
+            state.rowMeta[action.payload.bcName][action.payload.bcUrl] = action.payload.rowMeta
             state.metaInProgress[action.payload.bcName] = false
         })
         .addCase(bcNewDataSuccess, (state, action) => {
