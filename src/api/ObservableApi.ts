@@ -105,6 +105,22 @@ export class Api {
         const url = applyParams(buildUrl`row-meta/${screenName}/` + (bcUrl ?? ''), params)
         return this.api$.post<RowMetaResponse>(url, { data }).pipe(map(response => response.data.row))
     }
+    /**
+     * Get Cxbox API file upload endpoint based on baseURL of axios instance
+     *
+     * Handles empty baseURL and trailing slash
+     *
+     * @returns File upload endpoint
+     */
+    get fileUploadEndpoint() {
+        const instance = this.api$.instance
+
+        if (!instance.defaults.baseURL) {
+            return '/file'
+        }
+
+        return instance.defaults.baseURL.endsWith('/') ? `${instance.defaults.baseURL}file` : `${instance.defaults.baseURL}/file`
+    }
 
     refreshMeta() {
         return this.api$.get(buildUrl`bc-registry/refresh-meta`)

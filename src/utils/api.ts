@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { AxiosInstance } from 'axios'
 export interface ApiCallContext {
     widgetName: string
 }
@@ -71,18 +70,4 @@ export function applyRawParams(url: string, qso: Record<string, any>) {
     }
     const result = new URLSearchParams(qso).toString()
     return `${addTailControlSequences(url)}${result && `${result}`}`
-}
-
-/**
- * Get Cxbox API file upload endpoint based on baseURL of axios instance
- *
- * Handles empty baseURL and trailing slash
- *
- * @returns File upload endpoint
- */
-export function getFileUploadEndpoint(instance: AxiosInstance) {
-    if (!instance.defaults.baseURL) {
-        return '/file'
-    }
-    return instance.defaults.baseURL.endsWith('/') ? `${instance.defaults.baseURL}file` : `${instance.defaults.baseURL}/file`
 }
