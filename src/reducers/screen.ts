@@ -46,7 +46,7 @@ import {
     showViewPopup
 } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
-import { DepthBcType } from '@internal/interfaces/bc'
+import { DepthBcType } from '../interfaces/bc'
 
 export const initialScreenState: ScreenState = {
     screenName: '',

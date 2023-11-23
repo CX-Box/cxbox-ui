@@ -23,8 +23,8 @@ import { Store } from '../interfaces'
 import { processPreInvoke, sendOperation } from '../actions'
 import { buildBcUrl, flattenOperations } from '../utils'
 
-const preInvokeAction =
-    ({ getState, dispatch }: MiddlewareAPI<Dispatch, Store>) =>
+export const preInvokeAction: Middleware =
+    ({ getState }: MiddlewareAPI<Dispatch, Store>) =>
     (next: Dispatch) =>
     (action: AnyAction) => {
         if (sendOperation.match(action)) {
@@ -48,10 +48,3 @@ const preInvokeAction =
         }
         return next(action)
     }
-
-/**
- * TODO
- */
-export function createPreInvokeMiddleware() {
-    return preInvokeAction as Middleware
-}

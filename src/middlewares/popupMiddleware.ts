@@ -2,8 +2,8 @@ import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import { Store } from '../interfaces'
 import { showViewPopup } from '../actions'
 
-const popupMiddleware =
-    ({ getState, dispatch }: MiddlewareAPI<Dispatch, Store>) =>
+export const popupMiddleware: Middleware =
+    ({ getState }: MiddlewareAPI<Dispatch, Store>) =>
     (next: Dispatch) =>
     (action: AnyAction) => {
         if (showViewPopup.match(action)) {
@@ -15,10 +15,3 @@ const popupMiddleware =
         }
         return next(action)
     }
-
-/**
- * TODO
- */
-export function createPopupMiddleware() {
-    return popupMiddleware as Middleware
-}

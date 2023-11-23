@@ -25,3 +25,5 @@ export { Api } from './api'
 export * as utils from './utils'
 
 export * as interfaces from './interfaces'
+
+export { middlewares } from './middlewares'

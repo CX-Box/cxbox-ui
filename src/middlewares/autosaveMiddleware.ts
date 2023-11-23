@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { AnyAction, Dispatch, MiddlewareAPI } from 'redux'
+import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
 import { coreOperations, OperationTypeCrud } from '../interfaces'
 import { Store as CoreStore } from '../interfaces/store'
 import { autosaveRoutine, checkUnsavedChangesOfBc } from '../utils/autosave'
 import { WidgetOperations } from '@cxbox-ui/schema'
 import { changeLocation, selectTableCellInit, sendOperation } from '../actions'
 
-const saveFormMiddleware =
-    ({ getState, dispatch }: MiddlewareAPI<Dispatch<AnyAction>, CoreStore>) =>
+export const saveFormMiddleware: Middleware =
+    ({ getState, dispatch }: MiddlewareAPI<Dispatch, CoreStore>) =>
     (next: Dispatch) =>
     (action: AnyAction) => {
         const state = getState()
@@ -94,10 +94,3 @@ const saveFormMiddleware =
 
         return next(action)
     }
-
-/**
- *
- */
-export function createAutoSaveMiddleware() {
-    return saveFormMiddleware
-}

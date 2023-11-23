@@ -42,7 +42,7 @@ import {
 import { buildBcUrl, flattenOperations } from '../utils'
 import { DataItem, WidgetField } from '@cxbox-ui/schema'
 
-const requiredFields =
+export const requiredFields: Middleware =
     ({ getState, dispatch }: MiddlewareAPI<Dispatch, Store>) =>
     (next: Dispatch) =>
     (action: AnyAction) => {
@@ -155,13 +155,6 @@ export function getRequiredFieldsMissing(record: DataItem, pendingChanges: Pendi
         }
     })
     return Object.keys(result).length > 0 ? result : null
-}
-
-/**
- * TODO
- */
-export function createRequiredFieldsMiddleware() {
-    return requiredFields as Middleware
 }
 
 /**
