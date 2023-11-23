@@ -55,7 +55,7 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
             const record = state.data[bcName]?.find(item => item.id === bc.cursor)
             const filters = state.screen.filters[bcName]
             const sorters = state.screen.sorters[bcName]
-            const pendingRecordChange = state.view.pendingDataChanges[bcName]?.[bc.cursor]
+            const pendingRecordChange = { ...state.view.pendingDataChanges[bcName]?.[bc.cursor] }
             for (const key in pendingRecordChange) {
                 if (fields.find(item => item.key === key && item.disabled)) {
                     delete pendingRecordChange[key]
