@@ -59,7 +59,7 @@ export class Api {
 
     fetchRowMeta(screenName: string, bcUrl: string, params?: GetParamsMap, cancelToken?: CancelToken) {
         const url = applyParams(buildUrl`row-meta/${screenName}/` + bcUrl, params)
-        return this.api$.get<RowMetaResponse>(url, { cancelToken }).pipe(map(response => response.data.row))
+        return this.api$.get<RowMetaResponse>(url, { cancelToken }).pipe(map(response => response.data?.row))
     }
 
     newBcData(screenName: string, bcUrl: string, context: ApiCallContext, params?: GetParamsMap) {
