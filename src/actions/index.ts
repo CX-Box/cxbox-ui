@@ -1155,6 +1155,14 @@ export const emptyAction = createAction<null>('emptyAction')
  * refresh screens, views and widgets meta
  */
 export const refreshMeta = createAction<null>('refreshMeta')
+/**
+ * refresh refreshMeta was successful
+ */
+export const refreshMetaDone = createAction('refreshMetaDone')
+/**
+ * refresh refreshMeta was unsuccessful
+ */
+export const refreshMetaFail = createAction('refreshMetaFail')
 
 /**
  * Refresh meta data (see action above) and reload page

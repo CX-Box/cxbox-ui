@@ -15,8 +15,8 @@
  */
 
 import { CXBoxEpic } from '../../interfaces'
-import { catchError, concat, filter, mergeMap, of, switchMap } from 'rxjs'
-import { changeLocation, login, loginFail, logoutDone, refreshMeta } from '../../actions'
+import { catchError, concat, filter, mergeMap, switchMap } from 'rxjs'
+import { changeLocation, login, loginFail, logoutDone, refreshMeta, refreshMetaDone, refreshMetaFail } from '../../actions'
 
 /**
  * Performed on refresh meta dataEpics.ts process.
@@ -31,6 +31,7 @@ export const refreshMetaEpic: CXBoxEpic = (action$, state$, { api }) =>
             return api.refreshMeta().pipe(
                 switchMap(() =>
                     concat([
+                        refreshMetaDone(),
                         logoutDone(null),
                         login({ login: '', password: '', role: activeRole }),
                         changeLocation({
@@ -38,7 +39,7 @@ export const refreshMetaEpic: CXBoxEpic = (action$, state$, { api }) =>
                         })
                     ])
                 ),
-                catchError(error => of(loginFail(error)))
+                catchError(error => concat([loginFail(error), refreshMetaFail()]))
             )
         })
     )
