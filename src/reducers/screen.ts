@@ -412,6 +412,8 @@ export function screen(state = initialState, action: AnyAction, store: Store): S
             }
         }
         case types.showViewPopup: {
+            const currentPage = state.bo.bc[action.payload.bcName]?.page ?? 1
+
             return {
                 ...state,
                 bo: {
@@ -420,7 +422,7 @@ export function screen(state = initialState, action: AnyAction, store: Store): S
                         ...state.bo.bc,
                         [action.payload.bcName]: {
                             ...state.bo.bc[action.payload.bcName],
-                            page: 1,
+                            page: action.payload.bcName === action.payload.calleeBCName ? currentPage : 1,
                             loading: action.payload.bcName !== action.payload.calleeBCName
                         }
                     }
