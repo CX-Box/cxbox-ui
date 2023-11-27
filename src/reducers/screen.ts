@@ -205,7 +205,9 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             state.bo.bc[action.payload.bcName].loading = true
         })
         .addCase(showViewPopup, (state, action) => {
-            state.bo.bc[action.payload.bcName].page = 1
+            const currentPage = state.bo.bc[action.payload.bcName]?.page ?? 1
+
+            state.bo.bc[action.payload.bcName].page = action.payload.bcName === action.payload.calleeBCName ? currentPage : 1
             state.bo.bc[action.payload.bcName].loading = action.payload.bcName !== action.payload.calleeBCName
         })
         //don't use matcher in prior to add more cases
