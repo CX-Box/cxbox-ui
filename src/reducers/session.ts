@@ -22,6 +22,9 @@ import {
     loginDone,
     loginFail,
     logout,
+    refreshMeta,
+    refreshMetaDone,
+    refreshMetaFail,
     removeNotifications,
     removePendingRequest,
     switchDebugMode
@@ -43,7 +46,8 @@ export const initialSessionState: Session = {
     errorMsg: null,
     screens: [],
     pendingRequests: [],
-    notifications: []
+    notifications: [],
+    isMetaRefreshing: false
 }
 
 /**
@@ -88,4 +92,13 @@ export const createSessionReducerBuilderManager = <S extends Session>(initialSta
         .addCase(removeNotifications, (state, action) => {
             const closingKeys = action.payload
             state.notifications = state.notifications.filter(notification => !closingKeys.includes(notification.key))
+        })
+        .addCase(refreshMeta, state => {
+            state.isMetaRefreshing = true
+        })
+        .addCase(refreshMetaDone, state => {
+            state.isMetaRefreshing = false
+        })
+        .addCase(refreshMetaFail, state => {
+            state.isMetaRefreshing = false
         })

@@ -1154,7 +1154,7 @@ export const emptyAction = createAction<null>('emptyAction')
 /**
  * refresh screens, views and widgets meta
  */
-export const refreshMeta = createAction<null>('refreshMeta')
+export const refreshMeta = createAction('refreshMeta')
 /**
  * refresh refreshMeta was successful
  */

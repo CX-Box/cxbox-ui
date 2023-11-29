@@ -23,7 +23,7 @@ export const refreshMetaAndReloadPageEpic: CXBoxEpic = (action$, state$) =>
         filter(refreshMetaAndReloadPage.match),
         switchMap(() =>
             concat(
-                of(refreshMeta(null)),
+                of(refreshMeta()),
                 action$.pipe(
                     filter(loginDone.match),
                     take(1),

@@ -73,6 +73,7 @@ export interface Session {
     errorMsg?: string
     pendingRequests?: PendingRequest[]
     notifications: Notification[]
+    isMetaRefreshing: boolean
 }
 
 export interface LoginResponse extends CxboxResponse {
