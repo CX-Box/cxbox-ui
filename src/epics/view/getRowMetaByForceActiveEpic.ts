@@ -61,7 +61,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
             )
 
             const bcUrl = buildBcUrl(bcName, true, state)
-            const pendingChanges = state.view.pendingDataChanges[bcName][cursor]
+            const pendingChanges = state.view.pendingDataChanges[bcName]?.[cursor]
             const handledForceActive = state.view.handledForceActive[bcName]?.[cursor] || {}
             const currentRecordData = state.data[bcName]?.find(record => record.id === cursor)
             const fieldsRowMeta = state.view.rowMeta[bcName]?.[bcUrl]?.fields

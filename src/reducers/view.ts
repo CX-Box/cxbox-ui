@@ -127,7 +127,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
                     forceActiveFieldKeys.push(field.key)
                 }
             })
-
+            state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
             const consolidatedFrontData: PendingDataItem = { ...currentRecordData, ...state.pendingDataChanges[bcName][cursor] }
             // вычислим "разницу" между консолид.данными и полученными forcedValue's в пользу последних
             Object.keys(consolidatedFrontData).forEach(key => {
