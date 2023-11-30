@@ -33,6 +33,7 @@ import {
     bcSelectRecord,
     showViewPopup
 } from '../../actions'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  *
@@ -238,7 +239,10 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     }),
                     catchError((error: any) => {
                         console.error(error)
-                        return of(bcFetchDataFail({ bcName: action.payload.bcName as string, bcUrl }))
+                        return concat(
+                            of(bcFetchDataFail({ bcName: action.payload.bcName as string, bcUrl })),
+                            createApiErrorObservable(error)
+                        )
                     })
                 )
                 return [cancelFlow, cancelByParentBc, normalFlow]

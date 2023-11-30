@@ -19,6 +19,7 @@ import { catchError, concat, EMPTY, filter, mergeMap, of } from 'rxjs'
 import { bcCancelPendingChanges, bcDeleteDataFail, bcFetchDataRequest, processPostInvoke, sendOperation } from '../../actions'
 import { buildBcUrl, matchOperationRole } from '../../utils'
 import { OperationTypeCrud } from '@cxbox-ui/schema'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 export const bcDeleteDataEpic: CXBoxEpic = (action$, store$, { api }) =>
     action$.pipe(
@@ -43,7 +44,7 @@ export const bcDeleteDataEpic: CXBoxEpic = (action$, store$, { api }) =>
                 }),
                 catchError((error: any) => {
                     console.error(error)
-                    return of(bcDeleteDataFail({ bcName }))
+                    return concat(of(bcDeleteDataFail({ bcName })), createApiErrorObservable(error, context))
                 })
             )
         })

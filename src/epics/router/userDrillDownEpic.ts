@@ -18,6 +18,7 @@ import { buildBcUrl } from '../../utils'
 import { CXBoxEpic, DrillDownType, WidgetFieldBase } from '../../interfaces'
 import { catchError, concat, EMPTY, filter, mergeMap, of, switchMap } from 'rxjs'
 import { bcFetchRowMetaSuccess, drillDown, userDrillDown, userDrillDownSuccess } from '../../actions'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  *
@@ -82,7 +83,7 @@ export const userDrillDownEpic: CXBoxEpic = (action$, state$, { api }) =>
                 }),
                 catchError(error => {
                     console.error(error)
-                    return EMPTY // TODO:
+                    return createApiErrorObservable(error) // TODO:
                 })
             )
         })

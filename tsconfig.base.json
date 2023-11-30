@@ -21,8 +21,7 @@
     "emitDeclarationOnly": true,
     "baseUrl": ".",
     "paths": {
-      "@cxbox-ui/core": ["src/index.ts"],
-      "@internal/*": ["src/*"]
+      "@cxbox-ui/core": ["src/index.ts"]
     }
   }
 }

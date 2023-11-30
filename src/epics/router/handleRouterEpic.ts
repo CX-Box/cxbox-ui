@@ -17,6 +17,7 @@
 import { catchError, EMPTY, filter, mergeMap, switchMap } from 'rxjs'
 import { CXBoxEpic } from '../../interfaces'
 import { handleRouter } from '../../actions'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 export const handleRouterEpic: CXBoxEpic = (action$, state$, { api }) =>
     action$.pipe(
@@ -39,7 +40,7 @@ export const handleRouterEpic: CXBoxEpic = (action$, state$, { api }) =>
                 }),
                 catchError(error => {
                     console.error(error)
-                    return EMPTY
+                    return createApiErrorObservable(error)
                 })
             )
         })

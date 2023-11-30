@@ -28,6 +28,7 @@ import { buildBcUrl, getFilters, getSorters, matchOperationRole } from '../../ut
 import { AxiosError } from 'axios'
 
 import { postOperationRoutine } from '../utils/postOperationRoutine'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  * Handle any `sendOperationEpic` action which is not part of built-in operations types
@@ -100,7 +101,7 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
                         entityError = operationError?.error?.entity
                         viewError = operationError?.error?.popup?.[0]
                     }
-                    return of(sendOperationFail({ bcName, bcUrl, viewError, entityError }))
+                    return concat(of(sendOperationFail({ bcName, bcUrl, viewError, entityError })), createApiErrorObservable(e, context))
                 })
             )
         })

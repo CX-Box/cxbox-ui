@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { OperationError, OperationErrorEntity, OperationTypeCrud } from '../../interfaces/operation'
+import { OperationError, OperationErrorEntity, OperationTypeCrud } from '../../interfaces'
 import { buildBcUrl, getBcChildren, matchOperationRole } from '../../utils'
 import { catchError, concat, EMPTY, filter, mergeMap, Observable, of } from 'rxjs'
 import { CXBoxEpic } from '../../interfaces'
@@ -30,6 +30,7 @@ import {
 } from '../../actions'
 import { AxiosError } from 'axios'
 import { AnyAction } from '@reduxjs/toolkit'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  * Post record's pending changes to `save dataEpics.ts` API endpoint.
@@ -156,7 +157,12 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                         entityError = operationError?.error?.entity ?? entityError
                         viewError = operationError?.error?.popup?.[0] ?? viewError
                     }
-                    return concat(of(bcSaveDataFail({ bcName, bcUrl, viewError, entityError })), notification$)
+
+                    return concat(
+                        of(bcSaveDataFail({ bcName, bcUrl, viewError, entityError })),
+                        notification$,
+                        createApiErrorObservable(e, context)
+                    )
                 })
             )
         })

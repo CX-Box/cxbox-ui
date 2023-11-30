@@ -20,6 +20,7 @@ import { OperationTypeCrud } from '@cxbox-ui/schema'
 import { bcChangeCursors, bcDeleteDataFail, processPostInvoke, sendOperation, sendOperationSuccess } from '../../actions'
 import { CXBoxEpic } from '../../interfaces'
 import { isAnyOf } from '@reduxjs/toolkit'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 const actionTypesMatcher = isAnyOf(sendOperation)
 
@@ -68,7 +69,7 @@ export const bcCancelCreateDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                 }),
                 catchError((error: any) => {
                     console.error(error)
-                    return of(bcDeleteDataFail({ bcName }))
+                    return concat(of(bcDeleteDataFail({ bcName })), createApiErrorObservable(error, context))
                 })
             )
         })

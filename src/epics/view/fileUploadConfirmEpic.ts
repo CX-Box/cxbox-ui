@@ -16,10 +16,11 @@
 
 import { CXBoxEpic } from '../../interfaces'
 import { bcForceUpdate, bulkUploadFiles, closeViewPopup, sendOperationSuccess } from '../../actions'
-import { concat, filter, mergeMap, of } from 'rxjs'
+import { catchError, concat, filter, mergeMap, of } from 'rxjs'
 import { buildBcUrl } from '../../utils'
 import { OperationTypeCrud } from '@cxbox-ui/schema'
 import { postOperationRoutine } from '../utils/postOperationRoutine'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  * It sends customAction request for `file-upload-save` endpoint with `bulkIds` dataEpics.ts
@@ -61,6 +62,10 @@ export const fileUploadConfirmEpic: CXBoxEpic = (action$, state$, { api }) =>
                         of(closeViewPopup(null)),
                         ...postOperationRoutine(widgetName, postInvoke, preInvoke, OperationTypeCrud.save, bcName)
                     )
+                }),
+                catchError((error: any) => {
+                    console.error(error)
+                    return createApiErrorObservable(error)
                 })
             )
         })

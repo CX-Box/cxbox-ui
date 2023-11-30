@@ -1110,6 +1110,7 @@ export const bulkUploadFiles = createAction<{
 export const apiError = createAction<{
     /**
      * Axios error object
+     * https://redux.js.org/style-guide/#do-not-put-non-serializable-values-in-state-or-actions
      */
     error: AxiosError
     /**

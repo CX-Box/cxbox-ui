@@ -30,6 +30,7 @@ import { WidgetTypes } from '@cxbox-ui/schema'
 import { buildBcUrl } from '../../utils'
 import { AnyAction, nanoid } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  * Sends row meta request when `forceActive` field fires `onChange`
@@ -128,7 +129,8 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
                                           ),
                                           of(forceActiveChangeFail({ bcName, bcUrl, viewError, entityError }))
                                       )
-                                    : EMPTY
+                                    : EMPTY,
+                                createApiErrorObservable(e)
                             )
                         })
                     )

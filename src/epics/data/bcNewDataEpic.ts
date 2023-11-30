@@ -19,6 +19,7 @@ import { buildBcUrl, matchOperationRole } from '../../utils'
 import { DataItem, OperationTypeCrud } from '@cxbox-ui/schema'
 import { CXBoxEpic } from '../../interfaces'
 import { bcFetchRowMetaSuccess, bcNewDataFail, bcNewDataSuccess, changeDataItem, processPostInvoke, sendOperation } from '../../actions'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  * Access `row-meta-new` API endpoint for business component endpoint; response will contain
@@ -83,7 +84,7 @@ export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                 }),
                 catchError((error: any) => {
                     console.error(error)
-                    return of(bcNewDataFail({ bcName }))
+                    return concat(of(bcNewDataFail({ bcName })), createApiErrorObservable(error, context))
                 })
             )
         })

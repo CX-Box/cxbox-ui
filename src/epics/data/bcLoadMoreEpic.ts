@@ -15,11 +15,12 @@
  */
 
 import { CXBoxEpic } from '../../interfaces'
-import { catchError, filter, mergeMap, of, race } from 'rxjs'
+import { catchError, concat, filter, mergeMap, of, race } from 'rxjs'
 import { bcFetchDataFail, bcFetchDataSuccess, bcLoadMore } from '../../actions'
 import { buildBcUrl, getFilters, getSorters } from '../../utils'
 import { cancelRequestActionTypes, cancelRequestEpic } from '../../utils/cancelRequestEpic'
 import { DataItem } from '@cxbox-ui/schema'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 export const bcLoadMoreEpic: CXBoxEpic = (action$, state$, { api }) =>
     action$.pipe(
@@ -59,7 +60,7 @@ export const bcLoadMoreEpic: CXBoxEpic = (action$, state$, { api }) =>
                 }),
                 catchError((error: any) => {
                     console.error(error)
-                    return of(bcFetchDataFail({ bcName, bcUrl }))
+                    return concat(of(bcFetchDataFail({ bcName, bcUrl })), createApiErrorObservable(error))
                 })
             )
             return race(cancelFlow, normalFlow)

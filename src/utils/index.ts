@@ -15,6 +15,7 @@
  */
 
 export * from './api'
+export * from './apiError'
 export * from './strings'
 export * from './history'
 export * from './filters'

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { catchError, filter, map, mergeMap, of, race } from 'rxjs'
+import { catchError, concat, filter, map, mergeMap, of, race } from 'rxjs'
 import { buildBcUrl } from '../../utils'
 import { cancelRequestActionTypes, cancelRequestEpic } from '../../utils/cancelRequestEpic'
 import { CXBoxEpic } from '../../interfaces'
 import { bcFetchRowMeta, bcFetchRowMetaFail, bcFetchRowMetaSuccess, bcSelectRecord } from '../../actions'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  * Access `row-meta` API endpoint for business component; response will contain information
@@ -78,7 +79,7 @@ export const bcFetchRowMetaRequestEpic: CXBoxEpic = (action$, state$, { api }) =
                 }),
                 catchError(error => {
                     console.error(error)
-                    return of(bcFetchRowMetaFail({ bcName }))
+                    return concat(of(bcFetchRowMetaFail({ bcName })), createApiErrorObservable(error))
                 })
             )
 

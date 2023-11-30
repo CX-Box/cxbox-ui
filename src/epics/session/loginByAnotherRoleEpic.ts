@@ -19,6 +19,7 @@ import { catchError, concat, filter, mergeMap, of, switchMap } from 'rxjs'
 import { changeLocation, login, loginDone, loginFail } from '../../actions'
 import { AxiosError } from 'axios'
 import { defaultParseURL } from '../../utils'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 const responseStatusMessages: Record<number, string> = {
     401: 'Invalid credentials',
@@ -72,7 +73,7 @@ export const loginByAnotherRoleEpic: CXBoxEpic = (action$, state$, { api }) =>
                     const errorMsg = error.response
                         ? responseStatusMessages[error.response.status] || 'Server application unavailable'
                         : 'Empty server response'
-                    return of(loginFail({ errorMsg }))
+                    return concat(of(loginFail({ errorMsg })), createApiErrorObservable(error))
                 })
             )
         })
