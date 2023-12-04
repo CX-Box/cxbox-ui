@@ -14,89 +14,78 @@
  * limitations under the License.
  */
 
-import { Observable } from 'rxjs'
-import { Store } from 'redux'
-import { Epic, types, $do, AnyAction, ActionsMap } from '../../actions/actions'
-import { Store as CoreStore } from '../../interfaces/store'
-import { buildBcUrl } from '../../utils/strings'
-import { newBcData } from '../../api/api'
-import { matchOperationRole } from '../../utils/operations'
-import { OperationTypeCrud } from '../../interfaces/operation'
-import { DataItem } from '../../interfaces/data'
+import { catchError, concat, EMPTY, filter, mergeMap, of } from 'rxjs'
+import { buildBcUrl, matchOperationRole } from '../../utils'
+import { DataItem, OperationTypeCrud } from '@cxbox-ui/schema'
+import { CXBoxEpic } from '../../interfaces'
+import { bcFetchRowMetaSuccess, bcNewDataFail, bcNewDataSuccess, changeDataItem, processPostInvoke, sendOperation } from '../../actions'
+import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
  * Access `row-meta-new` API endpoint for business component endpoint; response will contain
  * row meta where `currentValue` of `id` field will contain an id for newly created record.
  *
- * `bcNewDataSuccess` action dispatched with new data item draft (vstamp = -1).
+ * `bcNewDataSuccess` action dispatched with new dataEpics.ts item draft (vstamp = -1).
  * `bcFetchRowMetaSuccess` action dispatched to set BC cursor to this new id.
  * `changeDataItem` action dispatched to add this new item to pending changes.
- * `processPostInvoke` dispatched to handle possible post invokes.
+ * `processPostInvokeEpic` dispatched to handle possible post invokes.
  *
  * In case of an error message is logged as warning and `bcNewDataFail` action dispatched.
  *
- * @param action$ `sendOperation` with `create` role
- * @param store Store instance
  */
-export const bcNewDataEpic: Epic = (action$, store) =>
-    action$
-        .ofType(types.sendOperation)
-        .filter(action => matchOperationRole(OperationTypeCrud.create, action.payload, store.getState()))
-        .mergeMap(action => {
-            return bcNewDataEpicImpl(action, store)
-        })
-
-/**
- * Default implementation for `bcNewDataEpic` epic
- *
- * Access `row-meta-new` API endpoint for business component endpoint; response will contain
- * row meta where `currentValue` of `id` field will contain an id for newly created record.
- *
- * `bcNewDataSuccess` action dispatched with new data item draft (vstamp = -1).
- * `bcFetchRowMetaSuccess` action dispatched to set BC cursor to this new id.
- * `changeDataItem` action dispatched to add this new item to pending changes.
- * `processPostInvoke` dispatched to handle possible post invokes.
- *
- * In case of an error message is logged as warning and `bcNewDataFail` action dispatched.
- *
- * @param action `sendOperation` with `create` role
- * @param store Store instance
- * @category Epics
- */
-export function bcNewDataEpicImpl(action: ActionsMap['sendOperation'], store: Store<CoreStore, AnyAction>): Observable<AnyAction> {
-    const state = store.getState()
-    const bcName = action.payload.bcName
-    const bcUrl = buildBcUrl(bcName)
-    const context = { widgetName: action.payload.widgetName }
-    const params = { _action: action.payload.operationType }
-    return newBcData(state.screen.screenName, bcUrl, context, params)
-        .mergeMap(data => {
-            const rowMeta = data.row
-            const dataItem: DataItem = { id: null, vstamp: -1 }
-            data.row.fields.forEach(field => {
-                dataItem[field.key] = field.currentValue
-            })
-            const postInvoke = data.postActions[0]
-            const cursor = dataItem.id
-            return Observable.concat(
-                Observable.of($do.bcNewDataSuccess({ bcName, dataItem, bcUrl })),
-                Observable.of($do.bcFetchRowMetaSuccess({ bcName, bcUrl: `${bcUrl}/${cursor}`, rowMeta, cursor })),
-                Observable.of(
-                    $do.changeDataItem({
-                        bcName: action.payload.bcName,
-                        cursor: cursor,
-                        dataItem: {
-                            id: cursor
-                        }
+export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
+    action$.pipe(
+        filter(sendOperation.match),
+        filter(action => matchOperationRole(OperationTypeCrud.create, action.payload, state$.value)),
+        mergeMap(action => {
+            /**
+             * Default implementation for `bcNewDataEpic` epic
+             *
+             * Access `row-meta-new` API endpoint for business component endpoint; response will contain
+             * row meta where `currentValue` of `id` field will contain an id for newly created record.
+             *
+             * `bcNewDataSuccess` action dispatched with new dataEpics.ts item draft (vstamp = -1).
+             * `bcFetchRowMetaSuccess` action dispatched to set BC cursor to this new id.
+             * `changeDataItem` action dispatched to add this new item to pending changes.
+             * `processPostInvokeEpic` dispatched to handle possible post invokes.
+             *
+             * In case of an error message is logged as warning and `bcNewDataFail` action dispatched.
+             *
+             */
+            const state = state$.value
+            const bcName = action.payload.bcName
+            const bcUrl = buildBcUrl(bcName, false, state) ?? ''
+            const context = { widgetName: action.payload.widgetName }
+            const params = { _action: action.payload.operationType }
+            return api.newBcData(state.screen.screenName, bcUrl, context, params).pipe(
+                mergeMap(data => {
+                    const rowMeta = data.row
+                    const dataItem: DataItem = { id: null as any, vstamp: -1 }
+                    data.row.fields.forEach(field => {
+                        dataItem[field.key] = field.currentValue
                     })
-                ),
-                postInvoke
-                    ? Observable.of($do.processPostInvoke({ bcName, postInvoke, cursor, widgetName: action.payload.widgetName }))
-                    : Observable.empty<never>()
+                    const postInvoke = data.postActions?.[0]
+                    const cursor = dataItem.id
+                    return concat(
+                        of(bcNewDataSuccess({ bcName, dataItem, bcUrl })),
+                        of(bcFetchRowMetaSuccess({ bcName, bcUrl: `${bcUrl}/${cursor}`, rowMeta, cursor })),
+                        of(
+                            changeDataItem({
+                                bcName,
+                                bcUrl: buildBcUrl(bcName, true, state) ?? '',
+                                cursor: cursor,
+                                dataItem: {
+                                    id: cursor
+                                }
+                            })
+                        ),
+                        postInvoke ? of(processPostInvoke({ bcName, postInvoke, cursor, widgetName: action.payload.widgetName })) : EMPTY
+                    )
+                }),
+                catchError((error: any) => {
+                    console.error(error)
+                    return concat(of(bcNewDataFail({ bcName })), createApiErrorObservable(error, context))
+                })
             )
         })
-        .catch((error: any) => {
-            console.error(error)
-            return Observable.of($do.bcNewDataFail({ bcName }))
-        })
-}
+    )

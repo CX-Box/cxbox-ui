@@ -23,12 +23,7 @@ module.exports = {
     "extends": [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
-        'plugin:@typescript-eslint/recommended-requiring-type-checking',
-        "plugin:react/recommended",
-        "plugin:react-hooks/recommended",
-        'prettier',
-        'prettier/@typescript-eslint',
-        'prettier/react'
+        'prettier'
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -46,6 +41,7 @@ module.exports = {
         "react-hooks",
         'file-progress'
     ],
+    "root": true,
     "rules": {
         "prettier/prettier": "error",
         "@typescript-eslint/adjacent-overload-signatures": "error",
@@ -80,6 +76,7 @@ module.exports = {
         "@typescript-eslint/restrict-template-expressions": "off",
         "@typescript-eslint/no-unused-vars": ["warn", { "vars": "all", "args": "none", "ignoreRestSiblings": true }],
         "@typescript-eslint/unified-signatures": "error",
+        "@typescript-eslint/no-shadow": "error",
         "complexity": "off",
         "constructor-super": "error",
         "eqeqeq": [
@@ -92,7 +89,6 @@ module.exports = {
         "import/order": "off",
         "jsdoc/check-alignment": "error",
         "jsdoc/check-indentation": "error",
-        "jsdoc/newline-after-description": "error",
         "max-classes-per-file": [
             "error",
             1
@@ -108,12 +104,7 @@ module.exports = {
         "no-fallthrough": "off",
         "no-invalid-this": "off",
         "no-new-wrappers": "error",
-        "no-shadow": [
-            "error",
-            {
-                "hoist": "all"
-            }
-        ],
+        "no-shadow": "off",
         "no-throw-literal": "error",
         "no-trailing-spaces": "warn",
         "no-undef-init": "error",
@@ -165,5 +156,5 @@ module.exports = {
             {"name": "Link", "linkAttribute": "to"}
         ]
     },
-    "ignorePatterns": [".eslintrc.js"]
+    "ignorePatterns": [".eslintrc.cjs"]
 };

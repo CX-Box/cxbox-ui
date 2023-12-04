@@ -19,64 +19,15 @@
  * custom implementations from client application.
  */
 import { Epic } from 'redux-observable'
-import coreEpics from '../epics'
+import { AnyAction } from '@reduxjs/toolkit'
+import { Store } from './store'
+import { Api } from '../api'
 
-/**
- * Very loose definition of epic; comes from the situation that client applications
- * does not inherit generic Epic from 'redux-observable` but define their own.
- * TODO: We can probably type it better for 2.0.0 with UI scaffolding.
- */
-export type AnyEpic = ($action: any, store: any) => any
-
-/**
- * A union of core epic slices: usually consistent with root reducer slices
- */
-export type RootEpicSlices = keyof typeof coreEpics
-
-/**
- * All epics for particular slice
- */
-export type SliceEpics<Slice> = Slice extends RootEpicSlices ? typeof coreEpics[Slice] : Record<string, NewEpicDescriptor>
-
-/**
- * Names for all epics in a specified slice
- */
-export type SliceEpicsNames<Slice> = keyof SliceEpics<Slice>
-
-/**
- * Client configuration to override or disable specific core epic
- */
-export type CustomEpicDescriptor = AnyEpic | null
-
-/**
- * Describes epics that exists only in client application and do not have a matching core epic
- */
-export type NewEpicDescriptor = { [epicName: string]: CustomEpicDescriptor }
-
-/**
- * Client configuration to specific root epic slice
- */
-export type CustomEpicSlice<Slice extends RootEpicSlices = any> =
-    | Partial<Record<SliceEpicsNames<Slice>, CustomEpicDescriptor>>
-    | NewEpicDescriptor
-
-/**
- * A configuration for epics overriding and customization by client application.
- */
-export type CustomEpics = {
-    [key in RootEpicSlices]?: CustomEpicSlice<key>
-} & { [newSlice: string]: CustomEpicSlice }
-
-/**
- * @deprecated TODO: For backward compatibility; remove in 2.0.0
- */
-export type LegacyCustomEpics = Epic<any, any>
-
-/**
- * @deprecated TODO: For backward compatibility; remove in 2.0.0
- */
-export function isLegacyCustomEpics(customEpics: CustomEpics | LegacyCustomEpics): customEpics is LegacyCustomEpics {
-    return typeof customEpics === 'function'
+export interface EpicDependencyInjection<A = Api> {
+    api: A
 }
 
-export default CustomEpics
+/**
+ * Default Epic typing with dependency injection
+ */
+export type CXBoxEpic<S = Store, A = Api> = Epic<AnyAction, AnyAction, S, EpicDependencyInjection<A>>

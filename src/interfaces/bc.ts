@@ -21,7 +21,7 @@
 import { FilterGroup } from './filters'
 
 /**
- * Meta data for Business Component
+ * Meta data.ts for Business Component
  */
 export interface BcMeta {
     /**
@@ -67,6 +67,14 @@ export interface BcMeta {
     defaultFilter?: string
 }
 
+export type DepthBcType = Record<
+    number,
+    {
+        loading?: boolean
+        cursor?: string
+    }
+>
+
 export interface BcMetaState extends BcMeta {
     /**
      * Data fetch for this business component is in progress
@@ -81,7 +89,7 @@ export interface BcMetaState extends BcMeta {
      */
     limit?: number
     /**
-     * There is an addional pages of data to fetch
+     * There is an addional pages of data.ts to fetch
      */
     hasNext?: boolean
     /**
@@ -90,11 +98,5 @@ export interface BcMetaState extends BcMeta {
      * Used by hierarchy widgets builded around single business component:
      * controls which record is expanded and which children should be fetched.
      */
-    depthBc?: Record<
-        number,
-        {
-            loading?: boolean
-            cursor?: string
-        }
-    >
+    depthBc?: DepthBcType
 }

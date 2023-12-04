@@ -30,11 +30,12 @@ export interface ObjectMap<T> {
  *
  * TODO: Move this to a an appropriate module
  */
-export interface CxboxResponse {
+export type CxboxResponse = {
     /**
      * If any response returs with this field, browser should redirect on this address
      */
     redirectUrl?: string
+    [x: string]: any
 }
 
 /**

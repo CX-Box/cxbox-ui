@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { createAutoSaveMiddleware } from './autosaveMiddleware'
-import { createRequiredFieldsMiddleware } from './requiredFieldsMiddleware'
-import { createPreInvokeMiddleware } from './preInvokeMiddleware'
-import { createActionsHistoryMiddleware } from './actionsHistoryMiddleware'
+import { saveFormMiddleware } from './autosaveMiddleware'
+import { requiredFields } from './requiredFieldsMiddleware'
+import { preInvokeAction } from './preInvokeMiddleware'
+import { popupMiddleware } from './popupMiddleware'
 
 export const middlewares = {
-    actionsHistory: createActionsHistoryMiddleware?.(),
-    autosave: createAutoSaveMiddleware?.(),
-    requiredFields: createRequiredFieldsMiddleware?.(),
-    preInvoke: createPreInvokeMiddleware?.()
+    autosave: saveFormMiddleware,
+    requiredFields: requiredFields,
+    preInvoke: preInvokeAction,
+    popup: popupMiddleware
 }

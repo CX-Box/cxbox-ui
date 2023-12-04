@@ -53,7 +53,7 @@ export function getBcChildren(originBcName: string, widgets: WidgetMeta[], bcMap
         .forEach(widget => {
             const [hierarchyBcName, hierarchyWidgetName] = getHierarchyChildBc(originBcName, widget)
             if (hierarchyBcName) {
-                childrenBcMap[hierarchyBcName] = [...(childrenBcMap[hierarchyBcName] || []), hierarchyWidgetName]
+                childrenBcMap[hierarchyBcName] = [...(childrenBcMap[hierarchyBcName] || []), hierarchyWidgetName as string]
             }
         })
 
@@ -67,12 +67,12 @@ export function getBcChildren(originBcName: string, widgets: WidgetMeta[], bcMap
  * @param hierarchyWidget Hierarchy widget
  */
 function getHierarchyChildBc(originBcName: string, hierarchyWidget: WidgetMeta) {
-    const nestedBcNames = hierarchyWidget.options.hierarchy.map(nestedItem => nestedItem.bcName)
-    if (originBcName !== hierarchyWidget.bcName && !nestedBcNames.includes(originBcName)) {
+    const nestedBcNames = hierarchyWidget?.options?.hierarchy?.map(nestedItem => nestedItem.bcName)
+    if (originBcName !== hierarchyWidget.bcName && !nestedBcNames?.includes(originBcName)) {
         return []
     }
-    const childHierarchyBcIndex = nestedBcNames.findIndex(item => item === originBcName)
-    const childHierarchyBcName = nestedBcNames[childHierarchyBcIndex + 1]
+    const childHierarchyBcIndex = nestedBcNames?.findIndex(item => item === originBcName) as number
+    const childHierarchyBcName = nestedBcNames?.[childHierarchyBcIndex + 1]
     return [childHierarchyBcName, hierarchyWidget.name]
 }
 
@@ -87,11 +87,11 @@ function getHierarchyChildBc(originBcName: string, hierarchyWidget: WidgetMeta) 
  *
  * @param condition Widget showCondition to check
  * @param cursor Id of active record for business component in condition
- * @param data An array of data items to check for condition
- * @param pendingDataChanges Pending data changes of the currently active view
+ * @param data An array of data.ts items to check for condition
+ * @param pendingDataChanges Pending data.ts changes of the currently active view
  */
 export function checkShowCondition(
-    condition: WidgetShowCondition,
+    condition: WidgetShowCondition | undefined,
     cursor: string,
     data: DataItem[],
     pendingDataChanges: Record<string, Record<string, PendingDataItem>>
@@ -105,7 +105,7 @@ export function checkShowCondition(
     if (!record) {
         return false
     }
-    const actualValue = record?.[params.fieldKey]
-    const pendingValue = pendingDataChanges?.[bcName]?.[cursor]?.[params.fieldKey]
-    return pendingValue !== undefined ? pendingValue === params.value : actualValue === params.value
+    const actualValue = record?.[params?.fieldKey as string]
+    const pendingValue = pendingDataChanges?.[bcName as string]?.[cursor]?.[params?.fieldKey as string]
+    return pendingValue !== undefined ? pendingValue === params?.value : actualValue === params?.value
 }

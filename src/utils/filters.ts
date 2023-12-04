@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import { BcFilter, BcSorter, FilterType } from '../interfaces/filters'
-import { DataValue } from '../interfaces/data'
-import qs from 'query-string'
-import { FieldType } from '../interfaces/view'
+import { BcFilter, BcSorter, FilterType, DataValue, FieldType } from '../interfaces'
 
 /**
  * Maps an input array of BcFilter objects into a dictionary of GET-request params
@@ -88,16 +85,18 @@ export function getSorters(sorters: BcSorter[]) {
  * @param defaultFilters string representation of filters
  * @category Utils
  */
-export function parseFilters(defaultFilters: string) {
+export function parseFilters(defaultFilters: string = '') {
     const result: BcFilter[] = []
-    const urlParams = qs.parse(defaultFilters)
-    Object.keys(urlParams).forEach(param => {
+    const urlParams = new URL(defaultFilters, window.location.origin).searchParams // TODO fix URL
+    urlParams.forEach(param => {
         const [fieldName, type] = param.split('.')
-        if (fieldName && type && urlParams[param]) {
-            let value = urlParams[param]
+        if (fieldName && type && urlParams.get(param)) {
+            let value = urlParams.getAll(param)
             if (type === FilterType.containsOneOf || type === FilterType.equalsOneOf) {
                 try {
-                    value = JSON.parse(value)
+                    if (typeof value === 'string') {
+                        value = JSON.parse(value)
+                    }
                 } catch (e) {
                     console.warn(e)
                 }
@@ -127,12 +126,12 @@ export function parseFilters(defaultFilters: string) {
  * @param sorters string representation of sorters
  * @category Utils
  */
-export function parseSorters(sorters: string) {
+export function parseSorters(sorters?: string) {
     if (!sorters || !sorters.length) {
         return null
     }
     const result: BcSorter[] = []
-    const dictionary = qs.parse(sorters)
+    const dictionary = new URL(sorters, window.location.origin).searchParams // TODO fix URL
     Object.entries(dictionary)
         .map(([sort, fieldKey]) => {
             const [order, direction] = sort.split('.').slice(1)

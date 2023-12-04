@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-import { AnyAction, types } from '../actions/actions'
-import { DepthDataState } from '../interfaces/data'
+import { DepthDataState } from '../interfaces'
+import { bcFetchDataSuccess, selectView } from '../actions'
+import { ReducerBuilderManager } from './ReducerBuilderManager'
 
-const initialState: DepthDataState = {}
+export const initialDepthDataState: DepthDataState = {}
 
-/**
- * TODO
- */
-export function depthData(state = initialState, action: AnyAction) {
-    switch (action.type) {
-        case types.bcFetchDataSuccess: {
-            return !action.payload.depth || action.payload.depth < 2
-                ? state
-                : {
-                      ...state,
-                      [action.payload.depth]: {
-                          ...state[action.payload.depth],
-                          [action.payload.bcName]: action.payload.data
-                      }
-                  }
-        }
-        case types.selectView: {
-            return initialState
-        }
-        default:
-            return state
-    }
+export const createDepthDataReducerBuilderManager = (initialState: DepthDataState) => {
+    return new ReducerBuilderManager<typeof initialState>()
+        .addCase(bcFetchDataSuccess, (state, action) => {
+            if (!action.payload.depth || action.payload.depth < 2) {
+                return
+            }
+            state[action.payload.depth][action.payload.bcName] = action.payload.data
+        })
+        .addCase(selectView, state => {
+            state = {}
+        })
 }
-
-export default depthData
