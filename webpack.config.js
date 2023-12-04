@@ -112,6 +112,7 @@ module.exports = (_env, options) => {
                     use: {
                         loader: 'ts-loader',
                         options: {
+                            configFile: path.resolve(__dirname, './tsconfig.json'),
                             getCustomTransformers: function() {
                                 return {
                                     before: [
