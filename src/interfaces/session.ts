@@ -35,6 +35,7 @@ export interface Notification {
     key: string
     type: DefaultNotificationType | string
     message: string
+    description?: string
     options?: {
         messageOptions?: { [key: string]: string | number }
         buttonWarningNotificationOptions?: {
