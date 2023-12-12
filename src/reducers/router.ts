@@ -15,7 +15,7 @@
  */
 
 import { Route, RouteType } from '../interfaces'
-import { loginDone, changeLocation } from '../actions'
+import { changeLocation } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
 
 export const initialRouterState: Route = { type: RouteType.default, path: '/', params: null, screenName: null }
@@ -26,10 +26,6 @@ export const initialRouterState: Route = { type: RouteType.default, path: '/', p
  * Stores information about currently active route
  */
 export const createRouterReducerBuilderManager = <S extends Route>(initialState: S) =>
-    new ReducerBuilderManager<S>()
-        .addCase(loginDone, (state, action) => {
-            state = { ...state, ...action.payload }
-        })
-        .addCase(changeLocation, (state, action) => {
-            state = { ...state, ...action.payload.location }
-        })
+    new ReducerBuilderManager<S>().addCase(changeLocation, (state, action) => {
+        return action.payload.location as S
+    })

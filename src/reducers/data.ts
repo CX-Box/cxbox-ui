@@ -53,5 +53,5 @@ export const createDataReducerBuilderManager = (initialState: DataState) =>
             state[`${action.payload.bcName}Delta`] = action.payload.records || []
         })
         .addCase(selectView, state => {
-            state = {}
+            return initialState
         })

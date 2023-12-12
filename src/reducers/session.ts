@@ -63,7 +63,7 @@ export const createSessionReducerBuilderManager = <S extends Session>(initialSta
             state.errorMsg = null
         })
         .addCase(loginDone, (state, action) => {
-            state = { ...state, ...action.payload }
+            state = Object.assign(state, action.payload)
             state.loginSpin = false
             state.active = true
             state.logout = false
