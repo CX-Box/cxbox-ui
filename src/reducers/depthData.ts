@@ -26,6 +26,7 @@ export const createDepthDataReducerBuilderManager = (initialState: DepthDataStat
             if (!action.payload.depth || action.payload.depth < 2) {
                 return
             }
+            state[action.payload.depth] = state[action.payload.depth] ?? {}
             state[action.payload.depth][action.payload.bcName] = action.payload.data
         })
         .addCase(selectView, state => {

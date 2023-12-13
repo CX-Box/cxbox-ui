@@ -177,7 +177,9 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.pendingDataChanges[action.payload.bcName] = state.pendingDataChanges[action.payload.bcName] ?? {}
             state.pendingDataChanges[action.payload.bcName][action.payload.cursor] = nextPending
             if (isTargetFormatPVF) {
-                ;(state.pendingValidationFails?.[actionBcName] as { [cursor: string]: Record<string, string> })[action.payload.cursor] =
+                state.pendingValidationFails = state.pendingValidationFails ?? {}
+                state.pendingValidationFails[actionBcName] = state.pendingValidationFails[actionBcName] ?? {}
+                ;(state.pendingValidationFails[actionBcName] as { [cursor: string]: Record<string, string> })[action.payload.cursor] =
                     nextValidationFails
             } else {
                 state.pendingValidationFails = nextValidationFails
@@ -324,7 +326,9 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
             state.pendingDataChanges[bcName][cursor] = {}
             if (isTargetFormatPVF) {
-                ;(state.pendingValidationFails?.[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
+                state.pendingValidationFails = state.pendingValidationFails ?? {}
+                state.pendingValidationFails[bcName] = state.pendingValidationFails[bcName] ?? {}
+                ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
             } else {
                 state.pendingValidationFails = initialViewState.pendingValidationFails
             }
@@ -337,7 +341,8 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
             state.pendingDataChanges[bcName][cursor] = {}
             if (isTargetFormatPVF) {
-                ;(state.pendingValidationFails?.[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
+                state.pendingValidationFails = state.pendingValidationFails ?? {}
+                ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
             } else {
                 state.pendingValidationFails = initialViewState.pendingValidationFails
             }
