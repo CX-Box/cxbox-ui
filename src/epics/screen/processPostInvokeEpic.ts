@@ -83,15 +83,15 @@ export const processPostInvokeEpic: CXBoxEpic = (action$, state$) =>
                     return infinitePagination
                         ? of(
                               bcFetchDataPages({
-                                  bcName: postInvokeBCItem.name,
+                                  bcName: postInvokeBCItem?.name,
                                   widgetName: widgetName,
                                   from: 1,
-                                  to: postInvokeBCItem.page
+                                  to: postInvokeBCItem?.page
                               })
                           )
                         : of(
                               bcFetchDataRequest({
-                                  bcName: postInvokeBCItem.name,
+                                  bcName: postInvokeBCItem?.name,
                                   widgetName
                               })
                           )
