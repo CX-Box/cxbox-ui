@@ -16,7 +16,8 @@
 
 import { RouteType, CXBoxEpic } from '../../interfaces'
 import { filter, of, switchMap } from 'rxjs'
-import { handleRouter, loginDone, selectScreen, selectScreenFail } from '../../actions'
+import { changeLocation, handleRouter, loginDone } from '../../actions'
+import { getRouteFromString } from '../../utils'
 
 /**
  * Fires `selectScreen` or `selectScreenFail` to set requested in url screen as active
@@ -35,10 +36,10 @@ export const loginDoneEpic: CXBoxEpic = (action$, state$) =>
                 return of(handleRouter(state.router))
             }
 
-            const nextScreenName = state.router.screenName
-            const nextScreen =
-                state.session.screens.find(item => (nextScreenName ? item.name === nextScreenName : item.defaultScreen)) ||
-                state.session.screens[0]
-            return nextScreen ? of(selectScreen({ screen: nextScreen })) : of(selectScreenFail({ screenName: nextScreenName }))
+            return of(
+                changeLocation({
+                    location: getRouteFromString(window.location.hash.replace('#', ''))
+                })
+            )
         })
     )

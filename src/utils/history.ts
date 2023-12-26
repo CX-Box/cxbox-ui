@@ -148,3 +148,9 @@ export function defaultParseURL(url: URL): Route {
 export function defaultBuildURL(route: Route) {
     return `/screen/${route.screenName}/view/${route.viewName}/${route.bcPath}`
 }
+
+export const getRouteFromString = (ulrString: string) => {
+    const url = new URL(ulrString, window.location.origin)
+
+    return defaultParseURL(url)
+}
