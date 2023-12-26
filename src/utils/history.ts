@@ -130,6 +130,7 @@ export function defaultParseURL(url: URL): Route {
     return {
         type: type,
         path: path.length !== 0 && !path.startsWith('/') ? `/${path}` : path,
+        search: url.search,
         params,
         screenName,
         viewName,

@@ -18,7 +18,7 @@ import { Route, RouteType } from '../interfaces'
 import { changeLocation } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
 
-export const initialRouterState: Route = { type: RouteType.default, path: '/', params: null, screenName: null }
+export const initialRouterState: Route = { type: RouteType.default, path: '/', search: '', params: null, screenName: null }
 
 /**
  * Router reducer
