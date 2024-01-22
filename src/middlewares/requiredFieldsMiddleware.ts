@@ -66,7 +66,7 @@ export const requiredFields: Middleware =
                     state.view.widgets
                         .filter(item => item.bcName === widget?.bcName)
                         .forEach(item => {
-                            const itemFieldsCalc = item.fields
+                            const itemFieldsCalc = [...item.fields]
                             if (item.fields) {
                                 item.fields.forEach((block: Record<string, unknown> | WidgetFieldBlock<unknown>) => {
                                     if (isWidgetFieldBlock(block)) {
