@@ -29,7 +29,10 @@ export const selectViewFailEpic: CXBoxEpic = (action$, state$) =>
             return addNotification({
                 type: 'error',
                 key: 'selectViewFail',
-                message: `View is missing or unavailable for your role', ${action.payload.viewName}`,
+                message: 'View is missing or unavailable for your role',
+                options: {
+                    messageOptions: { viewName: action.payload.viewName }
+                },
                 duration: 15
             })
         })

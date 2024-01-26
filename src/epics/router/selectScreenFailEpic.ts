@@ -30,7 +30,10 @@ export const selectScreenFailEpic: CXBoxEpic = action$ =>
             return addNotification({
                 type: 'error',
                 key: 'selectScreenFail',
-                message: `Screen is missing or unavailable for your role', ${action.payload.screenName}}`,
+                message: 'Screen is missing or unavailable for your role',
+                options: {
+                    messageOptions: { screenName: action.payload.screenName }
+                },
                 duration: 15
             })
         })
