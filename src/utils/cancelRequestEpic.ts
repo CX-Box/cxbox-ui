@@ -20,9 +20,19 @@ import { AnyAction } from 'redux'
 import { isAnyOf } from '@reduxjs/toolkit'
 
 /**
+ * Type tweak for backward @reduxjs/toolkit compatibility
+ */
+type TypeGuard<T> = (value: any) => value is T
+interface HasMatchFunction<T> {
+    match: TypeGuard<T>
+}
+/** @public */
+type Matcher<T> = HasMatchFunction<T> | TypeGuard<T>
+
+/**
  * Default list of action types which are triggers for request cancel
  */
-export const cancelRequestActionTypes = [selectView, logout]
+export const cancelRequestActionTypes = [selectView, logout] as [Matcher<any>, ...Array<Matcher<any>>]
 
 /**
  * Creator of request cancel epic

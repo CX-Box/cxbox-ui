@@ -1,6 +1,6 @@
 {
   "name": "@cxbox-ui/core",
-  "version": "1.37.3-alpha.9",
+  "version": "2.0.0-alpha.0",
   "description": "CXBox RTK business logic",
   "author": "cxbox",
   "license": "Apache-2.0",
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@cxbox-ui/schema": "0.7.1",
-    "@reduxjs/toolkit": "1.9.6",
+    "@reduxjs/toolkit": "1.7.2",
     "@types/convert-source-map": "^2.0.1",
     "@types/react-redux": "7.1.27",
     "@typescript-eslint/eslint-plugin": "6.7.4",
@@ -63,7 +63,7 @@
     "yargs": "^17.7.2"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "^1.9.5",
+    "@reduxjs/toolkit": "^1.7.2",
     "axios": "^1.5.0",
     "react": "^16.9.0 || ^17.0.0 || ^18",
     "react-redux": "^7.2.1 || ^8.0.2",
