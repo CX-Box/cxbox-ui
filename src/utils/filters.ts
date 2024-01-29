@@ -87,28 +87,34 @@ export function getSorters(sorters: BcSorter[]) {
  */
 export function parseFilters(defaultFilters: string = '') {
     const result: BcFilter[] = []
-    const urlParams = new URL(defaultFilters, window.location.origin).searchParams // TODO fix URL
-    urlParams.forEach(param => {
+    const urlParams = new URLSearchParams(defaultFilters)
+    const paramKeys = Object.keys(Object.fromEntries(urlParams))
+
+    paramKeys.forEach(param => {
         const [fieldName, type] = param.split('.')
         if (fieldName && type && urlParams.get(param)) {
             let value = urlParams.getAll(param)
+
             if (type === FilterType.containsOneOf || type === FilterType.equalsOneOf) {
                 try {
-                    if (typeof value === 'string') {
-                        value = JSON.parse(value)
+                    if (value.length === 1) {
+                        value = JSON.parse(value[0])
                     }
                 } catch (e) {
                     console.warn(e)
                 }
+
                 value = Array.isArray(value) ? value : []
             }
+
             result.push({
                 fieldName,
                 type: type as FilterType,
-                value
+                value: value.length === 1 ? value[0] : value
             })
         }
     })
+
     return result.length ? result : null
 }
 
@@ -117,9 +123,9 @@ export function parseFilters(defaultFilters: string = '') {
  * String representation of sorters is url based:
  * "_sort.{order}.{direction}={fieldKey}&_sort.{order}.{direction}"
  *
- * @param fieldKey Sort by field
- * @param order Priority of this specfic sorter
- * @param direction "asc" or "desc"
+ * fieldKey Sort by field
+ * order Priority of this specfic sorter
+ * direction "asc" or "desc"
  *
  * i.e. "_sort.0.asc=firstName"
  *
@@ -131,8 +137,8 @@ export function parseSorters(sorters?: string) {
         return null
     }
     const result: BcSorter[] = []
-    const dictionary = new URL(sorters, window.location.origin).searchParams // TODO fix URL
-    Object.entries(dictionary)
+    const dictionary = new URLSearchParams(sorters)
+    Array.from(dictionary.entries())
         .map(([sort, fieldKey]) => {
             const [order, direction] = sort.split('.').slice(1)
             return { fieldName: fieldKey as string, order: Number.parseInt(order, 10), direction }
