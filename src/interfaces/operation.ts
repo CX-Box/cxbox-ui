@@ -90,6 +90,11 @@ export interface Operation {
      * this flag can be specified and will be used instead of real `type`
      */
     actionRole?: OperationType
+    /**
+     * Subtype for association popup, used for calling multiFileUploadPopup,
+     * else has default behaviour of assoc popup
+     */
+    subtype?: 'bc' | 'multiFileUpload'
 }
 
 /**

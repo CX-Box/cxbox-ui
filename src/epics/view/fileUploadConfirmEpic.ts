@@ -49,10 +49,13 @@ export const fileUploadConfirmEpic: CXBoxEpic = (action$, state$, { api }) =>
             const bcName = state.view.popupData?.bcName
             const bcUrl = buildBcUrl(bcName, true, state)
             const widgetName = state.view.widgets.find(item => item.bcName === bcName)?.name
-            const data = {
-                bulkIds: action.payload.fileIds
-            }
-            return api.customAction(state.screen.screenName, bcUrl, data, null, { _action: 'file-upload-save' }).pipe(
+            const data = action.payload.fileIds.map(id => ({
+                id: id,
+                _associate: true,
+                vstamp: 0
+            }))
+
+            return api.associate(state.screen.screenName, bcUrl, data, null).pipe(
                 mergeMap(response => {
                     const postInvoke = response.postActions?.[0]
                     const preInvoke = response.preInvoke

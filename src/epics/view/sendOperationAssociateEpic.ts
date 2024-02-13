@@ -16,8 +16,8 @@
 
 import { CXBoxEpic } from '../../interfaces'
 import { filter, map } from 'rxjs'
-import { sendOperation, showViewPopup } from '../../actions'
-import { matchOperationRole } from '../../utils'
+import { sendOperation, showFileUploadPopup, showViewPopup } from '../../actions'
+import { buildBcUrl, flattenOperations, matchOperationRole } from '../../utils'
 import { OperationTypeCrud } from '@cxbox-ui/schema'
 
 /**
@@ -28,6 +28,15 @@ export const sendOperationAssociateEpic: CXBoxEpic = (action$, state$) =>
         filter(sendOperation.match),
         filter(action => matchOperationRole(OperationTypeCrud.associate, action.payload, state$.value)),
         map(action => {
+            const state = state$.value
+            const bcUrl = buildBcUrl(action.payload.bcName, true, state)
+            const operations = flattenOperations(state.view.rowMeta[action.payload.bcName]?.[bcUrl]?.actions)
+            const operation = operations.find(item => item.type === action.payload.operationType)
+            if (operation.subtype === 'multiFileUpload') {
+                return showFileUploadPopup({
+                    widgetName: action.payload.widgetName
+                })
+            }
             return showViewPopup({
                 // TODO: 2.0.0 bcKey and bcName will be removed in favor `widgetName`
                 bcName: action.payload.bcKey ? `${action.payload.bcKey}` : `${action.payload.bcName}Assoc`,
