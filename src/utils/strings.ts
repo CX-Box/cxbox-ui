@@ -52,7 +52,7 @@ export function buildBcUrl(bcName: string, includeSelf = false, state: Store) {
     let nextBc = bc
     while (nextBc.parentName) {
         nextBc = bcMap[nextBc.parentName]
-        url.push(`${nextBc.name}/${nextBc.cursor}`)
+        url.push(`${nextBc.name}/${nextBc.cursor ?? null}`)
     }
     const bcUrl = url.reverse().join('/')
     return bcUrl
