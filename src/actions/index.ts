@@ -35,7 +35,7 @@ import { AxiosError } from 'axios'
 import { ApiCallContext } from '../utils'
 import { createAction, AnyAction } from '@reduxjs/toolkit'
 
-export const changeLocation = createAction<{ location: Route }>('changeLocation')
+export const changeLocation = createAction<{ location: Route; forceUpdate?: boolean }>('changeLocation')
 /**
  * Authentication request
  */

@@ -59,7 +59,7 @@ export const changeLocationEpic: CXBoxEpic = (action$, state$) =>
             const defaultScreenName = state.session.screens.find(screen => screen.defaultScreen)?.name || state.session.screens[0]?.name
             const nextScreenName = state.router.type === RouteType.default ? defaultScreenName : state.router.screenName
 
-            if (nextScreenName !== currentScreenName) {
+            if (nextScreenName !== currentScreenName || action.payload.forceUpdate) {
                 const nextScreen = state.session.screens.find(item => item.name === nextScreenName)
                 return nextScreen ? of(selectScreen({ screen: nextScreen })) : of(selectScreenFail({ screenName: nextScreenName }))
             }

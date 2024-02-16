@@ -16,7 +16,7 @@
 
 import { CXBoxEpic } from '../../interfaces'
 import { catchError, concat, filter, mergeMap, switchMap } from 'rxjs'
-import { changeLocation, login, loginFail, logoutDone, refreshMeta, refreshMetaDone, refreshMetaFail } from '../../actions'
+import { login, loginFail, logoutDone, refreshMeta, refreshMetaDone, refreshMetaFail } from '../../actions'
 import { createApiError } from '../../utils/apiError'
 
 /**
@@ -27,19 +27,9 @@ export const refreshMetaEpic: CXBoxEpic = (action$, state$, { api }) =>
         filter(refreshMeta.match),
         mergeMap(() => {
             const state = state$.value
-            const { router } = state
             const { activeRole } = state.session
             return api.refreshMeta().pipe(
-                switchMap(() =>
-                    concat([
-                        refreshMetaDone(),
-                        logoutDone(null),
-                        login({ login: '', password: '', role: activeRole }),
-                        changeLocation({
-                            location: router
-                        })
-                    ])
-                ),
+                switchMap(() => concat([refreshMetaDone(), logoutDone(null), login({ login: '', password: '', role: activeRole })])),
                 catchError(error => concat([loginFail(error), refreshMetaFail(), createApiError(error)]))
             )
         })
