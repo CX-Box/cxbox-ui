@@ -78,6 +78,7 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
             return api.customAction(screenName, bcUrl, data, context, params).pipe(
                 mergeMap(response => {
                     const postInvoke = response.postActions?.[0]
+                    const dataItem = response.record
                     // TODO: Remove in 2.0.0 in favor of postInvokeConfirm (is this todo needed?)
                     const preInvoke = response.preInvoke
                     // defaultSaveOperation mean that executed custom autosave and postAction will be ignored
@@ -87,7 +88,7 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
                             ? concat(of(bcCancelPendingChanges({ bcNames: [bcName] })), of(action.payload.onSuccessAction))
                             : EMPTY
                         : concat(
-                              of(sendOperationSuccess({ bcName, cursor })),
+                              of(sendOperationSuccess({ bcName, cursor, dataItem })),
                               of(bcForceUpdate({ bcName })),
                               ...postOperationRoutine(widgetName, postInvoke, preInvoke, operationType, bcName)
                           )
