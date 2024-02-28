@@ -93,7 +93,7 @@ export function parseFilters(defaultFilters: string = '') {
     paramKeys.forEach(param => {
         const [fieldName, type] = param.split('.')
         if (fieldName && type && urlParams.get(param)) {
-            let value = urlParams.getAll(param)
+            let value: string | string[] = urlParams.getAll(param)
 
             if (type === FilterType.containsOneOf || type === FilterType.equalsOneOf) {
                 try {
@@ -105,12 +105,14 @@ export function parseFilters(defaultFilters: string = '') {
                 }
 
                 value = Array.isArray(value) ? value : []
+            } else {
+                value = Array.isArray(value) ? value[0] : value
             }
 
             result.push({
                 fieldName,
                 type: type as FilterType,
-                value: value.length === 1 ? value[0] : value
+                value
             })
         }
     })

@@ -31,7 +31,7 @@ export const clearPendingDataChangesAfterCursorChangeEpic: CXBoxEpic = (action$,
             const state = state$.value
 
             /*
-             *  Если при загрузке view курсор проставился не во всех бк
+             * Если при загрузке view курсор проставился не во всех бк
              * то дописать недостающие курсоры
              */
             const nextCursors = parseBcCursors(state.router.bcPath) || {}
