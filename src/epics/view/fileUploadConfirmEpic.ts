@@ -16,7 +16,7 @@
 
 import { CXBoxEpic } from '../../interfaces'
 import { bcForceUpdate, bulkUploadFiles, closeViewPopup, sendOperationSuccess } from '../../actions'
-import { catchError, concat, filter, mergeMap, of } from 'rxjs'
+import { catchError, concat, EMPTY, filter, mergeMap, of } from 'rxjs'
 import { buildBcUrl } from '../../utils'
 import { OperationTypeCrud } from '@cxbox-ui/schema'
 import { postOperationRoutine } from '../utils/postOperationRoutine'
@@ -46,7 +46,8 @@ export const fileUploadConfirmEpic: CXBoxEpic = (action$, state$, { api }) =>
              * It also launces postOperationRoutine to handle pre and post invokes.
              */
             const state = state$.value
-            const bcName = state.view.popupData?.bcName
+            const isPopup = action.payload.isPopup ?? true
+            const bcName = action.payload.bcName ?? state.view.popupData?.bcName
             const bcUrl = buildBcUrl(bcName, true, state)
             const widgetName = state.view.widgets.find(item => item.bcName === bcName)?.name
             const data = action.payload.fileIds.map(id => ({
@@ -62,7 +63,7 @@ export const fileUploadConfirmEpic: CXBoxEpic = (action$, state$, { api }) =>
                     return concat(
                         of(sendOperationSuccess({ bcName, cursor: null })),
                         of(bcForceUpdate({ bcName })),
-                        of(closeViewPopup(null)),
+                        isPopup ? of(closeViewPopup(null)) : EMPTY,
                         ...postOperationRoutine(widgetName, postInvoke, preInvoke, OperationTypeCrud.save, bcName)
                     )
                 }),

@@ -1103,6 +1103,14 @@ export const downloadFileByUrl = createAction<{
  */
 export const bulkUploadFiles = createAction<{
     /**
+     * default true
+     */
+    isPopup?: boolean
+    /**
+     * If not specified, then taken from state.view.popupData.bcName
+     */
+    bcName?: string
+    /**
      * Ids of uploaded files
      */
     fileIds: string[]
