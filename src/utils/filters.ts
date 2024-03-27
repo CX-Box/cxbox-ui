@@ -52,7 +52,9 @@ export function getFilters(filters: BcFilter[]) {
                 const values = (item.value as DataValue[]).map(val => `"${val}"`)
                 value = `[${values}]`
             }
-            result[`${item.fieldName}.${item.type}`] = value
+
+            const separator = item.fieldName ? '.' : ''
+            result[`${item.fieldName}${separator}${item.type}`] = value
         }
     })
     return result
@@ -78,6 +80,16 @@ export function getSorters(sorters: BcSorter[]) {
     return result
 }
 
+const jsonParse = <T extends string>(value: T) => {
+    try {
+        return JSON.parse(value)
+    } catch (e) {
+        console.warn(e)
+
+        return null
+    }
+}
+
 /**
  * Function for parsing filters from string into BcFilter type
  *
@@ -92,16 +104,14 @@ export function parseFilters(defaultFilters: string = '') {
 
     paramKeys.forEach(param => {
         const [fieldName, type] = param.split('.')
-        if (fieldName && type && urlParams.get(param)) {
+        const isStandardFilter = fieldName && type && urlParams.get(param)
+
+        if (isStandardFilter) {
             let value: string | string[] = urlParams.getAll(param)
 
             if (type === FilterType.containsOneOf || type === FilterType.equalsOneOf) {
-                try {
-                    if (value.length === 1) {
-                        value = JSON.parse(value[0])
-                    }
-                } catch (e) {
-                    console.warn(e)
+                if (value.length === 1) {
+                    value = jsonParse(value[0]) ?? value
                 }
 
                 value = Array.isArray(value) ? value : []
@@ -113,6 +123,18 @@ export function parseFilters(defaultFilters: string = '') {
                 fieldName,
                 type: type as FilterType,
                 value
+            })
+        } else if (defaultFilters) {
+            let value: string | string[] = urlParams.getAll(param)
+
+            if (value.length === 1) {
+                value = jsonParse(value[0]) ?? value[0]
+            }
+
+            result.push({
+                fieldName: '',
+                type: param as any,
+                value: value
             })
         }
     })
