@@ -67,8 +67,9 @@ jobs:
           git config --global user.email "cxbox.mail@gmail.com"
 
       - name: install
-        run: yarn install
+        run: yarn
 
       - name: Publish dist to NPM
-        run: |
-          yarn npm publish --tag alpha --access public
+        run: yarn npm publish --tag alpha --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
