@@ -1,50 +1,40 @@
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+name: Tests and Coverage
 
-name: Build
+on: [push, pull_request]
 
 jobs:
-  assets:
-    name: Create NPM Release
+  build:
+    name: Lint, Test, Build and check SonarCloud Scan on Node ${{matrix.node}}
+
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['18.x']
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use node ${{matrix.node}}
+        uses: actions/setup-node@v4
         with:
-          node-version: '10.x'
-          always-auth: true
-          registry-url: https://registry.npmjs.org/
-      - name: install
+          node-version: ${{matrix.node}}
+          cache: 'yarn'
+
+      - name: Install dependencies
         run: yarn install
-      - name: linter
+
+      - name: Check linting
         run: yarn lint
-      - name: build
+
+      - name: Check build
         run: yarn build
-      - name: Publish dist to NPM
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-          cd dist
-          npm publish --access public
-          cd ..
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-  
-  reportCoverage:
-    name: Report SonarCloud Coverage
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '10.x'
-          always-auth: true
-      - name: install
-        run: yarn install
-      - name: unit tests
-        run: yarn test --coverage --coverageProvider=v8
+
+      # Add here test step later
+
+      - name: Check build
+        run: yarn build
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:

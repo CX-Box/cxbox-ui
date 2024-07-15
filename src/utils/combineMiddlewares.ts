@@ -35,12 +35,12 @@ export function combineMiddlewares(coreMiddlewares: CoreMiddlewares, customMiddl
     Object.entries(customMiddlewares)
         .filter(([cMKey, customMiddleware]) => !coreMiddlewaresKeys.includes(cMKey as keyof CoreMiddlewares))
         .forEach(([cMKey, customMiddleware]) => {
-            if (((customMiddleware as unknown) as CustomMiddleware)?.priority === 'BEFORE') {
-                customMiddlewaresBefore.push(((customMiddleware as unknown) as CustomMiddleware).implementation)
+            if ((customMiddleware as unknown as CustomMiddleware)?.priority === 'BEFORE') {
+                customMiddlewaresBefore.push((customMiddleware as unknown as CustomMiddleware).implementation)
                 return
             }
-            if (((customMiddleware as unknown) as CustomMiddleware)?.priority === 'AFTER') {
-                customMiddlewaresAfter.push(((customMiddleware as unknown) as CustomMiddleware).implementation)
+            if ((customMiddleware as unknown as CustomMiddleware)?.priority === 'AFTER') {
+                customMiddlewaresAfter.push((customMiddleware as unknown as CustomMiddleware).implementation)
             }
         })
 

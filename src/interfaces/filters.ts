@@ -34,7 +34,7 @@ export enum FilterType {
 }
 
 export interface BcFilter {
-    type: FilterType
+    type: FilterType | string
     fieldName: string
     value: DataValue | DataValue[]
     viewName?: string
