@@ -87,7 +87,9 @@ export const initialViewState: ViewState = {
 export const createViewReducerBuilderManager = <S extends ViewState>(initialState: S) =>
     new ReducerBuilderManager<S>()
         .addCase(selectView, (state, action) => {
-            state.rowMeta = initialViewState.rowMeta
+            if (!action.payload.isTab) {
+                state.rowMeta = initialViewState.rowMeta
+            }
             Object.assign(state, action.payload)
         })
         .addCase(bcFetchRowMeta, (state, action) => {
@@ -342,6 +344,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.pendingDataChanges[bcName][cursor] = {}
             if (isTargetFormatPVF) {
                 state.pendingValidationFails = state.pendingValidationFails ?? {}
+                state.pendingValidationFails[bcName] = state.pendingValidationFails[bcName] ?? {}
                 ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = {}
             } else {
                 state.pendingValidationFails = initialViewState.pendingValidationFails
@@ -419,7 +422,9 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.selectedCell = { widgetName: action.payload.widgetName, rowId: action.payload.rowId, fieldKey: action.payload.fieldKey }
         })
         .addCase(changeLocation, (state, action) => {
-            state.pendingDataChanges = initialViewState.pendingDataChanges
+            if (!action.payload.isTab) {
+                state.pendingDataChanges = initialViewState.pendingDataChanges
+            }
             state.selectedCell = initialViewState.selectedCell
         })
         .addCase(showNotification, (state, action) => {

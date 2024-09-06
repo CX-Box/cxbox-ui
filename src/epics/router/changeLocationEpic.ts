@@ -89,7 +89,9 @@ export const changeLocationEpic: CXBoxEpic = (action$, state$) =>
                     : state.screen.primaryView
                     ? state.screen.views.find(item => item.name === state.screen.primaryView)
                     : state.screen.views[0]
-                resultObservables.push(nextView ? of(selectView(nextView)) : of(selectViewFail({ viewName: nextViewName })))
+                resultObservables.push(
+                    nextView ? of(selectView({ ...nextView, isTab: action.payload.isTab })) : of(selectViewFail({ viewName: nextViewName }))
+                )
             }
             // If CURSOR has been updated but VIEW has`t changed, need update DATA
             if (needUpdateCursors && !needUpdateViews) {
