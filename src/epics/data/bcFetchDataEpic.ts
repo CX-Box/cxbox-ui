@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { catchError, concat, EMPTY, filter, mergeMap, of, race } from 'rxjs'
+import { catchError, concat, EMPTY, filter, mergeMap, Observable, of, race } from 'rxjs'
 import { AnyAction } from 'redux'
 import { buildBcUrl, checkShowCondition, getBcChildren, getFilters, getSorters } from '../../utils'
 import { cancelRequestActionTypes, cancelRequestEpic } from '../../utils/cancelRequestEpic'
 import { DataItem, WidgetTypes } from '@cxbox-ui/schema'
-import { BcMetaState, CXBoxEpic, PopupWidgetTypes, WidgetMeta } from '../../interfaces'
+import { BcMetaState, CXBoxEpic, PopupData, PopupWidgetTypes, WidgetMeta } from '../../interfaces'
 import { isAnyOf } from '@reduxjs/toolkit'
 import {
     bcChangeCursors,
@@ -133,10 +133,14 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
             const normalFlow = api.fetchBcData(state.screen.screenName, bcUrl, fetchParams, canceler.cancelToken).pipe(
                 mergeMap(response => {
                     const cursorChange = getCursorChange(action, response.data, cursor, !!anyHierarchyWidget)
-                    const parentOfNotLazyWidget = widgets?.some(item => {
-                        return state.screen.bo.bc[item.bcName]?.parentName === bcName && !PopupWidgetTypes.includes(item.type)
-                    })
-
+                    const setDataSuccess = of(
+                        bcFetchDataSuccess({
+                            bcName,
+                            data: response.data,
+                            bcUrl,
+                            hasNext: response.hasNext
+                        })
+                    )
                     const isWidgetVisible = (w: WidgetMeta) => {
                         // check whether BC names from action payload, showCondition and current widget are relatives
                         // if positive check skip `checkShowCondition` call
@@ -160,20 +164,9 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                             state.view.pendingDataChanges
                         )
                     }
-                    const leastOneWidgetIsVisible = !!widgetsWithCurrentBc?.some(widgetWithCurrentBc =>
-                        isWidgetVisible(widgetWithCurrentBc)
-                    )
-                    const lazyWidget = (!leastOneWidgetIsVisible || PopupWidgetTypes.includes(widget.type)) && !parentOfNotLazyWidget
-                    const skipLazy = state.view.popupData?.bcName !== widget.bcName
-                    if (lazyWidget && skipLazy) {
-                        return of(
-                            bcFetchDataSuccess({
-                                bcName,
-                                data: response.data,
-                                bcUrl,
-                                hasNext: response.hasNext
-                            })
-                        )
+
+                    if (!isVisibleBc(bcName, widgets, state.screen.bo.bc, state.view.popupData, isWidgetVisible)) {
+                        return setDataSuccess
                     }
                     const fetchChildren = response.data?.length
                         ? getChildrenData(action, widgets, state.screen.bo.bc, !!anyHierarchyWidget, isWidgetVisible)
@@ -181,20 +174,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     const fetchRowMeta = of(bcFetchRowMeta({ widgetName, bcName }))
                     const resetOutdatedData = resetOutdatedChildrenData(bcName, state.screen.bo.bc, state.data)
 
-                    return concat(
-                        cursorChange,
-                        resetOutdatedData,
-                        of(
-                            bcFetchDataSuccess({
-                                bcName,
-                                data: response.data,
-                                bcUrl,
-                                hasNext: response.hasNext
-                            })
-                        ),
-                        fetchRowMeta,
-                        fetchChildren
-                    )
+                    return concat(cursorChange, resetOutdatedData, setDataSuccess, fetchRowMeta, fetchChildren)
                 }),
                 catchError((error: any) => {
                     console.error(error)
@@ -235,6 +215,8 @@ const getCursorChange = (action: AnyAction, data: DataItem[], prevCursor: string
         : EMPTY
 }
 
+const isPopupWidget = (type: string) => PopupWidgetTypes.includes(type)
+
 const getChildrenData = (
     action: AnyAction,
     widgets: WidgetMeta[],
@@ -243,34 +225,32 @@ const getChildrenData = (
     showConditionCheck: (widget: WidgetMeta) => boolean
 ) => {
     const { bcName } = action.payload
-    const { ignorePageLimit, keepDelta } = bcFetchDataRequest.match(action)
-        ? action.payload
-        : { ignorePageLimit: undefined, keepDelta: undefined }
+
     return concat(
-        ...Object.entries(getBcChildren(bcName as string, widgets, bcDictionary))
-            .filter(([childBcName, widgetNames]) => {
-                const nonLazyWidget = widgets.find(item => {
-                    return widgetNames.includes(item.name) && !PopupWidgetTypes.includes(item.type) && showConditionCheck(item)
-                })
+        ...Object.entries(getBcChildren(bcName as string, widgets, bcDictionary)).reduce<Array<Observable<AnyAction>>>(
+            (acc, [childBcName, widgetNames]) => {
                 const ignoreLazyLoad = showViewPopup.match(action)
-                if (ignoreLazyLoad) {
-                    return true
-                }
-                return !!nonLazyWidget
-            })
-            .map(([childBcName, widgetNames]) => {
                 const nonLazyWidget = widgets.find(item => {
-                    return widgetNames.includes(item.name) && !PopupWidgetTypes.includes(item.type) && showConditionCheck(item)
+                    return widgetNames.includes(item.name) && !isPopupWidget(item.type) && showConditionCheck(item)
                 })
-                return of(
-                    bcFetchDataRequest({
-                        bcName: childBcName,
-                        widgetName: nonLazyWidget?.name as string,
-                        ignorePageLimit: ignorePageLimit || showViewPopup.match(action),
-                        keepDelta: isHierarchy || keepDelta
-                    })
-                )
-            })
+
+                if (nonLazyWidget || ignoreLazyLoad) {
+                    acc.push(
+                        of(
+                            bcFetchDataRequest({
+                                bcName: childBcName,
+                                widgetName: nonLazyWidget?.name as string,
+                                ignorePageLimit: action.payload?.ignorePageLimit || showViewPopup.match(action),
+                                keepDelta: isHierarchy || action.payload?.keepDelta
+                            })
+                        )
+                    )
+                }
+
+                return acc
+            },
+            []
+        )
     )
 }
 
@@ -293,4 +273,50 @@ const resetOutdatedChildrenData = (bcName: string, bcDictionary: Record<string, 
               })
           )
         : EMPTY
+}
+
+/**
+ * Checks if there is at least one visible widget with originBc or any child bc to it.
+ * The check takes into account the visibility of popup widgets.
+ */
+function isVisibleBc(
+    originBcName: string,
+    widgets: WidgetMeta[],
+    bcDictionary: Record<string, BcMetaState>,
+    popupData: PopupData,
+    showConditionCheck: (widget: WidgetMeta) => boolean
+) {
+    const bcWidgetsMap = widgets.reduce<Record<string, WidgetMeta[]>>((acc, widget) => {
+        if (!widget.bcName) return acc
+
+        if (!Array.isArray(acc[widget.bcName])) {
+            acc[widget.bcName] = []
+        }
+
+        acc[widget.bcName].push(widget)
+
+        return acc
+    }, {})
+    const bcListOnCurrentView = Object.keys(bcWidgetsMap)
+    const originBcIsOnCurrentView = bcListOnCurrentView.includes(originBcName)
+
+    const leastOneWidgetIsVisible = (currentBcName: string) =>
+        !!bcWidgetsMap[currentBcName]?.some(widget => {
+            const isVisiblePopup = popupData?.bcName === widget.bcName
+
+            return (showConditionCheck(widget) && !isPopupWidget(widget.type)) || isVisiblePopup
+        })
+
+    if (originBcIsOnCurrentView) {
+        return leastOneWidgetIsVisible(originBcName)
+    }
+
+    const isChildBcForOriginBc = (bcName: string) => {
+        const partUrlOfChildBc = `${bcDictionary[originBcName].url}/:id`
+        return bcDictionary[bcName].url.includes(partUrlOfChildBc)
+    }
+
+    return bcListOnCurrentView.some(bcName => {
+        return isChildBcForOriginBc(bcName) ? leastOneWidgetIsVisible(bcName) : false
+    })
 }
