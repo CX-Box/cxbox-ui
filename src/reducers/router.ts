@@ -27,5 +27,7 @@ export const initialRouterState: Route = { type: RouteType.default, path: '/', s
  */
 export const createRouterReducerBuilderManager = <S extends Route>(initialState: S) =>
     new ReducerBuilderManager<S>().addCase(changeLocation, (state, action) => {
-        return action.payload.location as S
+        const { isTab, location } = action.payload
+        // bcPath can be considered a filter for bc. This filter should not be reset when switching tabs.
+        return (isTab ? { ...location, bcPath: location.bcPath || state.bcPath } : location) as S
     })

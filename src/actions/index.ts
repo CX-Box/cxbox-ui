@@ -35,7 +35,7 @@ import { AxiosError } from 'axios'
 import { ApiCallContext } from '../utils'
 import { createAction, AnyAction } from '@reduxjs/toolkit'
 
-export const changeLocation = createAction<{ location: Route; forceUpdate?: boolean }>('changeLocation')
+export const changeLocation = createAction<{ location: Route; forceUpdate?: boolean; isTab?: boolean }>('changeLocation')
 /**
  * Authentication request
  */
@@ -109,7 +109,7 @@ export const selectScreenFail = createAction<{
  * TODO: 2.0.0 Should be string (just the view name) instead;
  * Initially this was due to `screen` and `view` reducers did not having access to `session` part of redux store
  */
-export const selectView = createAction<ViewMetaResponse>('selectView')
+export const selectView = createAction<ViewMetaResponse & { isTab?: boolean }>('selectView')
 
 /**
  * Request to change active view was unsuccesful (incorrect path, unknown screen, etc.)
@@ -177,6 +177,8 @@ export const bcFetchDataPages = createAction<{
      */
     to?: number
 }>('bcFetchDataPages')
+
+export const bcClearData = createAction<{ bcNames: string[] }>('bcClearData')
 
 /**
  * Fetch data request for searchable fields

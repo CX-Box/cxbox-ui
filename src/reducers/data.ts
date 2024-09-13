@@ -1,5 +1,13 @@
 import { DataState, DataItem } from '../interfaces'
-import { bcFetchDataSuccess, bcFetchRowMetaSuccess, bcNewDataSuccess, bcSaveDataSuccess, changeAssociations, selectView } from '../actions'
+import {
+    bcClearData,
+    bcFetchDataSuccess,
+    bcFetchRowMetaSuccess,
+    bcNewDataSuccess,
+    bcSaveDataSuccess,
+    changeAssociations,
+    selectView
+} from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
 
 const emptyData: DataItem[] = []
@@ -52,6 +60,15 @@ export const createDataReducerBuilderManager = (initialState: DataState) =>
         .addCase(changeAssociations, (state, action) => {
             state[`${action.payload.bcName}Delta`] = action.payload.records || []
         })
-        .addCase(selectView, state => {
+        .addCase(selectView, (state, action) => {
+            if (action.payload.isTab) {
+                return state
+            }
+
             return initialState
+        })
+        .addCase(bcClearData, (state, action) => {
+            action.payload.bcNames?.forEach(bcName => {
+                delete state[bcName]
+            })
         })

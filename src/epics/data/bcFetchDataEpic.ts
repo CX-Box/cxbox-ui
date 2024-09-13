@@ -19,11 +19,12 @@ import { AnyAction } from 'redux'
 import { buildBcUrl, checkShowCondition, getBcChildren, getFilters, getSorters } from '../../utils'
 import { cancelRequestActionTypes, cancelRequestEpic } from '../../utils/cancelRequestEpic'
 import { DataItem, WidgetTypes } from '@cxbox-ui/schema'
-import { BcMetaState, CXBoxEpic, PopupWidgetTypes, WidgetMeta } from '../../interfaces'
+import { BcMetaState, CXBoxEpic, PopupData, PopupWidgetTypes, WidgetMeta } from '../../interfaces'
 import { isAnyOf } from '@reduxjs/toolkit'
 import {
     bcChangeCursors,
     bcChangePage,
+    bcClearData,
     bcFetchDataFail,
     bcFetchDataPages,
     bcFetchDataRequest,
@@ -52,203 +53,136 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
     action$.pipe(
         filter(isAnyOf(bcFetchDataRequest, bcFetchDataPages, showViewPopup, bcForceUpdate, bcChangePage)),
         mergeMap(action => {
-            const getCursorChange = (data: DataItem[], prevCursor: string, isHierarchy: boolean) => {
-                const { bcName } = action.payload
-                const keepDelta = bcFetchDataRequest.match(action) ? action.payload.keepDelta : undefined
-                const newCursor = data[0]?.id
-                return of(
-                    bcChangeCursors({
-                        cursorsMap: {
-                            [bcName as string]: data.some(i => i.id === prevCursor) ? prevCursor : newCursor
-                        },
-                        keepDelta: isHierarchy || keepDelta
-                    })
-                )
+            const state = state$.value
+            const { widgetName = '' } = action.payload
+            const { widgets, infiniteWidgets } = state.view
+
+            const widgetsWithCurrentBc = widgets?.filter(item => item.bcName === action.payload.bcName)
+            /**
+             * TODO: Widget name will be mandatory in 2.0.0 but until then collision-vulnerable fallback is provided
+             * through business component match
+             */
+            const widget = widgets?.find(item => item.name === widgetName) ?? widgetsWithCurrentBc?.[0]
+            /**
+             * Missing widget means the view or screen were changed and dataEpics.ts request is no longer relevant
+             */
+            if (!widget) {
+                return EMPTY
+            }
+            const bcName = action.payload.bcName as string
+            const bc = state.screen.bo.bc[bcName]
+            const { cursor, page = 1 } = bc
+            const limit = (widgets?.find(i => i.bcName === bcName)?.limit || bc.limit) ?? 5
+            const sorters = state.screen.sorters[bcName]
+            /**
+             * If popup has the same bc as initiator no dataEpics.ts fetching required, it will be
+             * handled by initiator widget instead
+             */
+            if (showViewPopup.match(action) && bcName === action.payload.calleeBCName) {
+                return EMPTY
             }
 
-            const getChildrenData = (
-                widgets: WidgetMeta[],
-                bcDictionary: Record<string, BcMetaState>,
-                isHierarchy: boolean,
-                showConditionCheck: (widget: WidgetMeta) => boolean
-            ) => {
-                const { bcName } = action.payload
-                const { ignorePageLimit, keepDelta } = bcFetchDataRequest.match(action)
-                    ? action.payload
-                    : { ignorePageLimit: undefined, keepDelta: undefined }
-                return concat(
-                    ...Object.entries(getBcChildren(bcName as string, widgets, bcDictionary))
-                        .filter(([childBcName, widgetNames]) => {
-                            const nonLazyWidget = widgets.find(item => {
-                                return widgetNames.includes(item.name) && !PopupWidgetTypes.includes(item.type) && showConditionCheck(item)
-                            })
-                            const ignoreLazyLoad = showViewPopup.match(action)
-                            if (ignoreLazyLoad) {
+            const anyHierarchyWidget = widgets?.find(item => {
+                return item.bcName === widget.bcName && item.type === WidgetTypes.AssocListPopup && isHierarchyWidget(item)
+            })
+            const fullHierarchyWidget = state.view.widgets?.find(item => {
+                return item.bcName === widget.bcName && item.type === WidgetTypes.AssocListPopup && item.options?.hierarchyFull
+            })
+
+            const limitBySelfCursor = state.router.bcPath?.includes(`${bcName}/${cursor}`)
+            const bcUrl = buildBcUrl(bcName, limitBySelfCursor, state)
+
+            // Hierarchy widgets has own filter implementation
+            const fetchParams: Record<string, any> = {
+                _page: page,
+                _limit: limit,
+                ...getFilters(fullHierarchyWidget ? [] : state.screen.filters[bcName] || []),
+                ...getSorters(sorters)
+            }
+
+            if (bcForceUpdate.match(action)) {
+                const infinityPaginationWidget =
+                    (widgetName && infiniteWidgets?.includes(widgetName)) ||
+                    widgets?.filter(item => item.bcName === bcName)?.find(item => infiniteWidgets?.includes(item.name))?.name
+                if (infinityPaginationWidget) {
+                    fetchParams._page = 1
+                    fetchParams._limit = limit * page
+                }
+            }
+
+            if (bcFetchDataPages.match(action)) {
+                fetchParams._page = action.payload.from || 1
+                fetchParams._limit = (action.payload.to || page - fetchParams._page) * limit
+            }
+            if ((bcFetchDataRequest.match(action) && action.payload.ignorePageLimit) || anyHierarchyWidget?.options?.hierarchyFull) {
+                fetchParams._limit = 0
+            }
+            const canceler = api.createCanceler()
+            const cancelFlow = cancelRequestEpic(action$, cancelRequestActionTypes, canceler.cancel, bcFetchDataFail({ bcName, bcUrl }))
+            const cancelByParentBc = cancelRequestEpic(
+                action$,
+                [bcSelectRecord],
+                canceler.cancel,
+                bcFetchDataFail({ bcName, bcUrl }),
+                filteredAction => {
+                    const actionBc = filteredAction.payload.bcName
+                    return bc.parentName === actionBc
+                }
+            )
+
+            const normalFlow = api.fetchBcData(state.screen.screenName, bcUrl, fetchParams, canceler.cancelToken).pipe(
+                mergeMap(response => {
+                    const cursorChange = getCursorChange(action, response.data, cursor, !!anyHierarchyWidget)
+                    const setDataSuccess = of(
+                        bcFetchDataSuccess({
+                            bcName,
+                            data: response.data,
+                            bcUrl,
+                            hasNext: response.hasNext
+                        })
+                    )
+                    const isWidgetVisible = (w: WidgetMeta) => {
+                        // check whether BC names from action payload, showCondition and current widget are relatives
+                        // if positive check skip `checkShowCondition` call
+                        if (w.showCondition?.bcName === state.screen.bo.bc[w.bcName]?.parentName) {
+                            let parentName = state.screen.bo.bc[w.showCondition?.bcName]?.parentName
+                            let parent = parentName === bcName
+                            while (!parent && parentName) {
+                                parentName = state.screen.bo.bc[parentName]?.parentName
+                                parent = parentName === bcName
+                            }
+                            if (parent) {
                                 return true
                             }
-                            return !!nonLazyWidget
-                        })
-                        .map(([childBcName, widgetNames]) => {
-                            const nonLazyWidget = widgets.find(item => {
-                                return widgetNames.includes(item.name) && !PopupWidgetTypes.includes(item.type) && showConditionCheck(item)
-                            })
-                            return of(
-                                bcFetchDataRequest({
-                                    bcName: childBcName,
-                                    widgetName: nonLazyWidget?.name as string,
-                                    ignorePageLimit: ignorePageLimit || showViewPopup.match(action),
-                                    keepDelta: isHierarchy || keepDelta
-                                })
-                            )
-                        })
-                )
-            }
-
-            const bcFetchDataImpl = (): Array<Observable<AnyAction>> => {
-                const state = state$.value
-                const { widgetName = '' } = action.payload
-                const { widgets, infiniteWidgets } = state.view
-
-                /**
-                 * TODO: Widget name will be mandatory in 2.0.0 but until then collision-vulnerable fallback is provided
-                 * through business component match
-                 */
-                const widget =
-                    widgets?.find(item => item.name === widgetName) ?? widgets?.find(item => item.bcName === action.payload.bcName)
-                /**
-                 * Missing widget means the view or screen were changed and dataEpics.ts request is no longer relevant
-                 */
-                if (!widget) {
-                    return [EMPTY]
-                }
-                const bcName = action.payload.bcName as string
-                const bc = state.screen.bo.bc[bcName]
-                const { cursor, page = 1 } = bc
-                const limit = (widgets?.find(i => i.bcName === bcName)?.limit || bc.limit) ?? 5
-                const sorters = state.screen.sorters[bcName]
-                /**
-                 * If popup has the same bc as initiator no dataEpics.ts fetching required, it will be
-                 * handled by initiator widget instead
-                 */
-                if (showViewPopup.match(action) && bcName === action.payload.calleeBCName) {
-                    return [EMPTY]
-                }
-
-                const anyHierarchyWidget = widgets?.find(item => {
-                    return item.bcName === widget.bcName && item.type === WidgetTypes.AssocListPopup && isHierarchyWidget(item)
-                })
-                const fullHierarchyWidget = state.view.widgets?.find(item => {
-                    return item.bcName === widget.bcName && item.type === WidgetTypes.AssocListPopup && item.options?.hierarchyFull
-                })
-
-                const limitBySelfCursor = state.router.bcPath?.includes(`${bcName}/${cursor}`)
-                const bcUrl = buildBcUrl(bcName, limitBySelfCursor, state)
-
-                // Hierarchy widgets has own filter implementation
-                const fetchParams: Record<string, any> = {
-                    _page: page,
-                    _limit: limit,
-                    ...getFilters(fullHierarchyWidget ? [] : state.screen.filters[bcName] || []),
-                    ...getSorters(sorters)
-                }
-
-                if (bcForceUpdate.match(action)) {
-                    const infinityPaginationWidget =
-                        (widgetName && infiniteWidgets?.includes(widgetName)) ||
-                        widgets?.filter(item => item.bcName === bcName)?.find(item => infiniteWidgets?.includes(item.name))?.name
-                    if (infinityPaginationWidget) {
-                        fetchParams._page = 1
-                        fetchParams._limit = limit * page
-                    }
-                }
-
-                if (bcFetchDataPages.match(action)) {
-                    fetchParams._page = action.payload.from || 1
-                    fetchParams._limit = (action.payload.to || page - fetchParams._page) * limit
-                }
-                if ((bcFetchDataRequest.match(action) && action.payload.ignorePageLimit) || anyHierarchyWidget?.options?.hierarchyFull) {
-                    fetchParams._limit = 0
-                }
-                const canceler = api.createCanceler()
-                const cancelFlow = cancelRequestEpic(action$, cancelRequestActionTypes, canceler.cancel, bcFetchDataFail({ bcName, bcUrl }))
-                const cancelByParentBc = cancelRequestEpic(
-                    action$,
-                    [bcSelectRecord],
-                    canceler.cancel,
-                    bcFetchDataFail({ bcName, bcUrl }),
-                    filteredAction => {
-                        const actionBc = filteredAction.payload.bcName
-                        return bc.parentName === actionBc
-                    }
-                )
-
-                const normalFlow = api.fetchBcData(state.screen.screenName, bcUrl, fetchParams, canceler.cancelToken).pipe(
-                    mergeMap(response => {
-                        const cursorChange = getCursorChange(response.data, cursor, !!anyHierarchyWidget)
-                        const parentOfNotLazyWidget = widgets?.some(item => {
-                            return state.screen.bo.bc[item.bcName]?.parentName === bcName && !PopupWidgetTypes.includes(item.type)
-                        })
-
-                        const isWidgetVisible = (w: WidgetMeta) => {
-                            // check whether BC names from action payload, showCondition and current widget are relatives
-                            // if positive check skip `checkShowCondition` call
-                            if (w.showCondition?.bcName === state.screen.bo.bc[w.bcName]?.parentName) {
-                                let parentName = state.screen.bo.bc[w.showCondition?.bcName]?.parentName
-                                let parent = parentName === bcName
-                                while (!parent && parentName) {
-                                    parentName = state.screen.bo.bc[parentName]?.parentName
-                                    parent = parentName === bcName
-                                }
-                                if (parent) {
-                                    return true
-                                }
-                            }
-                            const dataToCheck =
-                                bcName === w.showCondition?.bcName ? response.data : state.data[w.showCondition?.bcName as string]
-                            return checkShowCondition(
-                                w.showCondition,
-                                state.screen.bo.bc[w.showCondition?.bcName as string]?.cursor,
-                                dataToCheck,
-                                state.view.pendingDataChanges
-                            )
                         }
-
-                        const lazyWidget = (!isWidgetVisible(widget) || PopupWidgetTypes.includes(widget.type)) && !parentOfNotLazyWidget
-                        const skipLazy = state.view.popupData?.bcName !== widget.bcName
-                        if (lazyWidget && skipLazy) {
-                            return EMPTY
-                        }
-                        const fetchChildren = response.data?.length
-                            ? getChildrenData(widgets, state.screen.bo.bc, !!anyHierarchyWidget, isWidgetVisible)
-                            : EMPTY
-                        const fetchRowMeta = of(bcFetchRowMeta({ widgetName, bcName }))
-
-                        return concat(
-                            cursorChange,
-                            of(
-                                bcFetchDataSuccess({
-                                    bcName,
-                                    data: response.data,
-                                    bcUrl,
-                                    hasNext: response.hasNext
-                                })
-                            ),
-                            fetchRowMeta,
-                            fetchChildren
+                        const dataToCheck =
+                            bcName === w.showCondition?.bcName ? response.data : state.data[w.showCondition?.bcName as string]
+                        return checkShowCondition(
+                            w.showCondition,
+                            state.screen.bo.bc[w.showCondition?.bcName as string]?.cursor,
+                            dataToCheck,
+                            state.view.pendingDataChanges
                         )
-                    }),
-                    catchError((error: any) => {
-                        console.error(error)
-                        return concat(
-                            of(bcFetchDataFail({ bcName: action.payload.bcName as string, bcUrl })),
-                            createApiErrorObservable(error)
-                        )
-                    })
-                )
-                return [cancelFlow, cancelByParentBc, normalFlow]
-            }
+                    }
 
-            return race(...bcFetchDataImpl())
+                    if (!isVisibleBc(bcName, widgets, state.screen.bo.bc, state.view.popupData, isWidgetVisible)) {
+                        return setDataSuccess
+                    }
+                    const fetchChildren = response.data?.length
+                        ? getChildrenData(action, widgets, state.screen.bo.bc, !!anyHierarchyWidget, isWidgetVisible)
+                        : EMPTY
+                    const fetchRowMeta = of(bcFetchRowMeta({ widgetName, bcName }))
+                    const resetOutdatedData = resetOutdatedChildrenData(bcName, state.screen.bo.bc, state.data)
+
+                    return concat(cursorChange, resetOutdatedData, setDataSuccess, fetchRowMeta, fetchChildren)
+                }),
+                catchError((error: any) => {
+                    console.error(error)
+                    return concat(of(bcFetchDataFail({ bcName: action.payload.bcName as string, bcUrl })), createApiErrorObservable(error))
+                })
+            )
+
+            return race(cancelFlow, cancelByParentBc, normalFlow)
         })
     )
 
@@ -262,4 +196,127 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
  */
 function isHierarchyWidget(widget: WidgetMeta) {
     return widget.options?.hierarchy || widget.options?.hierarchyFull
+}
+
+const getCursorChange = (action: AnyAction, data: DataItem[], prevCursor: string, isHierarchy: boolean) => {
+    const { bcName } = action.payload
+    const keepDelta = bcFetchDataRequest.match(action) ? action.payload.keepDelta : undefined
+    const newCursor = data[0]?.id
+    const cursorShouldChange = !data.some(i => i.id === prevCursor)
+    return cursorShouldChange
+        ? of(
+              bcChangeCursors({
+                  cursorsMap: {
+                      [bcName as string]: newCursor
+                  },
+                  keepDelta: isHierarchy || keepDelta
+              })
+          )
+        : EMPTY
+}
+
+const isPopupWidget = (type: string) => PopupWidgetTypes.includes(type)
+
+const getChildrenData = (
+    action: AnyAction,
+    widgets: WidgetMeta[],
+    bcDictionary: Record<string, BcMetaState>,
+    isHierarchy: boolean,
+    showConditionCheck: (widget: WidgetMeta) => boolean
+) => {
+    const { bcName } = action.payload
+
+    return concat(
+        ...Object.entries(getBcChildren(bcName as string, widgets, bcDictionary)).reduce<Array<Observable<AnyAction>>>(
+            (acc, [childBcName, widgetNames]) => {
+                const ignoreLazyLoad = showViewPopup.match(action)
+                const nonLazyWidget = widgets.find(item => {
+                    return widgetNames.includes(item.name) && !isPopupWidget(item.type) && showConditionCheck(item)
+                })
+
+                if (nonLazyWidget || ignoreLazyLoad) {
+                    acc.push(
+                        of(
+                            bcFetchDataRequest({
+                                bcName: childBcName,
+                                widgetName: nonLazyWidget?.name as string,
+                                ignorePageLimit: action.payload?.ignorePageLimit || showViewPopup.match(action),
+                                keepDelta: isHierarchy || action.payload?.keepDelta
+                            })
+                        )
+                    )
+                }
+
+                return acc
+            },
+            []
+        )
+    )
+}
+
+const resetOutdatedChildrenData = (bcName: string, bcDictionary: Record<string, BcMetaState>, data: Record<string, DataItem[]>) => {
+    const parentBcNames = [bcName]
+    const parentsBcUrls = parentBcNames.map(parentBcName => `${bcDictionary[parentBcName].url}/:id`)
+    const childBcNamesWithData = Object.keys(data).reduce<string[]>((acc, bcNameWithData) => {
+        const bc = bcDictionary[bcNameWithData]
+        if (parentsBcUrls.some(item => bc.url.includes(item))) {
+            acc.push(bc.name)
+        }
+
+        return acc
+    }, [])
+
+    return childBcNamesWithData.length
+        ? of(
+              bcClearData({
+                  bcNames: childBcNamesWithData
+              })
+          )
+        : EMPTY
+}
+
+/**
+ * Checks if there is at least one visible widget with originBc or any child bc to it.
+ * The check takes into account the visibility of popup widgets.
+ */
+function isVisibleBc(
+    originBcName: string,
+    widgets: WidgetMeta[],
+    bcDictionary: Record<string, BcMetaState>,
+    popupData: PopupData,
+    showConditionCheck: (widget: WidgetMeta) => boolean
+) {
+    const bcWidgetsMap = widgets.reduce<Record<string, WidgetMeta[]>>((acc, widget) => {
+        if (!widget.bcName) return acc
+
+        if (!Array.isArray(acc[widget.bcName])) {
+            acc[widget.bcName] = []
+        }
+
+        acc[widget.bcName].push(widget)
+
+        return acc
+    }, {})
+    const bcListOnCurrentView = Object.keys(bcWidgetsMap)
+    const originBcIsOnCurrentView = bcListOnCurrentView.includes(originBcName)
+
+    const leastOneWidgetIsVisible = (currentBcName: string) =>
+        !!bcWidgetsMap[currentBcName]?.some(widget => {
+            const isVisiblePopup = popupData?.bcName === widget.bcName
+
+            return (showConditionCheck(widget) && !isPopupWidget(widget.type)) || isVisiblePopup
+        })
+
+    if (originBcIsOnCurrentView) {
+        return leastOneWidgetIsVisible(originBcName)
+    }
+
+    const isChildBcForOriginBc = (bcName: string) => {
+        const partUrlOfChildBc = `${bcDictionary[originBcName].url}/:id`
+        return bcDictionary[bcName].url.includes(partUrlOfChildBc)
+    }
+
+    return bcListOnCurrentView.some(bcName => {
+        return isChildBcForOriginBc(bcName) ? leastOneWidgetIsVisible(bcName) : false
+    })
 }

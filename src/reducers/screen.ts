@@ -103,6 +103,9 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             currentBc.loading = true
         })
         .addCase(selectView, (state, action) => {
+            if (action.payload.isTab) {
+                return
+            }
             const newBcs: Record<string, BcMetaState> = {}
             Array.from(
                 new Set(action.payload.widgets?.map(widget => widget.bcName)) // БК которые есть на вьюхе
@@ -148,7 +151,7 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             // Also reset cursors of all children of requested BCs
             const changedParents = Object.values(newCursors).map(bc => `${bc.url}/:id`)
             Object.values(state.bo.bc).forEach(bc => {
-                if (changedParents.some(item => bc.url.includes(item))) {
+                if (changedParents.some(item => bc.url.includes(item)) && !(bc.name in newCursors)) {
                     newCursors[bc.name] = { ...state.bo.bc[bc.name], cursor: null }
                     newCache[bc.name] = null
                 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CXBoxEpic, PopupWidgetTypes, WidgetMeta } from '../../interfaces'
+import { CXBoxEpic, PopupWidgetTypes, Store, WidgetMeta } from '../../interfaces'
 import { EMPTY, filter, mergeMap } from 'rxjs'
 import { bcFetchDataRequest, selectView } from '../../actions'
 
@@ -44,31 +44,74 @@ export const selectViewEpic: CXBoxEpic = (action$, state$) =>
              */
             try {
                 const state = state$.value
-                const bcToLoad: Record<string, WidgetMeta> = {}
-                state.view.widgets
-                    .filter(widget => !PopupWidgetTypes.includes(widget.type))
-                    .forEach(widget => {
-                        if (widget.bcName) {
-                            let bcName = widget.bcName
-                            let parentName = state.screen.bo.bc[widget.bcName].parentName
-                            while (parentName) {
-                                bcName = parentName
-                                parentName = state.screen.bo.bc[parentName].parentName
-                            }
-                            if (!bcToLoad[bcName]) {
-                                bcToLoad[bcName] = widget
-                            }
-                        }
-                    })
-                const result = Object.entries(bcToLoad).map(([bcName, widget]) => {
-                    // TODO: Row meta request should be scheduled after `bcFetchDataSuccess` here
-                    // (now it is scheduled in bcFetchDataRequest epic)
-                    return bcFetchDataRequest({ widgetName: widget.name, bcName })
-                })
-                return result
+                if (action.payload.isTab) {
+                    return lazyLoad(state)
+                }
+
+                return fullLoad(state)
             } catch (e) {
                 console.error(`selectView Epic:: ${e}`)
                 return EMPTY
             }
         })
     )
+
+function fullLoad<S extends Store>(state: S) {
+    const bcToLoad: Record<string, WidgetMeta> = {}
+
+    state.view.widgets
+        .filter(widget => !PopupWidgetTypes.includes(widget.type))
+        .forEach(widget => {
+            if (widget.bcName) {
+                let bcName = widget.bcName
+                let parentName = state.screen.bo.bc[widget.bcName].parentName
+                while (parentName) {
+                    bcName = parentName
+                    parentName = state.screen.bo.bc[parentName].parentName
+                }
+
+                if (!bcToLoad[bcName]) {
+                    bcToLoad[bcName] = widget
+                }
+            }
+        })
+
+    return Object.entries(bcToLoad).map(([bcName, widget]) => {
+        // TODO: Row meta request should be scheduled after `bcFetchDataSuccess` here
+        // (now it is scheduled in bcFetchDataRequest epic)
+        return bcFetchDataRequest({ widgetName: widget.name, bcName })
+    })
+}
+
+/**
+ * Here is a list of bc that require downloading.
+ * Either bc that have no data are loaded, or the cursor has been reset.
+ * It is assumed that the cursor for a non-displayed bookmaker will be reset if the parent cursor has changed.
+ */
+function lazyLoad<S extends Store>(state: S) {
+    const bcToLoad: Record<string, WidgetMeta> = {}
+    const data = state.data
+
+    state.view.widgets
+        .filter(widget => !PopupWidgetTypes.includes(widget.type))
+        .forEach(widget => {
+            if (widget.bcName && (!(widget.bcName in data) || state.screen.bo.bc[widget.bcName]?.cursor === null)) {
+                let bcName = widget.bcName
+                let parentName = state.screen.bo.bc[widget.bcName].parentName
+                while (parentName && (!(parentName in data) || state.screen.bo.bc[parentName]?.cursor === null)) {
+                    bcName = parentName
+                    parentName = state.screen.bo.bc[parentName].parentName
+                }
+
+                if (!bcToLoad[bcName]) {
+                    bcToLoad[bcName] = widget
+                }
+            }
+        })
+
+    return Object.entries(bcToLoad).map(([bcName, widget]) => {
+        // TODO: Row meta request should be scheduled after `bcFetchDataSuccess` here
+        // (now it is scheduled in bcFetchDataRequest epic)
+        return bcFetchDataRequest({ widgetName: widget.name, bcName })
+    })
+}
