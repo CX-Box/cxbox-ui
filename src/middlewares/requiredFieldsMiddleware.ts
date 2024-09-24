@@ -93,18 +93,20 @@ export const requiredFields: Middleware =
 
                 // If operation is not validation-sensetive and validation failed, offer to drop pending changes
                 if (hasPendingValidationFails(state, bcName)) {
-                    return addNotification({
-                        key: 'requiredFieldsMissing',
-                        type: 'buttonWarningNotification',
-                        message: 'Required fields are missing',
-                        duration: 0,
-                        options: {
-                            buttonWarningNotificationOptions: {
-                                buttonText: 'Cancel changes',
-                                actionsForClick: [bcCancelPendingChanges(null), clearValidationFails(null)]
+                    return next(
+                        addNotification({
+                            key: 'requiredFieldsMissing',
+                            type: 'buttonWarningNotification',
+                            message: 'Required fields are missing',
+                            duration: 0,
+                            options: {
+                                buttonWarningNotificationOptions: {
+                                    buttonText: 'Cancel changes',
+                                    actionsForClick: [bcCancelPendingChanges(null), clearValidationFails(null)]
+                                }
                             }
-                        }
-                    })
+                        })
+                    )
                 }
             }
         }
