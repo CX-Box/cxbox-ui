@@ -25,6 +25,7 @@ export interface ScreenMetaResponse {
     }
     views: ViewMetaResponse[]
     primary?: string
+    primaries: string[] | null
     // TODO: Will not be optional in 2.0.0
     navigation?: {
         menu: Array<ViewNavigationGroup | ViewNavigationItem>
@@ -42,6 +43,7 @@ export interface ScreenState {
     }
     views: ViewMetaResponse[]
     primaryView: string
+    primaryViews: string[] | null
     filters: Record<string, BcFilter[]>
     sorters: Record<string, BcSorter[]>
 }

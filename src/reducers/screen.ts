@@ -54,6 +54,7 @@ export const initialScreenState: ScreenState = {
     cachedBc: {},
     views: [],
     primaryView: '',
+    primaryViews: null,
     filters: {},
     sorters: {}
 }
@@ -85,6 +86,7 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             })
             state.screenName = action.payload.screen.name
             state.primaryView = action.payload.screen.meta?.primary ?? state.primaryView
+            state.primaryViews = action.payload.screen.meta?.primaries ?? state.primaryViews
             state.views = action.payload.screen.meta?.views ?? state.views
             state.bo = { activeBcName: null, bc: bcDictionary }
             state.sorters = { ...state.sorters, ...bcSorters }

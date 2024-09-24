@@ -29,6 +29,8 @@ import {
     selectViewFail
 } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
+import { getDefaultViewForPrimary } from '../../utils/getDefaultViewForPrimary'
+import { getDefaultViewFromPrimaries } from '../../utils/getDefaultViewFromPrimaries'
 
 /**
  * Epic of changing the current route
@@ -86,9 +88,10 @@ export const changeLocationEpic: CXBoxEpic = (action$, state$) =>
             if (needUpdateViews) {
                 const nextView = nextViewName
                     ? state.screen.views.find(item => item.name === nextViewName)
-                    : state.screen.primaryView
-                    ? state.screen.views.find(item => item.name === state.screen.primaryView)
-                    : state.screen.views[0]
+                    : getDefaultViewForPrimary(state.screen.primaryView, state.screen.views) ??
+                      getDefaultViewFromPrimaries(state.screen.primaryViews, state.screen.views) ??
+                      state.screen.views[0]
+
                 resultObservables.push(
                     nextView ? of(selectView({ ...nextView, isTab: action.payload.isTab })) : of(selectViewFail({ viewName: nextViewName }))
                 )
