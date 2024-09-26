@@ -14,36 +14,31 @@
  * limitations under the License.
  */
 
-import { bcSelectRecord, selectTableCell, selectTableCellInit } from '../../actions'
+import { bcSelectRecord, selectTableRow, selectTableRowInit } from '../../actions'
 import { CXBoxEpic } from '../../interfaces'
 import { concat, filter, mergeMap, Observable, of } from 'rxjs'
 import { AnyAction } from '@reduxjs/toolkit'
 
-export const selectTableCellInitEpic: CXBoxEpic = (action$, state$) =>
+export const selectTableRowInitEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
-        filter(selectTableCellInit.match),
+        filter(selectTableRowInit.match),
         mergeMap(action => {
             const resultObservables: Array<Observable<AnyAction>> = []
             const state = state$.value
 
-            const { rowId: nextRowId, fieldKey } = action.payload
+            const { rowId: nextRowId } = action.payload
 
             const nextWidget = state.view.widgets.find(widget => widget.name === action.payload.widgetName)
             const nextBcName = nextWidget?.bcName
             const nextBcCursor = state.screen.bo.bc[nextBcName]?.cursor
 
-            const selectedCell = state.view.selectedCell
+            const selectedCell = state.view.selectedRow
             if (nextRowId !== nextBcCursor) {
                 resultObservables.push(of(bcSelectRecord({ bcName: nextBcName, cursor: nextRowId })))
             }
 
-            if (
-                !selectedCell ||
-                fieldKey !== selectedCell.fieldKey ||
-                nextRowId !== selectedCell.rowId ||
-                nextWidget?.name !== selectedCell.widgetName
-            ) {
-                resultObservables.push(of(selectTableCell({ widgetName: nextWidget?.name, rowId: nextRowId, fieldKey })))
+            if (!selectedCell || nextRowId !== selectedCell.rowId || nextWidget?.name !== selectedCell.widgetName) {
+                resultObservables.push(of(selectTableRow({ widgetName: nextWidget?.name, rowId: nextRowId })))
             }
 
             return concat(...resultObservables)

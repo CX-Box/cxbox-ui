@@ -41,7 +41,7 @@ import {
     forceActiveRmUpdate,
     operationConfirmation,
     processPostInvoke,
-    selectTableCell,
+    selectTableRow,
     selectView,
     sendOperation,
     sendOperationFail,
@@ -71,7 +71,7 @@ export const initialViewState: ViewState = {
     pendingValidationFailsFormat: PendingValidationFailsFormat.old,
     pendingValidationFails: {},
     handledForceActive: {},
-    selectedCell: null,
+    selectedRow: null,
     ignoreHistory: null,
     systemNotifications: [],
     error: null,
@@ -113,7 +113,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.metaInProgress[action.payload.bcName] = false
         })
         .addCase(bcNewDataSuccess, (state, action) => {
-            state.selectedCell = initialViewState.selectedCell
+            state.selectedRow = initialViewState.selectedRow
         })
         .addCase(forceActiveRmUpdate, (state, action) => {
             const { bcName, bcUrl, currentRecordData, rowMeta, cursor } = action.payload
@@ -418,14 +418,14 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.popupData = {}
             state.popupData.bcName = null
         })
-        .addCase(selectTableCell, (state, action) => {
-            state.selectedCell = { widgetName: action.payload.widgetName, rowId: action.payload.rowId, fieldKey: action.payload.fieldKey }
+        .addCase(selectTableRow, (state, action) => {
+            state.selectedRow = { widgetName: action.payload.widgetName, rowId: action.payload.rowId }
         })
         .addCase(changeLocation, (state, action) => {
             if (!action.payload.isTab) {
                 state.pendingDataChanges = initialViewState.pendingDataChanges
             }
-            state.selectedCell = initialViewState.selectedCell
+            state.selectedRow = initialViewState.selectedRow
         })
         .addCase(showNotification, (state, action) => {
             state.systemNotifications = state.systemNotifications ?? []
@@ -452,5 +452,5 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             state.error = null
         })
         .addCase(processPostInvoke, state => {
-            state.selectedCell = null
+            state.selectedRow = null
         })

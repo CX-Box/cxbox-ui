@@ -36,7 +36,7 @@ import {
     bcCancelPendingChanges,
     changeDataItem,
     clearValidationFails,
-    selectTableCellInit,
+    selectTableRowInit,
     sendOperation
 } from '../actions'
 import { buildBcUrl, flattenOperations } from '../utils'
@@ -84,7 +84,7 @@ export const requiredFields: Middleware =
                     const dataItem: PendingDataItem = getRequiredFieldsMissing(record, pendingValues, Object.values(fieldsToCheck))
                     // For tables, try to autofocus on first missing field
                     if (dataItem && TableLikeWidgetTypes.includes((widget as WidgetTableMeta)?.type)) {
-                        dispatch(selectTableCellInit({ widgetName, rowId: cursor, fieldKey: Object.keys(dataItem)[0] }))
+                        dispatch(selectTableRowInit({ widgetName, rowId: cursor }))
                     }
                     return dataItem
                         ? next(changeDataItem({ bcName, bcUrl: buildBcUrl(bcName, true, state), cursor, dataItem }))

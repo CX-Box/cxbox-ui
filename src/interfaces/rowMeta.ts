@@ -98,4 +98,5 @@ export interface RowMetaField {
         value: string
     }>
     filterable?: boolean
+    sortable?: boolean
 }
