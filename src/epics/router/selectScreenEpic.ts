@@ -17,6 +17,8 @@
 import { CXBoxEpic } from '../../interfaces'
 import { filter, of, switchMap } from 'rxjs'
 import { selectScreen, selectView, selectViewFail } from '../../actions'
+import { getDefaultViewForPrimary } from '../../utils/getDefaultViewForPrimary'
+import { getDefaultViewFromPrimaries } from '../../utils/getDefaultViewFromPrimaries'
 
 /**
  *
@@ -30,8 +32,10 @@ export const changeScreen: CXBoxEpic = (action$, state$) =>
             const state = state$.value
             const nextViewName = state.router.viewName
             const requestedView = state.screen.views.find(item => item.name === nextViewName)
-            const defaultView =
-                !nextViewName && state.screen.primaryView && state.screen.views.find(item => item.name === state.screen.primaryView)
+            const defaultView = !nextViewName
+                ? getDefaultViewForPrimary(state.screen.primaryView, state.screen.views) ??
+                  getDefaultViewFromPrimaries(state.screen.primaryViews, state.screen.views)
+                : null
             const nextView = requestedView || defaultView || state.screen.views[0]
             return nextView ? of(selectView(nextView)) : of(selectViewFail({ viewName: nextViewName }))
         })

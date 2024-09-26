@@ -94,6 +94,7 @@ export interface SessionScreen {
     text: string // Отображаемое название
     url: string
     primary?: string
+    primaries: string[] | null
     defaultScreen?: boolean
     meta?: ScreenMetaResponse
     icon?: string

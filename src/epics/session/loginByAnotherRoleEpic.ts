@@ -20,6 +20,8 @@ import { changeLocation, login, loginDone, loginFail } from '../../actions'
 import { AxiosError } from 'axios'
 import { defaultParseURL } from '../../utils'
 import { createApiErrorObservable } from '../../utils/apiError'
+import { getDefaultViewForPrimary } from '../../utils/getDefaultViewForPrimary'
+import { getDefaultViewFromPrimaries } from '../../utils/getDefaultViewFromPrimaries'
 
 const responseStatusMessages: Record<number, string> = {
     401: 'Invalid credentials',
@@ -49,8 +51,11 @@ export const loginByAnotherRoleEpic: CXBoxEpic = (action$, state$, { api }) =>
                     const result = []
                     if (isSwitchRole) {
                         const defaultScreen = data.screens.find(screen => screen.defaultScreen) || data.screens[0]
-                        const defaultViewName = defaultScreen?.primary ?? defaultScreen.meta.views[0].name
-                        const defaultView = defaultScreen?.meta.views.find(view => defaultViewName === view.name)
+                        const defaultView =
+                            getDefaultViewForPrimary(defaultScreen.primary, defaultScreen.meta.views) ??
+                            getDefaultViewFromPrimaries(defaultScreen.primaries, defaultScreen.meta.views) ??
+                            defaultScreen?.meta.views[0]
+
                         if (defaultView)
                             result.push(changeLocation({ location: defaultParseURL(new URL(defaultView.url, window.location.origin)) }))
                     }
