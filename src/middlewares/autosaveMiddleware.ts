@@ -19,7 +19,7 @@ import { coreOperations, OperationTypeCrud } from '../interfaces'
 import { Store as CoreStore } from '../interfaces/store'
 import { autosaveRoutine, checkUnsavedChangesOfBc } from '../utils/autosave'
 import { WidgetOperations } from '@cxbox-ui/schema'
-import { changeLocation, selectTableCellInit, sendOperation } from '../actions'
+import { changeLocation, selectTableRowInit, sendOperation } from '../actions'
 
 export const saveFormMiddleware: Middleware =
     ({ getState, dispatch }: MiddlewareAPI<Dispatch, CoreStore>) =>
@@ -31,7 +31,7 @@ export const saveFormMiddleware: Middleware =
 
         const isSendOperation = sendOperation.match(action)
         const isCoreSendOperation = isSendOperation && coreOperations.includes(action.payload.operationType as OperationTypeCrud)
-        const isSelectTableCellInit = selectTableCellInit.match(action)
+        const isSelectTableRowInit = selectTableRowInit.match(action)
 
         /**
          * Saving actions should be ignored
@@ -53,11 +53,11 @@ export const saveFormMiddleware: Middleware =
         /**
          * Checking if the action is `selectTableCellInit` called for another row or another widget
          */
-        const selectedCell = state.view.selectedCell
-        const isSelectTableCellInitOnAnotherRowOrWidget =
-            selectedCell &&
-            isSelectTableCellInit &&
-            (selectedCell.widgetName !== action.payload.widgetName || selectedCell.rowId !== action.payload.rowId)
+        const selectedRow = state.view.selectedRow
+        const isSelectTableRowInitOnAnotherRowOrWidget =
+            selectedRow &&
+            isSelectTableRowInit &&
+            (selectedRow.widgetName !== action.payload.widgetName || selectedRow.rowId !== action.payload.rowId)
 
         /**
          * Default save operation as custom action
@@ -84,7 +84,7 @@ export const saveFormMiddleware: Middleware =
         /**
          * final condition
          */
-        const isNeedSaveCondition = isNotSaveAction && (isSendOperationForAnotherBc || isSelectTableCellInitOnAnotherRowOrWidget)
+        const isNeedSaveCondition = isNotSaveAction && (isSendOperationForAnotherBc || isSelectTableRowInitOnAnotherRowOrWidget)
         /**
          * Default save operation CRUD
          */

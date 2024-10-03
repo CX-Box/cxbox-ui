@@ -954,22 +954,20 @@ export const handleRouter = createAction<{
 }>('handleRouter')
 
 /**
- * TODO
+ * Used for edit list widget row
  */
-export const selectTableCellInit = createAction<{
+export const selectTableRowInit = createAction<{
     widgetName: string
     rowId: string
-    fieldKey: string
-}>('selectTableCellInit')
+}>('selectTableRowInit')
 
 /**
  * TODO
  */
-export const selectTableCell = createAction<{
+export const selectTableRow = createAction<{
     widgetName: string
     rowId: string
-    fieldKey: string
-}>('selectTableCell')
+}>('selectTableRow')
 
 /**
  * TODO

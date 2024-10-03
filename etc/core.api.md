@@ -36,6 +36,7 @@ declare namespace actions {
         selectViewFail,
         bcFetchDataRequest,
         bcFetchDataPages,
+        bcClearData,
         inlinePickListFetchDataRequest,
         bcFetchDataSuccess,
         bcFetchDataFail,
@@ -90,6 +91,8 @@ declare namespace actions {
         dropAllAssociationsSameBc,
         dropAllAssociationsFull,
         handleRouter,
+        selectTableRowInit,
+        selectTableRow,
         selectTableCellInit,
         selectTableCell,
         showAllTableRecordsInit,
@@ -309,6 +312,11 @@ const bcChangePage: ActionCreatorWithOptionalPayload<    {
 bcName: string;
 page: number;
 widgetName?: string;
+}, string>;
+
+// @public (undocumented)
+const bcClearData: ActionCreatorWithOptionalPayload<    {
+bcNames: string[];
 }, string>;
 
 // @public
@@ -646,6 +654,7 @@ const changeDescendantsAssociationsFullEpic: CXBoxEpic;
 const changeLocation: ActionCreatorWithOptionalPayload<    {
 location: Route;
 forceUpdate?: boolean;
+isTab?: boolean;
 }, string>;
 
 // @public
@@ -917,7 +926,7 @@ declare namespace epics {
         sendOperationEpic,
         showAssocPopupEpic,
         fileUploadConfirmEpic,
-        selectTableCellInitEpic,
+        selectTableRowInitEpic,
         showFileUploadPopupEpic,
         sendOperationAssociateEpic,
         getRowMetaByForceActiveEpic,
@@ -1205,13 +1214,13 @@ declare namespace interfaces {
         DataItem,
         MultivalueSingleValue,
         MultivalueSingleValueOptions,
-        RecordSnapshotState,
         PendingDataItem,
         DataItemResponse,
         BcDataResponse,
         DataState,
         DepthDataState,
         PickMap,
+        RecordSnapshotState,
         SystemNotification,
         CxboxResponse,
         ObjectMap,
@@ -1237,7 +1246,7 @@ declare namespace interfaces {
         PendingRequest,
         Store,
         FieldType,
-        ViewSelectedCell,
+        ViewSelectedRow,
         PendingValidationFails,
         PendingValidationFailsFormat,
         ViewState,
@@ -2008,6 +2017,8 @@ export interface RowMetaField {
     required?: boolean;
     // @deprecated (undocumented)
     setForced?: boolean;
+    // (undocumented)
+    sortable?: boolean;
     // @deprecated (undocumented)
     values?: Array<{
         value: string;
@@ -2089,25 +2100,39 @@ screenName: string;
 // @public
 const selectScreenFailEpic: CXBoxEpic;
 
-// @public
+// @public @deprecated (undocumented)
 const selectTableCell: ActionCreatorWithOptionalPayload<    {
 widgetName: string;
 rowId: string;
 fieldKey: string;
 }, string>;
 
-// @public
+// @public @deprecated (undocumented)
 const selectTableCellInit: ActionCreatorWithOptionalPayload<    {
 widgetName: string;
 rowId: string;
 fieldKey: string;
 }, string>;
 
-// @public (undocumented)
-const selectTableCellInitEpic: CXBoxEpic;
+// @public
+const selectTableRow: ActionCreatorWithOptionalPayload<    {
+widgetName: string;
+rowId: string;
+}, string>;
 
 // @public
-const selectView: ActionCreatorWithOptionalPayload<ViewMetaResponse, string>;
+const selectTableRowInit: ActionCreatorWithOptionalPayload<    {
+widgetName: string;
+rowId: string;
+}, string>;
+
+// @public (undocumented)
+const selectTableRowInitEpic: CXBoxEpic;
+
+// @public
+const selectView: ActionCreatorWithOptionalPayload<ViewMetaResponse & {
+isTab?: boolean;
+}, string>;
 
 // @public
 const selectViewEpic: CXBoxEpic;
@@ -2492,9 +2517,7 @@ bcName: string;
 }, string>;
 
 // @public (undocumented)
-export interface ViewSelectedCell {
-    // (undocumented)
-    fieldKey: string;
+export interface ViewSelectedRow {
     // (undocumented)
     rowId: string;
     // (undocumented)
@@ -2546,7 +2569,7 @@ export interface ViewState extends ViewMetaResponse {
         };
     };
     // (undocumented)
-    selectedCell?: ViewSelectedCell;
+    selectedRow: ViewSelectedRow | null;
     // (undocumented)
     systemNotifications?: SystemNotification[];
 }
@@ -2797,7 +2820,7 @@ export enum WidgetTypes {
 
 // Warnings were encountered during analysis:
 //
-// /Users/ikorneev/Projects/cxbox-schema/dist/index.d.ts:525:5 - (ae-forgotten-export) The symbol "PickMap_2" needs to be exported by the entry point index.d.ts
+// node_modules/@cxbox-ui/schema/dist/index.d.ts:525:5 - (ae-forgotten-export) The symbol "PickMap_2" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

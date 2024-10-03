@@ -22,10 +22,9 @@ import { OperationTypeCrud, OperationPostInvokeConfirm } from './operation'
 import { AxiosError } from 'axios'
 export { FieldType } from '@cxbox-ui/schema'
 
-export interface ViewSelectedCell {
+export interface ViewSelectedRow {
     widgetName: string
     rowId: string
-    fieldKey: string
 }
 
 export interface PendingValidationFails {
@@ -65,7 +64,7 @@ export interface ViewState extends ViewMetaResponse {
     popupData?: PopupData
     infiniteWidgets?: string[]
     pickMap?: PickMap
-    selectedCell?: ViewSelectedCell
+    selectedRow: ViewSelectedRow | null
     systemNotifications?: SystemNotification[]
     error?: ApplicationError
     /**
