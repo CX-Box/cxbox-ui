@@ -307,8 +307,8 @@ function isVisibleBc(
             return (showConditionCheck(widget) && !isPopupWidget(widget.type)) || isVisiblePopup
         })
 
-    if (originBcIsOnCurrentView) {
-        return leastOneWidgetIsVisible(originBcName)
+    if (originBcIsOnCurrentView && leastOneWidgetIsVisible(originBcName)) {
+        return true
     }
 
     const isChildBcForOriginBc = (bcName: string) => {
