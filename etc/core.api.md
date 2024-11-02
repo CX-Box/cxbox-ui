@@ -2024,6 +2024,11 @@ export interface RowMetaField {
         value: string;
         icon: string;
     }>;
+    // (undocumented)
+    allValues?: Array<{
+        value: string;
+        icon: string;
+    }>;
 }
 
 // @public (undocumented)
