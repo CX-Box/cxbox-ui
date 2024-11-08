@@ -60,6 +60,7 @@ export interface RowMetaResponse extends CxboxResponse {
  * @param drillDownKey - ключ для получения адреса из данных
  * @param values TODO:
  * @param filterValues TODO:
+ * @param allValues TODO:
  * @param filterable - можно ли фильтровать записи по этому полю
  */
 export interface RowMetaField {
@@ -90,7 +91,7 @@ export interface RowMetaField {
     // dictionaryName?: string,
     values?: Array<{
         value: string
-        // настройки (иконка-направление(ANT) цвет) для иконки соответствующей значению
+        // настройки (иконка-направление(ANT или кастомная) цвет) для иконки соответствующей значению
         icon: string
     }>
     filterValues?: Array<{
@@ -99,4 +100,9 @@ export interface RowMetaField {
     }>
     filterable?: boolean
     sortable?: boolean
+    allValues?: Array<{
+        value: string
+        // настройки (иконка-направление(ANT или кастомная) цвет) для иконки соответствующей значению
+        icon: string
+    }>
 }
