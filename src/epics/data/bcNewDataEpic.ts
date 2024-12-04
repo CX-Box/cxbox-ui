@@ -18,7 +18,15 @@ import { catchError, concat, EMPTY, filter, mergeMap, of } from 'rxjs'
 import { buildBcUrl, matchOperationRole } from '../../utils'
 import { DataItem, OperationTypeCrud } from '@cxbox-ui/schema'
 import { CXBoxEpic } from '../../interfaces'
-import { bcFetchRowMetaSuccess, bcNewDataFail, bcNewDataSuccess, changeDataItem, processPostInvoke, sendOperation } from '../../actions'
+import {
+    bcFetchRowMetaSuccess,
+    bcNewDataFail,
+    bcNewDataSuccess,
+    changeDataItem,
+    processPostInvoke,
+    selectTableRow,
+    sendOperation
+} from '../../actions'
 import { createApiErrorObservable } from '../../utils/apiError'
 
 /**
@@ -79,6 +87,7 @@ export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                                 }
                             })
                         ),
+                        of(selectTableRow({ widgetName: action.payload.widgetName, rowId: cursor })),
                         postInvoke ? of(processPostInvoke({ bcName, postInvoke, cursor, widgetName: action.payload.widgetName })) : EMPTY
                     )
                 }),

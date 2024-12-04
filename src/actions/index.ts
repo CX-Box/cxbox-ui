@@ -969,6 +969,8 @@ export const selectTableRow = createAction<{
     rowId: string
 }>('selectTableRow')
 
+export const deselectTableRow = createAction('deselectTableRow')
+
 /**
  * TODO
  */

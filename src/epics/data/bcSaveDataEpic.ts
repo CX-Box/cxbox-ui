@@ -25,6 +25,7 @@ import {
     bcFetchRowMeta,
     bcSaveDataFail,
     bcSaveDataSuccess,
+    deselectTableRow,
     processPostInvoke,
     sendOperation
 } from '../../actions'
@@ -116,6 +117,7 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     return concat(
                         of(bcSaveDataSuccess({ bcName, cursor, dataItem: responseDataItem })),
                         of(bcFetchRowMeta({ widgetName, bcName })),
+                        of(deselectTableRow()),
                         of(...fetchChildrenBcData),
                         postInvoke
                             ? of(
