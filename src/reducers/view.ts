@@ -34,6 +34,7 @@ import {
     closeNotification,
     closeViewError,
     closeViewPopup,
+    deselectTableRow,
     dropAllAssociations,
     dropAllAssociationsFull,
     dropAllAssociationsSameBc,
@@ -420,6 +421,9 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
         })
         .addCase(selectTableRow, (state, action) => {
             state.selectedRow = { widgetName: action.payload.widgetName, rowId: action.payload.rowId }
+        })
+        .addCase(deselectTableRow, (state, action) => {
+            state.selectedRow = null
         })
         .addCase(changeLocation, (state, action) => {
             if (!action.payload.isTab) {
