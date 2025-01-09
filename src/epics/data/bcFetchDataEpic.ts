@@ -141,6 +141,8 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                             hasNext: response.hasNext
                         })
                     )
+                    const fetchRowMeta = of(bcFetchRowMeta({ widgetName, bcName }))
+
                     const isWidgetVisible = (w: WidgetMeta) => {
                         // check whether BC names from action payload, showCondition and current widget are relatives
                         // if positive check skip `checkShowCondition` call
@@ -157,21 +159,18 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                         }
                         const dataToCheck =
                             bcName === w.showCondition?.bcName ? response.data : state.data[w.showCondition?.bcName as string]
-                        return checkShowCondition(
-                            w.showCondition,
-                            state.screen.bo.bc[w.showCondition?.bcName as string]?.cursor,
-                            dataToCheck,
-                            state.view.pendingDataChanges
-                        )
+                        const currentCursor = dataToCheck
+                            ? getCurrentCursor(dataToCheck, state.screen.bo.bc[w.showCondition?.bcName as string]?.cursor).cursor
+                            : null
+                        return checkShowCondition(w.showCondition, currentCursor, dataToCheck, state.view.pendingDataChanges)
                     }
 
-                    if (!isVisibleBc(bcName, widgets, state.screen.bo.bc, state.view.popupData, isWidgetVisible)) {
-                        return setDataSuccess
+                    if (!widgetIsUsedOnView(bcName, widgets, state.screen.bo.bc, state.view.popupData, isWidgetVisible)) {
+                        return concat(cursorChange, setDataSuccess, fetchRowMeta)
                     }
                     const fetchChildren = response.data?.length
                         ? getChildrenData(action, widgets, state.screen.bo.bc, !!anyHierarchyWidget, isWidgetVisible)
                         : EMPTY
-                    const fetchRowMeta = of(bcFetchRowMeta({ widgetName, bcName }))
                     const resetOutdatedData = resetOutdatedChildrenData(bcName, state.screen.bo.bc, state.data)
 
                     return concat(cursorChange, resetOutdatedData, setDataSuccess, fetchRowMeta, fetchChildren)
@@ -198,16 +197,25 @@ function isHierarchyWidget(widget: WidgetMeta) {
     return widget.options?.hierarchy || widget.options?.hierarchyFull
 }
 
+const getCurrentCursor = (data: DataItem[], prevCursor: string | undefined) => {
+    const newCursor = data[0]?.id
+    const updatedCursor = !prevCursor || !data?.some(i => i.id === prevCursor)
+
+    return {
+        cursor: updatedCursor ? newCursor : prevCursor,
+        updatedCursor
+    }
+}
+
 const getCursorChange = (action: AnyAction, data: DataItem[], prevCursor: string, isHierarchy: boolean) => {
     const { bcName } = action.payload
     const keepDelta = bcFetchDataRequest.match(action) ? action.payload.keepDelta : undefined
-    const newCursor = data[0]?.id
-    const cursorShouldChange = !data.some(i => i.id === prevCursor)
-    return cursorShouldChange
+    const { cursor, updatedCursor } = getCurrentCursor(data, prevCursor)
+    return updatedCursor
         ? of(
               bcChangeCursors({
                   cursorsMap: {
-                      [bcName as string]: newCursor
+                      [bcName as string]: cursor
                   },
                   keepDelta: isHierarchy || keepDelta
               })
@@ -279,7 +287,7 @@ const resetOutdatedChildrenData = (bcName: string, bcDictionary: Record<string, 
  * Checks if there is at least one visible widget with originBc or any child bc to it.
  * The check takes into account the visibility of popup widgets.
  */
-function isVisibleBc(
+function widgetIsUsedOnView(
     originBcName: string,
     widgets: WidgetMeta[],
     bcDictionary: Record<string, BcMetaState>,
@@ -307,7 +315,12 @@ function isVisibleBc(
             return (showConditionCheck(widget) && !isPopupWidget(widget.type)) || isVisiblePopup
         })
 
-    if (originBcIsOnCurrentView && leastOneWidgetIsVisible(originBcName)) {
+    const bcIsUsedInShowCondition = (currentBcName: string) =>
+        !!bcWidgetsMap[currentBcName]?.some(widget => {
+            return widget.showCondition.bcName === originBcName
+        })
+
+    if ((originBcIsOnCurrentView && leastOneWidgetIsVisible(originBcName)) || bcIsUsedInShowCondition(originBcName)) {
         return true
     }
 
@@ -317,6 +330,6 @@ function isVisibleBc(
     }
 
     return bcListOnCurrentView.some(bcName => {
-        return isChildBcForOriginBc(bcName) ? leastOneWidgetIsVisible(bcName) : false
+        return isChildBcForOriginBc(bcName) ? leastOneWidgetIsVisible(bcName) || bcIsUsedInShowCondition(originBcName) : false
     })
 }
