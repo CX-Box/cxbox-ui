@@ -75,6 +75,9 @@ export interface Session {
     pendingRequests?: PendingRequest[]
     notifications: Notification[]
     isMetaRefreshing: boolean
+    disableDeprecatedFeatures?: {
+        popupCloseAfterChangeData?: boolean
+    }
 }
 
 export interface LoginResponse extends CxboxResponse {

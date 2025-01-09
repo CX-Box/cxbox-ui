@@ -60,6 +60,8 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
                     [WidgetTypes.PickListPopup, WidgetTypes.FlatTreePopup].includes(item.type as WidgetTypes)
             )
 
+            const needPopupClose = isPickListPopup && !state.session.disableDeprecatedFeatures?.popupCloseAfterChangeData
+
             const bcUrl = buildBcUrl(bcName, true, state)
             const pendingChanges = state.view.pendingDataChanges[bcName]?.[cursor]
             const handledForceActive = state.view.handledForceActive[bcName]?.[cursor] || {}
@@ -100,7 +102,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
                                     )
                                 )
                             }
-                            if (isPickListPopup) {
+                            if (needPopupClose) {
                                 result.push(closePopup)
                             }
                             return concat(...result)
@@ -136,6 +138,6 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
                     )
                 )
             }
-            return isPickListPopup ? closePopup : EMPTY
+            return needPopupClose ? closePopup : EMPTY
         })
     )
