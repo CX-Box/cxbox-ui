@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { concat, filter, mergeMap, of } from 'rxjs'
+import { concat, EMPTY, filter, mergeMap, of } from 'rxjs'
 import { CXBoxEpic, PopupWidgetTypes, TreeAssociatedRecord } from '../../interfaces'
 import { assignTreeLinks, buildBcUrl, getDescendants } from '../../utils'
 import { changeDataItem, removeMultivalueTag } from '../../actions'
@@ -123,6 +123,9 @@ export const removeMultivalueTagEpic: CXBoxEpic = (action$, state$) =>
                     })
                 )
             }
+            const disableSecondDataChangeForAssocPopup =
+                state.session.disableDeprecatedFeatures?.secondDataChangeForAssocPopupWhenRemovingTagFromField
+
             // Non-full hierarchies drops removed item's `_associate` flag`
             // And also updates source record value
             if (widget?.options?.hierarchy) {
@@ -132,21 +135,23 @@ export const removeMultivalueTagEpic: CXBoxEpic = (action$, state$) =>
                     })?.bcName ?? bcName
 
                 return concat(
-                    of(
-                        changeDataItem({
-                            /**
-                             * This is incorrect and will break if different BC has records with
-                             * identical ids.
-                             *
-                             * TODO: Record `level` should be mapped to hierarchyData index instead
-                             */
-                            bcName: hierarchyBcName,
-                            bcUrl: buildBcUrl(hierarchyBcName, true, state),
+                    disableSecondDataChangeForAssocPopup
+                        ? EMPTY
+                        : of(
+                              changeDataItem({
+                                  /**
+                                   * This is incorrect and will break if different BC has records with
+                                   * identical ids.
+                                   *
+                                   * TODO: Record `level` should be mapped to hierarchyData index instead
+                                   */
+                                  bcName: hierarchyBcName,
+                                  bcUrl: buildBcUrl(hierarchyBcName, true, state),
 
-                            cursor: action.payload.removedItem.id,
-                            dataItem: { ...(action.payload.removedItem as any), _associate: false }
-                        })
-                    ),
+                                  cursor: action.payload.removedItem.id,
+                                  dataItem: { ...(action.payload.removedItem as any), _associate: false }
+                              })
+                          ),
                     of(
                         changeDataItem({
                             bcName,
@@ -160,14 +165,16 @@ export const removeMultivalueTagEpic: CXBoxEpic = (action$, state$) =>
             // Non hierarchies drops removed item's `_associate` flag` from popup BC
             // And also updates source record value
             return concat(
-                of(
-                    changeDataItem({
-                        bcName: popupBcName,
-                        bcUrl: buildBcUrl(popupBcName, true, state),
-                        cursor: action.payload.removedItem.id,
-                        dataItem: { ...(action.payload.removedItem as any), _associate: false }
-                    })
-                ),
+                disableSecondDataChangeForAssocPopup
+                    ? EMPTY
+                    : of(
+                          changeDataItem({
+                              bcName: popupBcName,
+                              bcUrl: buildBcUrl(popupBcName, true, state),
+                              cursor: action.payload.removedItem.id,
+                              dataItem: { ...(action.payload.removedItem as any), _associate: false }
+                          })
+                      ),
                 of(
                     changeDataItem({
                         bcName,

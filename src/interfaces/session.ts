@@ -77,6 +77,7 @@ export interface Session {
     isMetaRefreshing: boolean
     disableDeprecatedFeatures?: {
         popupCloseAfterChangeData?: boolean
+        secondDataChangeForAssocPopupWhenRemovingTagFromField?: boolean
     }
 }
 
