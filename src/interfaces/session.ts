@@ -75,6 +75,10 @@ export interface Session {
     pendingRequests?: PendingRequest[]
     notifications: Notification[]
     isMetaRefreshing: boolean
+    disableDeprecatedFeatures?: {
+        popupCloseAfterChangeData?: boolean
+        secondDataChangeForAssocPopupWhenRemovingTagFromField?: boolean
+    }
 }
 
 export interface LoginResponse extends CxboxResponse {
