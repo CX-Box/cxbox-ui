@@ -48,7 +48,7 @@ export const requiredFields: Middleware =
     (action: AnyAction) => {
         const state = getState()
         if (sendOperation.match(action)) {
-            const { bcName, operationType, widgetName } = action.payload
+            const { bcName, operationType, widgetName, confirmOperation } = action.payload
             const cursor = state.screen.bo.bc[bcName]?.cursor
             if (cursor) {
                 const bcUrl = buildBcUrl(bcName, true, state)
@@ -56,11 +56,14 @@ export const requiredFields: Middleware =
                 const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
                 const pendingValues = state.view.pendingDataChanges[bcName]?.[cursor]
                 const widget = state.view.widgets.find(item => item.name === widgetName)
+                const confirmWidgetName = confirmOperation?.widget
+                const confirmWidget = confirmWidgetName && state.view.widgets.find(item => item.name === confirmWidgetName)
                 // If operation marked as validation-sensetive, mark all 'required' fields which haven't been filled as dirty and invalid
                 if (operationRequiresAutosave(operationType, rowMeta?.actions)) {
                     // While `required` fields are assigned via rowMeta, only visually visible fields should be checked
                     // to avoid situations when field is marked as `required` but not available for user to interact.
                     const fieldsToCheck: Record<string, RowMetaField> = {}
+                    const skipConfirmWidgetFieldsCheck = confirmWidget && confirmWidget.bcName === bcName
                     // Form could be split into multiple widgets so we check all widget with the same BC as action initiator.
                     // TODO: use visibleSameBcWidgets instead of state.view.widgets (i.e. widgets showCondition should be respected)
                     state.view.widgets
@@ -76,7 +79,15 @@ export const requiredFields: Middleware =
                             }
                             itemFieldsCalc.forEach((widgetField: WidgetField) => {
                                 const matchingRowMeta = rowMeta?.fields?.find(rowMetaField => rowMetaField.key === widgetField.key)
-                                if (!fieldsToCheck[widgetField.key] && matchingRowMeta && !matchingRowMeta.hidden) {
+                                const isConfirmWidgetField =
+                                    skipConfirmWidgetFieldsCheck &&
+                                    confirmWidget?.fields?.find((field: WidgetField) => field.key === widgetField.key)
+                                if (
+                                    !fieldsToCheck[widgetField.key] &&
+                                    matchingRowMeta &&
+                                    !matchingRowMeta.hidden &&
+                                    !isConfirmWidgetField
+                                ) {
                                     fieldsToCheck[widgetField.key] = matchingRowMeta
                                 }
                             })

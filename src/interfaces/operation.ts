@@ -144,6 +144,10 @@ export interface OperationPreInvoke {
      * A message shown to user before operation fires
      */
     message: string
+    /**
+     * The custom popup widget name
+     */
+    widget?: string
 }
 
 /**
