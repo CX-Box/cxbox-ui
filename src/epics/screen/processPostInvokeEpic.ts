@@ -21,9 +21,10 @@ import {
     OperationPostInvokeDrillDown,
     OperationPostInvokeRefreshBc,
     OperationPostInvokeShowMessage,
-    OperationPostInvokeType
+    OperationPostInvokeType,
+    OperationPostInvokeWaitUntil
 } from '../../interfaces'
-import { EMPTY, filter, mergeMap, of } from 'rxjs'
+import { concat, EMPTY, filter, mergeMap, of } from 'rxjs'
 import {
     bcChangeCursors,
     bcFetchDataPages,
@@ -33,7 +34,8 @@ import {
     downloadFileByUrl,
     drillDown,
     processPostInvoke,
-    showNotification
+    showNotification,
+    waitUntil
 } from '../../actions'
 import { AnyAction } from '@reduxjs/toolkit'
 import { defaultParseURL } from '../../utils'
@@ -107,6 +109,25 @@ export const processPostInvokeEpic: CXBoxEpic = (action$, state$) =>
                 case OperationPostInvokeType.downloadFileByUrl: {
                     const postInvoke = action.payload.postInvoke as OperationPostInvokeDownloadFileByUrl
                     return of(downloadFileByUrl({ url: postInvoke.url }))
+                }
+                case OperationPostInvokeType.waitUntil: {
+                    const postInvoke = action.payload.postInvoke as OperationPostInvokeWaitUntil
+
+                    return of(waitUntil({ bcName: action.payload.bcName, postInvoke }))
+                }
+                case OperationPostInvokeType.drillDownAndWaitUntil: {
+                    const postInvoke = action.payload.postInvoke as OperationPostInvokeWaitUntil
+
+                    return concat(
+                        of(
+                            drillDown({
+                                ...(action.payload.postInvoke as OperationPostInvokeDrillDown),
+                                route: state.router,
+                                widgetName: action.payload.widgetName,
+                                onSuccessAction: waitUntil({ bcName: action.payload.bcName, postInvoke })
+                            })
+                        )
+                    )
                 }
                 default:
                     // Other types can be handled by client application

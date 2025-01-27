@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SessionScreen, PendingRequest, NotificationKeys, LoginResponse } from '../interfaces'
+import { SessionScreen, PendingRequest, NotificationKeys, LoginResponse, OperationPostInvokeWaitUntil } from '../interfaces'
 import { DrillDownType, Route } from '../interfaces/router'
 import { ViewMetaResponse, ApplicationError, PopupType } from '../interfaces'
 import { DataItem, MultivalueSingleValue, PendingDataItem, PickMap } from '../interfaces/data'
@@ -35,7 +35,9 @@ import { AxiosError } from 'axios'
 import { ApiCallContext } from '../utils'
 import { createAction, AnyAction } from '@reduxjs/toolkit'
 
-export const changeLocation = createAction<{ location: Route; forceUpdate?: boolean; isTab?: boolean }>('changeLocation')
+export const changeLocation = createAction<{ location: Route; forceUpdate?: boolean; isTab?: boolean; onSuccessAction?: AnyAction }>(
+    'changeLocation'
+)
 /**
  * Authentication request
  */
@@ -551,6 +553,7 @@ export const drillDown = createAction<{
     urlName?: string
     route: Route
     widgetName?: string
+    onSuccessAction?: AnyAction
 }>('drillDown')
 
 /**
@@ -616,10 +619,16 @@ export const forceActiveRmUpdate = createAction<{
     cursor: string
 }>('forceActiveRmUpdate')
 
+export interface WaitUntilPopupOptions {
+    status: 'progress' | 'success' | 'timeout'
+    message: string
+}
+
 /**
  * TODO
  */
 export const showViewPopup = createAction<{
+    options?: Partial<WaitUntilPopupOptions>
     /**
      * BC name of popup widget
      *
@@ -661,7 +670,7 @@ export const showViewPopup = createAction<{
     /**
      * Type of popup
      */
-    type?: PopupType
+    type?: PopupType | string
 }>('showViewPopup')
 
 /**
@@ -1208,3 +1217,5 @@ export const removePendingRequest = createAction<{
 export const addNotification = createAction<Notification>('addNotification')
 
 export const removeNotifications = createAction<NotificationKeys>('removeNotifications')
+
+export const waitUntil = createAction<{ bcName: string; postInvoke: Omit<OperationPostInvokeWaitUntil, 'type'> }>('waitUntil')

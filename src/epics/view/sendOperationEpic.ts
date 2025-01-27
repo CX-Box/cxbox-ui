@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CXBoxEpic, OperationError, OperationErrorEntity } from '../../interfaces'
+import { CXBoxEpic, OperationError, OperationErrorEntity, OperationPostInvokeRefreshBc, OperationPostInvokeType } from '../../interfaces'
 import {
     bcCancelPendingChanges,
     bcForceUpdate,
@@ -81,6 +81,14 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
                     const dataItem = response.record
                     // TODO: Remove in 2.0.0 in favor of postInvokeConfirm (is this todo needed?)
                     const preInvoke = response.preInvoke
+                    const postInvokeType = postInvoke?.type || ''
+                    const postInvokeRefreshCurrentBc =
+                        OperationPostInvokeType.refreshBC === postInvokeType && (postInvoke as OperationPostInvokeRefreshBc)?.bc === bcName
+                    const postInvokeTypesWithRefreshBc = (
+                        [OperationPostInvokeType.waitUntil, OperationPostInvokeType.drillDownAndWaitUntil] as string[]
+                    ).includes(postInvokeType)
+                    const withoutBcForceUpdate = postInvokeRefreshCurrentBc || postInvokeTypesWithRefreshBc
+
                     // defaultSaveOperation mean that executed custom autosave and postAction will be ignored
                     // drop pendingChanges and onSuccessAction execute instead
                     return defaultSaveOperation
@@ -89,7 +97,7 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
                             : EMPTY
                         : concat(
                               of(sendOperationSuccess({ bcName, cursor, dataItem })),
-                              of(bcForceUpdate({ bcName })),
+                              withoutBcForceUpdate ? EMPTY : of(bcForceUpdate({ bcName })),
                               ...postOperationRoutine(widgetName, postInvoke, preInvoke, operationType, bcName)
                           )
                 }),

@@ -207,7 +207,11 @@ export enum OperationPostInvokeType {
      *
      * @deprecated TODO: Remove in 2.0.0
      */
-    postDelete = 'postDelete'
+    postDelete = 'postDelete',
+
+    waitUntil = 'waitUntil',
+
+    drillDownAndWaitUntil = 'drillDownAndWaitUntil'
 }
 
 /**
@@ -354,6 +358,19 @@ export interface OperationPostInvokeShowMessage extends OperationPostInvoke {
     messageText: string
 }
 
+export interface OperationPostInvokeWaitUntil extends OperationPostInvoke {
+    inProgressMessage?: string
+    successCondition_bcName: string
+    successCondition_fieldKey: string
+    successCondition_value: unknown
+    successMessage?: string
+    timeout?: number | string
+    timeoutMaxRequests?: number | string
+    timeoutMessage?: string
+}
+
+export interface OperationPostInvokeDrilldownAndWaitUntil extends OperationPostInvokeDrillDown, OperationPostInvokeWaitUntil {}
+
 /**
  * A union of all action types which could be be fired after user's operation
  */
@@ -365,6 +382,8 @@ export type OperationPostInvokeAny =
     | OperationPostInvokeOpenPickList
     | OperationPostInvokeShowMessage
     | OperationPostInvokeConfirm
+    | OperationPostInvokeWaitUntil
+    | OperationPostInvokeDrilldownAndWaitUntil
 
 /**
  * TODO: ???

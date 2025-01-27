@@ -45,6 +45,8 @@ export const changeLocationEpic: CXBoxEpic = (action$, state$) =>
         filter(changeLocation.match),
         mergeMap(action => {
             const state = state$.value
+            const { onSuccessAction } = action.payload
+            const successAction = onSuccessAction ? of(onSuccessAction) : EMPTY
 
             // User not logged
             if (!state.session.active) {
@@ -52,22 +54,10 @@ export const changeLocationEpic: CXBoxEpic = (action$, state$) =>
             }
 
             if (state.router.type === RouteType.router) {
-                return of(handleRouter(state.router))
+                return concat(of(handleRouter(state.router)), successAction)
             }
 
-            // Reload screen if nextScreen and currentScreen not equal
-            // With the default route type use the first default screen, if not exist then first screen
-            const currentScreenName = state.screen.screenName
-            const defaultScreenName = state.session.screens.find(screen => screen.defaultScreen)?.name || state.session.screens[0]?.name
-            const nextScreenName = state.router.type === RouteType.default ? defaultScreenName : state.router.screenName
-
-            if (nextScreenName !== currentScreenName || action.payload.forceUpdate) {
-                const nextScreen = state.session.screens.find(item => item.name === nextScreenName)
-                return nextScreen ? of(selectScreen({ screen: nextScreen })) : of(selectScreenFail({ screenName: nextScreenName }))
-            }
             // Check cursor different between store and url
-            const currentViewName = state.view.name
-            const nextViewName = state.router.viewName
             const nextCursors = parseBcCursors(state.router.bcPath) || {}
             const cursorsDiffMap: Record<string, string> = {}
             Object.entries(nextCursors).forEach(entry => {
@@ -78,6 +68,26 @@ export const changeLocationEpic: CXBoxEpic = (action$, state$) =>
                 }
             })
             const needUpdateCursors = Object.keys(cursorsDiffMap).length
+
+            // Reload screen if nextScreen and currentScreen not equal
+            // With the default route type use the first default screen, if not exist then first screen
+            const currentScreenName = state.screen.screenName
+            const defaultScreenName = state.session.screens.find(screen => screen.defaultScreen)?.name || state.session.screens[0]?.name
+            const nextScreenName = state.router.type === RouteType.default ? defaultScreenName : state.router.screenName
+
+            if (nextScreenName !== currentScreenName || action.payload.forceUpdate) {
+                const nextScreen = state.session.screens.find(item => item.name === nextScreenName)
+                return nextScreen
+                    ? concat(
+                          of(selectScreen({ screen: nextScreen })),
+                          needUpdateCursors ? of(bcChangeCursors({ cursorsMap: cursorsDiffMap })) : EMPTY,
+                          successAction
+                      )
+                    : of(selectScreenFail({ screenName: nextScreenName }))
+            }
+
+            const currentViewName = state.view.name
+            const nextViewName = state.router.viewName
             const needUpdateViews = nextViewName !== currentViewName
             const resultObservables: Array<Observable<AnyAction>> = []
             // if cursors have difference, then put new cursors and mark BC as "dirty"
@@ -106,6 +116,6 @@ export const changeLocationEpic: CXBoxEpic = (action$, state$) =>
                 })
             }
             // The order is important (cursors are placed first, then the view is reloaded)
-            return concat(...resultObservables)
+            return concat(...resultObservables, successAction)
         })
     )

@@ -100,7 +100,8 @@ export const drillDownEpic: CXBoxEpic = (action$, state$) =>
                     result.push(
                         changeLocation({
                             location: defaultParseURL(new URL(makeRelativeUrl(urlBase), window.location.origin)),
-                            forceUpdate: true
+                            forceUpdate: true,
+                            onSuccessAction: action.payload.onSuccessAction
                         })
                     )
                     break
