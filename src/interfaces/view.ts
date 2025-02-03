@@ -20,6 +20,7 @@ import { PendingDataItem, PickMap } from './data'
 import { SystemNotification } from './objectMap'
 import { OperationTypeCrud, OperationPostInvokeConfirm } from './operation'
 import { AxiosError } from 'axios'
+import { WaitUntilPopupOptions } from '../actions'
 export { FieldType } from '@cxbox-ui/schema'
 
 export interface ViewSelectedRow {
@@ -144,7 +145,7 @@ export interface ViewMetaResponse {
     ignoreHistory?: boolean
 }
 
-export type PopupType = 'assoc' | 'file-upload' | null
+export type PopupType = 'assoc' | 'file-upload' | 'waitUntil' | null
 
 /**
  * Describes currently open popup
@@ -167,7 +168,7 @@ export interface PopupData {
      *
      * TODO: Will not be optional in 2.0.0
      */
-    type?: PopupType
+    type?: PopupType | string
     /**
      * Business component for widget in Popup
      *
@@ -200,6 +201,8 @@ export interface PopupData {
      * TODO: Used only by assocs so probably move to AssocPopupDescriptor
      */
     isFilter?: boolean
+
+    options?: Partial<WaitUntilPopupOptions>
 }
 
 export type ApplicationError = BusinessError | SystemError | ApplicationErrorBase
