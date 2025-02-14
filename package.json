@@ -1,6 +1,6 @@
 {
   "name": "@cxbox-ui/core",
-  "version": "2.5.1-CXBOX-772-alpha.0",
+  "version": "2.5.1-beta.1",
   "description": "CXBox RTK business logic",
   "author": "cxbox",
   "license": "Apache-2.0",
