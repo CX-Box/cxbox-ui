@@ -429,6 +429,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             if (!action.payload.isTab) {
                 state.pendingDataChanges = initialViewState.pendingDataChanges
             }
+            state.popupData = initialViewState.popupData
             state.selectedRow = initialViewState.selectedRow
         })
         .addCase(showNotification, (state, action) => {

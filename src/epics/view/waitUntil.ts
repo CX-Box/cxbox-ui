@@ -1,9 +1,9 @@
 import { BcDataResponse, CXBoxEpic, OperationPostInvokeWaitUntil, Store } from '../../interfaces'
-import { actions, Api } from '../../index'
 import { catchError, concat, delay, EMPTY, filter, map, mergeMap, Observable, of, timeout, TimeoutError } from 'rxjs'
-import { bcForceUpdate, closeViewPopup, showViewPopup, WaitUntilPopupOptions } from '../../actions'
+import { bcForceUpdate, closeViewPopup, showViewPopup, waitUntil, WaitUntilPopupOptions } from '../../actions'
 import { buildBcUrl, createApiErrorObservable, getFilters, getSorters } from '../../utils'
 import { DataItem } from '@cxbox-ui/schema'
+import { Api } from '../../api'
 
 const fetchDataRequest = <S extends Store, A extends Api>(bcName: string, state: S, api: A) => {
     const bc = state.screen.bo.bc[bcName]
@@ -50,7 +50,7 @@ const recursiveQueryWithRepeat = <S extends Store, A extends Api>(
 
 export const waitUntilEpic: CXBoxEpic = (action$, state$, { api }) =>
     action$.pipe(
-        filter(actions.waitUntil.match),
+        filter(waitUntil.match),
         mergeMap(action => {
             const { bcName, postInvoke } = action.payload
 
