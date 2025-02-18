@@ -184,7 +184,11 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             const newFilters = prevFilter
                 ? prevFilters.map(item => (item === prevFilter ? { ...prevFilter, value: newFilter.value } : item))
                 : [...prevFilters, newFilter]
-            state.bo.bc[bcName].page = 1
+
+            if (state.bo.bc[bcName]) {
+                state.bo.bc[bcName].page = 1
+            }
+
             state.filters[bcName] = newFilters
         })
         .addCase(bcRemoveFilter, (state, action) => {
@@ -195,12 +199,19 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             if (!newBcFilters.length) {
                 delete newFilters[bcName]
             }
-            state.bo.bc[action.payload.bcName].page = 1
+
+            if (state.bo.bc[action.payload.bcName]) {
+                state.bo.bc[action.payload.bcName].page = 1
+            }
+
             state.filters = newFilters
         })
         .addCase(bcRemoveAllFilters, (state, action) => {
             delete state.filters[action.payload.bcName]
-            state.bo.bc[action.payload.bcName].page = 1
+
+            if (state.bo.bc[action.payload.bcName]) {
+                state.bo.bc[action.payload.bcName].page = 1
+            }
         })
         .addCase(bcAddSorter, (state, action) => {
             state.sorters[action.payload.bcName] = Array.isArray(action.payload.sorter) ? action.payload.sorter : [action.payload.sorter]
