@@ -136,9 +136,9 @@ export const waitUntilEpic: CXBoxEpic = (action$, state$, { api }) =>
                 switchMap(checkedState => {
                     return recursiveQueryWithRepeat(checkedState, api, postInvoke, currentBcName).pipe(
                         takeUntil(
-                            state$.pipe(
-                                filter(() => {
-                                    return state$.value.view.popupData.type !== 'waitUntil'
+                            action$.pipe(
+                                filter(closeAction => {
+                                    return closeViewPopup.match(closeAction)
                                 })
                             )
                         ),
