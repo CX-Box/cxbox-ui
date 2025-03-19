@@ -128,8 +128,6 @@ export const selectViewFail = createAction<{
 export const bcFetchDataRequest = createAction<{
     /**
      * The business component to fetch data for
-     *
-     * @deprecated TODO: 2.0.0 Should be removed in favor of widgetName
      */
     bcName?: string
     /**
