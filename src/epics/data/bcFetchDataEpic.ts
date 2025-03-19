@@ -71,8 +71,8 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
             }
             const bcName = action.payload.bcName as string
             const bc = state.screen.bo.bc[bcName]
-            const { cursor, page = 1 } = bc
-            const limit = (widgets?.find(i => i.bcName === bcName)?.limit || bc.limit) ?? 5
+            const { cursor, page = 1 } = bc ?? {};
+            const limit = (widgets?.find(i => i.bcName === bcName)?.limit || bc?.limit) ?? 5
             const sorters = state.screen.sorters[bcName]
             /**
              * If popup has the same bc as initiator no dataEpics.ts fetching required, it will be
