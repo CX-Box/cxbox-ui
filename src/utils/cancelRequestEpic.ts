@@ -29,10 +29,13 @@ interface HasMatchFunction<T> {
 /** @public */
 type Matcher<T> = HasMatchFunction<T> | TypeGuard<T>
 
+const fullLoadViewMatcher = (action => {
+    return selectView.match(action) && !(action as ReturnType<typeof selectView>).payload.isTab
+}) as Matcher<any>
 /**
  * Default list of action types which are triggers for request cancel
  */
-export const cancelRequestActionTypes = [selectView, logout] as [Matcher<any>, ...Array<Matcher<any>>]
+export const cancelRequestActionTypes = [fullLoadViewMatcher, logout] as [Matcher<any>, ...Array<Matcher<any>>]
 
 /**
  * Creator of request cancel epic
