@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SessionScreen, PendingRequest, NotificationKeys, LoginResponse, OperationPostInvokeWaitUntil } from '../interfaces'
+import { SessionScreen, PendingRequest, NotificationKeys, LoginResponse, OperationPostInvokeWaitUntil, ISendOperation } from '../interfaces'
 import { DrillDownType, Route } from '../interfaces/router'
 import { ViewMetaResponse, ApplicationError, PopupType } from '../interfaces'
 import { DataItem, MultivalueSingleValue, PendingDataItem, PickMap } from '../interfaces/data'
@@ -390,38 +390,7 @@ export const forceActiveChangeFail = createAction<{
 /**
  * Perform CustomAction
  */
-export const sendOperation = createAction<{
-    /**
-     * The business component to fetch data for
-     */
-    bcName: string
-    /**
-     * Type of operation to be performed
-     */
-    operationType: OperationTypeCrud | string
-    /**
-     * What widget requires data
-     */
-    widgetName: string
-    /**
-     * Any other action
-     */
-    onSuccessAction?: AnyAction
-    /**
-     * params for confirm modal
-     */
-    confirm?: string
-    /**
-     * key called bk
-     *
-     * @deprecated TODO: Remove in 2.0.0
-     */
-    bcKey?: string
-    /**
-     * @deprecated TODO: Remove in 2.0.0 in favor of sendOperationWithConfirm
-     */
-    confirmOperation?: OperationPreInvoke
-}>('sendOperation')
+export const sendOperation = createAction<ISendOperation>('sendOperation')
 
 /**
  * Send operation request was unsuccessful
@@ -1217,3 +1186,5 @@ export const addNotification = createAction<Notification>('addNotification')
 export const removeNotifications = createAction<NotificationKeys>('removeNotifications')
 
 export const waitUntil = createAction<{ bcName: string; postInvoke: Omit<OperationPostInvokeWaitUntil, 'type'> }>('waitUntil')
+
+export const setPendingSendOperation = createAction<ISendOperation>('setPendingSendOperation')
