@@ -19,9 +19,9 @@
  */
 
 import { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux'
-import { Store } from '../interfaces'
-import { processPreInvoke, sendOperation } from '../actions'
+import { processPreInvoke, sendOperation, setPendingSendOperation } from '../actions'
 import { buildBcUrl, flattenOperations } from '../utils'
+import { Store } from '../interfaces'
 
 export const preInvokeAction: Middleware =
     ({ getState }: MiddlewareAPI<Dispatch, Store>) =>
@@ -29,12 +29,19 @@ export const preInvokeAction: Middleware =
     (action: AnyAction) => {
         if (sendOperation.match(action)) {
             const state = getState()
+            const forceUpdateRowMetaPending = (state.session.pendingRequests?.filter(item => item.type === 'force-active')?.length ?? 0) > 0
+
+            if (forceUpdateRowMetaPending) {
+                return next(setPendingSendOperation(action.payload))
+            }
+
             const { operationType, widgetName, confirm } = action.payload
             const bcName = state.view.widgets.find(widgetItem => widgetItem.name === widgetName)?.bcName
             const bcUrl = buildBcUrl(bcName, true, state)
             const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
             const actions = rowMeta && flattenOperations(rowMeta.actions)
             const preInvoke = actions?.find(item => item.type === operationType)?.preInvoke
+
             return preInvoke && !confirm
                 ? next(
                       processPreInvoke({
@@ -46,5 +53,6 @@ export const preInvokeAction: Middleware =
                   )
                 : next(action)
         }
+
         return next(action)
     }

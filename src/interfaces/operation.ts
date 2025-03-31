@@ -18,6 +18,7 @@ import { DrillDownType } from './router'
 import { AppNotificationType } from './objectMap'
 import { DataItem } from './data'
 import { OperationTypeCrud, OperationType } from '@cxbox-ui/schema'
+import { AnyAction } from '@reduxjs/toolkit'
 export type { OperationType, OperationInclusionDescriptor } from '@cxbox-ui/schema'
 
 export { OperationTypeCrud }
@@ -414,3 +415,36 @@ export interface OperationErrorEntity {
 }
 
 export type RequestType = 'data' | 'row-meta' | 'force-active'
+
+export interface ISendOperation {
+    /**
+     * The business component to fetch data for
+     */
+    bcName: string
+    /**
+     * Type of operation to be performed
+     */
+    operationType: OperationTypeCrud | string
+    /**
+     * What widget requires data
+     */
+    widgetName: string
+    /**
+     * Any other action
+     */
+    onSuccessAction?: AnyAction
+    /**
+     * params for confirm modal
+     */
+    confirm?: string
+    /**
+     * key called bk
+     *
+     * @deprecated TODO: Remove in 2.0.0
+     */
+    bcKey?: string
+    /**
+     * @deprecated TODO: Remove in 2.0.0 in favor of sendOperationWithConfirm
+     */
+    confirmOperation?: OperationPreInvoke
+}
