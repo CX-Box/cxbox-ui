@@ -38,7 +38,7 @@ export const loginDoneEpic: CXBoxEpic = (action$, state$) =>
 
             return of(
                 changeLocation({
-                    location: getRouteFromString(window.location.hash.replace('#', '')),
+                    location: getRouteFromString(action.payload.defaultUrl ?? window.location.hash.replace('#', '')),
                     forceUpdate: true
                 })
             )
