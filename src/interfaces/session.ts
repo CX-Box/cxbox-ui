@@ -89,6 +89,7 @@ export interface LoginResponse extends CxboxResponse {
     lastName?: string
     login?: string
     screens: SessionScreen[]
+    defaultUrl?: string
     // TODO: Сравнить ответы досье и УОР
 }
 
