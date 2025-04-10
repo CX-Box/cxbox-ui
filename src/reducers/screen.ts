@@ -97,7 +97,10 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             state.views = []
         })
         .addCase(bcFetchDataRequest, (state, action) => {
-            state.bo.bc[action.payload.bcName as string].loading = true
+            const bcName = action.payload.bcName
+            if (action.payload.bcName) {
+                state.bo.bc[bcName].loading = true
+            }
         })
         .addCase(bcLoadMore, (state, action) => {
             const currentBc = state.bo.bc[action.payload.bcName]
