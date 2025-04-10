@@ -22,9 +22,11 @@ import { Epic } from 'redux-observable'
 import { AnyAction } from '@reduxjs/toolkit'
 import { Store } from './store'
 import { Api } from '../api'
+import { WidgetMeta } from './widget'
 
-export interface EpicDependencyInjection<A = Api> {
+export interface EpicDependencyInjection<A = Api, B = { getInternalWidgets?: (widgets: WidgetMeta[]) => string[] }> {
     api: A
+    utils?: B
 }
 
 /**
