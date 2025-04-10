@@ -68,7 +68,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
              */
             if (!widget) {
                 return EMPTY
-            } 
+            }
             if (!action.payload.bcName) {
                 console.warn(`No bc value found for refresh operation`)
                 return EMPTY
