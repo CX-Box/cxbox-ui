@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CXBoxEpic, PopupWidgetTypes, Store, WidgetMeta } from '../../interfaces'
+import { CXBoxEpic, EpicDependencyInjection, PopupWidgetTypes, Store, WidgetMeta } from '../../interfaces'
 import { EMPTY, filter, mergeMap } from 'rxjs'
 import { bcFetchDataRequest, selectView } from '../../actions'
 
@@ -27,7 +27,7 @@ import { bcFetchDataRequest, selectView } from '../../actions'
  *
  * @see {@link src/epics/dataEpics.ts/bcFetchDataEpic.ts} for details how descendants resolved
  */
-export const selectViewEpic: CXBoxEpic = (action$, state$) =>
+export const selectViewEpic: CXBoxEpic = (action$, state$, { utils }) =>
     action$.pipe(
         filter(selectView.match),
         mergeMap(action => {
@@ -45,7 +45,7 @@ export const selectViewEpic: CXBoxEpic = (action$, state$) =>
             try {
                 const state = state$.value
                 if (action.payload.isTab) {
-                    return lazyLoad(state)
+                    return lazyLoad(state, utils?.getInternalWidgets)
                 }
 
                 return fullLoad(state)
@@ -83,27 +83,57 @@ function fullLoad<S extends Store>(state: S) {
     })
 }
 
+const getExcludedWidgetsFromDataFetching = (
+    widgets: WidgetMeta[],
+    getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']
+) => {
+    const popupWidgets: typeof widgets = []
+    const mainWidgets: typeof widgets = []
+
+    widgets.forEach(widget => {
+        PopupWidgetTypes.includes(widget.type) ? popupWidgets.push(widget) : mainWidgets.push(widget)
+    })
+
+    let internalPopupWidgetsNames = getInternalWidgets?.(popupWidgets) || []
+    const internalMainWidgetsNames = getInternalWidgets?.(mainWidgets) || []
+
+    if (internalPopupWidgetsNames.length && internalMainWidgetsNames.length) {
+        internalPopupWidgetsNames = internalPopupWidgetsNames.filter(internalPopupWidgetName => {
+            return !internalMainWidgetsNames.includes(internalPopupWidgetName)
+        })
+    }
+
+    return [...popupWidgets.map(widget => widget.name), ...internalPopupWidgetsNames]
+}
+
 /**
  * Here is a list of bc that require downloading.
  * Either bc that have no data are loaded, or the cursor has been reset.
  * It is assumed that the cursor for a non-displayed bookmaker will be reset if the parent cursor has changed.
  */
-function lazyLoad<S extends Store>(state: S) {
+function lazyLoad<S extends Store>(state: S, getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']) {
     const bcToLoad: Record<string, WidgetMeta> = {}
     const data = state.data
+    const bcDictionary = state.screen.bo.bc
+    const hasBcData = (bcName?: string) => (bcName ? bcName in data : false)
+    const cursorIsNull = (bcName?: string) => (bcName ? bcDictionary[bcName]?.cursor === null : false)
+    const hasBcCursor = (bcName?: string) => (bcName ? !!bcDictionary[bcName]?.cursor : false)
+    const hasBcParent = (bcName?: string) => !!bcDictionary[bcName]?.parentName
+    const excludedWidgetsFromDataFetching = getExcludedWidgetsFromDataFetching(state.view.widgets, getInternalWidgets)
 
     state.view.widgets
-        .filter(widget => !PopupWidgetTypes.includes(widget.type))
+        .filter(widget => !excludedWidgetsFromDataFetching.includes(widget.name))
         .forEach(widget => {
-            if (widget.bcName && (!(widget.bcName in data) || state.screen.bo.bc[widget.bcName]?.cursor === null)) {
+            if (widget.bcName && (!hasBcData(widget.bcName) || cursorIsNull(widget.bcName))) {
                 let bcName = widget.bcName
-                let parentName = state.screen.bo.bc[widget.bcName].parentName
-                while (parentName && (!(parentName in data) || state.screen.bo.bc[parentName]?.cursor === null)) {
+                let parentName = bcDictionary[widget.bcName].parentName
+
+                while (parentName && (!hasBcData(parentName) || cursorIsNull(parentName))) {
                     bcName = parentName
-                    parentName = state.screen.bo.bc[parentName].parentName
+                    parentName = bcDictionary[parentName].parentName
                 }
 
-                if (!bcToLoad[bcName]) {
+                if (!bcToLoad[bcName] && (!hasBcParent(bcName) || hasBcCursor(bcDictionary[bcName]?.parentName))) {
                     bcToLoad[bcName] = widget
                 }
             }
