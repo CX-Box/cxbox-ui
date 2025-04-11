@@ -24,7 +24,11 @@ import { Store } from './store'
 import { Api } from '../api'
 import { WidgetMeta } from './widget'
 
-export interface EpicDependencyInjection<A = Api, B = { getInternalWidgets?: (widgets: WidgetMeta[]) => string[] }> {
+export interface Utils {
+    getInternalWidgets?: (widgets: WidgetMeta[]) => string[]
+}
+
+export interface EpicDependencyInjection<A = Api, B = Utils> {
     api: A
     utils?: B
 }
