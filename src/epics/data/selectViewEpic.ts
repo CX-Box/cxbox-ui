@@ -87,15 +87,23 @@ const getExcludedWidgetsFromDataFetching = (
     widgets: WidgetMeta[],
     getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']
 ) => {
-    const popupWidgets = widgets.filter(widget => PopupWidgetTypes.includes(widget.type))
+    const popupWidgets: typeof widgets = []
+    const mainWidgets: typeof widgets = []
+
+    widgets.forEach(widget => {
+        PopupWidgetTypes.includes(widget.type) ? popupWidgets.push(widget) : mainWidgets.push(widget)
+    })
+
     let internalPopupWidgetsNames = getInternalWidgets?.(popupWidgets) || []
-    const internalMainWidgetsNames = getInternalWidgets?.(popupWidgets) || []
-    if (internalMainWidgetsNames.length && internalPopupWidgetsNames.length) {
+    const internalMainWidgetsNames = getInternalWidgets?.(mainWidgets) || []
+
+    if (internalPopupWidgetsNames.length && internalMainWidgetsNames.length) {
         internalPopupWidgetsNames = internalPopupWidgetsNames.filter(internalPopupWidgetName => {
             return !internalMainWidgetsNames.includes(internalPopupWidgetName)
         })
     }
-    return [...popupWidgets, ...internalPopupWidgetsNames]
+
+    return [...popupWidgets.map(widget => widget.name), ...internalPopupWidgetsNames]
 }
 
 /**
@@ -108,17 +116,19 @@ function lazyLoad<S extends Store>(state: S, getInternalWidgets: EpicDependencyI
     const data = state.data
     const bcDictionary = state.screen.bo.bc
     const hasBcData = (bcName?: string) => (bcName ? bcName in data : false)
-    const hasBcCursor = (bcName?: string) => (bcName ? bcDictionary[bcName]?.cursor !== null : false)
+    const cursorIsNull = (bcName?: string) => (bcName ? bcDictionary[bcName]?.cursor === null : false)
+    const hasBcCursor = (bcName?: string) => (bcName ? !!bcDictionary[bcName]?.cursor : false)
     const hasBcParent = (bcName?: string) => !!bcDictionary[bcName]?.parentName
     const excludedWidgetsFromDataFetching = getExcludedWidgetsFromDataFetching(state.view.widgets, getInternalWidgets)
 
     state.view.widgets
-        .filter(widget => !excludedWidgetsFromDataFetching)
+        .filter(widget => !excludedWidgetsFromDataFetching.includes(widget.name))
         .forEach(widget => {
-            if (!hasBcData(widget.bcName) || !hasBcCursor(widget.bcName)) {
+            if (widget.bcName && (!hasBcData(widget.bcName) || cursorIsNull(widget.bcName))) {
                 let bcName = widget.bcName
                 let parentName = bcDictionary[widget.bcName].parentName
-                while (!hasBcData(parentName) || !hasBcCursor(parentName)) {
+
+                while (parentName && (!hasBcData(parentName) || cursorIsNull(parentName))) {
                     bcName = parentName
                     parentName = bcDictionary[parentName].parentName
                 }
