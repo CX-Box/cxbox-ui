@@ -15,9 +15,9 @@
  */
 
 import { concat, EMPTY, filter, switchMap } from 'rxjs'
-import { CXBoxEpic, DrillDownType } from '../../interfaces'
 import { bcAddFilter, bcAddSorter, bcForceUpdate, bcRemoveAllFilters, changeLocation, drillDown } from '../../actions'
-import { defaultParseURL, makeRelativeUrl, parseFilters, parseSorters } from '../../utils'
+import { defaultParseURL, makeRelativeUrl, parseFilters, parseSorters, processDrilldownFilters } from '../../utils'
+import { CXBoxEpic, DrillDownType } from '../../interfaces'
 
 export const drillDownEpic: CXBoxEpic = (action$, state$) =>
     action$.pipe(
@@ -77,7 +77,7 @@ export const drillDownEpic: CXBoxEpic = (action$, state$) =>
                     // Apply each new filter
                     Object.entries(newFilters).forEach(([bcName, filterExpression]) => {
                         const parsedFilters = parseFilters(filterExpression)?.map(item => ({ ...item, viewName }))
-                        parsedFilters?.forEach(parsedFilter => {
+                        processDrilldownFilters(parsedFilters)?.forEach(parsedFilter => {
                             bcToUpdate[bcName] = true
                             result.push(bcAddFilter({ bcName, filter: parsedFilter }))
                         })

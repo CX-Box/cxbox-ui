@@ -201,3 +201,30 @@ export function getFilterType(fieldType: FieldType) {
             return FilterType.equals
     }
 }
+
+/**
+ * Function for converting filters from 'moreOrEqualThan' and 'lessOrEqualThan' types to a 'range' type
+ *
+ * @param filters array of BcFilter objects
+ * @category Utils
+ */
+export const processDrilldownFilters = (filters: BcFilter[]) => {
+    const result: BcFilter[] = []
+    const rangeFilters: Record<string, BcFilter> = {}
+
+    filters.forEach(filterItem => {
+        const { type, fieldName, value } = filterItem
+
+        if (type === FilterType.greaterOrEqualThan || type === FilterType.lessOrEqualThan) {
+            if (!rangeFilters[fieldName]) {
+                rangeFilters[fieldName] = { ...filterItem, type: FilterType.range, value: [null, null] }
+            }
+            const rangeFilterValue = rangeFilters[fieldName].value as DataValue[]
+            rangeFilterValue[type === FilterType.greaterOrEqualThan ? 0 : 1] = value as DataValue
+        } else {
+            result.push(filterItem)
+        }
+    })
+
+    return [...result, ...Object.values(rangeFilters)]
+}
