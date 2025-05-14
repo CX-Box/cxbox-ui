@@ -3245,34 +3245,16 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "<{\n    bcName: string;\n    operationType: "
+                  "text": "<"
                 },
                 {
                   "kind": "Reference",
-                  "text": "OperationTypeCrud",
-                  "canonicalReference": "@cxbox-ui/core!OperationTypeCrud:enum"
+                  "text": "ISendOperation",
+                  "canonicalReference": "@cxbox-ui/core!ISendOperation:interface"
                 },
                 {
                   "kind": "Content",
-                  "text": " | string;\n    widgetName: string;\n    onSuccessAction?: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "AnyAction",
-                  "canonicalReference": "redux!AnyAction:interface"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";\n    confirm?: string;\n    bcKey?: string;\n    confirmOperation?: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "OperationPreInvoke",
-                  "canonicalReference": "@cxbox-ui/core!OperationPreInvoke:interface"
-                },
-                {
-                  "kind": "Content",
-                  "text": ";\n}, string>"
+                  "text": ", string>"
                 }
               ],
               "fileUrlPath": "src/actions/index.ts",
@@ -3281,7 +3263,7 @@
               "name": "sendOperation",
               "variableTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 10
+                "endIndex": 6
               }
             },
             {
@@ -3361,6 +3343,47 @@
               "isReadonly": true,
               "releaseTag": "Public",
               "name": "sendOperationSuccess",
+              "variableTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 6
+              }
+            },
+            {
+              "kind": "Variable",
+              "canonicalReference": "@cxbox-ui/core!actions.setPendingSendOperation:var",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "setPendingSendOperation: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import(\"@reduxjs/toolkit\")."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ActionCreatorWithOptionalPayload",
+                  "canonicalReference": "@reduxjs/toolkit!ActionCreatorWithOptionalPayload:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<"
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ISendOperation",
+                  "canonicalReference": "@cxbox-ui/core!ISendOperation:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", string>"
+                }
+              ],
+              "fileUrlPath": "src/actions/index.ts",
+              "isReadonly": true,
+              "releaseTag": "Public",
+              "name": "setPendingSendOperation",
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 6
@@ -8178,6 +8201,15 @@
             },
             {
               "kind": "Content",
+              "text": ", B = "
+            },
+            {
+              "kind": "Reference",
+              "text": "Utils",
+              "canonicalReference": "@cxbox-ui/core!Utils:interface"
+            },
+            {
+              "kind": "Content",
               "text": "> "
             }
           ],
@@ -8193,6 +8225,17 @@
               "defaultTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
+              }
+            },
+            {
+              "typeParameterName": "B",
+              "constraintTokenRange": {
+                "startIndex": 0,
+                "endIndex": 0
+              },
+              "defaultTypeTokenRange": {
+                "startIndex": 3,
+                "endIndex": 4
               }
             }
           ],
@@ -8221,6 +8264,33 @@
               "isOptional": false,
               "releaseTag": "Public",
               "name": "api",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!EpicDependencyInjection#utils:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "utils?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "B"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "utils",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -9386,6 +9456,30 @@
               "isReadonly": true,
               "releaseTag": "Public",
               "name": "sendOperationEpic",
+              "variableTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "Variable",
+              "canonicalReference": "@cxbox-ui/core!epics.setPendingSendOperationEpic:var",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "setPendingSendOperationEpic: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "CXBoxEpic",
+                  "canonicalReference": "@cxbox-ui/core!CXBoxEpic:type"
+                }
+              ],
+              "fileUrlPath": "src/epics/view/setPendingSendOperationEpic.ts",
+              "isReadonly": true,
+              "releaseTag": "Public",
+              "name": "setPendingSendOperationEpic",
               "variableTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -13284,6 +13378,15 @@
                 },
                 {
                   "kind": "Content",
+                  "text": ", B = "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Utils",
+                  "canonicalReference": "@cxbox-ui/core!Utils:interface"
+                },
+                {
+                  "kind": "Content",
                   "text": "> "
                 }
               ],
@@ -13299,6 +13402,17 @@
                   "defaultTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
+                  }
+                },
+                {
+                  "typeParameterName": "B",
+                  "constraintTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
                   }
                 }
               ],
@@ -13327,6 +13441,33 @@
                   "isOptional": false,
                   "releaseTag": "Public",
                   "name": "api",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.EpicDependencyInjection#utils:member",
+                  "docComment": "",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "utils?: "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "B"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": true,
+                  "releaseTag": "Public",
+                  "name": "utils",
                   "propertyTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
@@ -14488,6 +14629,220 @@
               "name": "isCustomWidgetConfiguration"
             },
             {
+              "kind": "Interface",
+              "canonicalReference": "@cxbox-ui/core!interfaces.ISendOperation:interface",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "export interface ISendOperation "
+                }
+              ],
+              "fileUrlPath": "src/interfaces/operation.ts",
+              "releaseTag": "Public",
+              "name": "ISendOperation",
+              "preserveMemberOrder": false,
+              "members": [
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.ISendOperation#bcKey:member",
+                  "docComment": "/**\n * key called bk\n *\n * @deprecated\n *\n * TODO: Remove in 2.0.0\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "bcKey?: "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "string"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": true,
+                  "releaseTag": "Public",
+                  "name": "bcKey",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.ISendOperation#bcName:member",
+                  "docComment": "/**\n * The business component to fetch data for\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "bcName: "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "string"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": false,
+                  "releaseTag": "Public",
+                  "name": "bcName",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.ISendOperation#confirm:member",
+                  "docComment": "/**\n * params for confirm modal\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "confirm?: "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "string"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": true,
+                  "releaseTag": "Public",
+                  "name": "confirm",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.ISendOperation#confirmOperation:member",
+                  "docComment": "/**\n * @deprecated\n *\n * TODO: Remove in 2.0.0 in favor of sendOperationWithConfirm\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "confirmOperation?: "
+                    },
+                    {
+                      "kind": "Reference",
+                      "text": "OperationPreInvoke",
+                      "canonicalReference": "@cxbox-ui/core!OperationPreInvoke:interface"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": true,
+                  "releaseTag": "Public",
+                  "name": "confirmOperation",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.ISendOperation#onSuccessAction:member",
+                  "docComment": "/**\n * Any other action\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "onSuccessAction?: "
+                    },
+                    {
+                      "kind": "Reference",
+                      "text": "AnyAction",
+                      "canonicalReference": "redux!AnyAction:interface"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": true,
+                  "releaseTag": "Public",
+                  "name": "onSuccessAction",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.ISendOperation#operationType:member",
+                  "docComment": "/**\n * Type of operation to be performed\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "operationType: "
+                    },
+                    {
+                      "kind": "Reference",
+                      "text": "OperationTypeCrud",
+                      "canonicalReference": "@cxbox-ui/core!OperationTypeCrud:enum"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": " | string"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": false,
+                  "releaseTag": "Public",
+                  "name": "operationType",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  }
+                },
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.ISendOperation#widgetName:member",
+                  "docComment": "/**\n * What widget requires data\n */\n",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "widgetName: "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "string"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": false,
+                  "releaseTag": "Public",
+                  "name": "widgetName",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                }
+              ],
+              "extendsTokenRanges": []
+            },
+            {
               "kind": "Function",
               "canonicalReference": "@cxbox-ui/core!interfaces.isOperationGroup:function(1)",
               "docComment": "/**\n * @param operation - \n */\n",
@@ -14946,6 +15301,33 @@
                   "isOptional": true,
                   "releaseTag": "Public",
                   "name": "activeRole",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  }
+                },
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.LoginResponse#defaultUrl:member",
+                  "docComment": "",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "defaultUrl?: "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "string"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": true,
+                  "releaseTag": "Public",
+                  "name": "defaultUrl",
                   "propertyTypeTokenRange": {
                     "startIndex": 1,
                     "endIndex": 2
@@ -23292,6 +23674,60 @@
             },
             {
               "kind": "Interface",
+              "canonicalReference": "@cxbox-ui/core!interfaces.Utils:interface",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "export interface Utils "
+                }
+              ],
+              "fileUrlPath": "src/interfaces/customEpics.ts",
+              "releaseTag": "Public",
+              "name": "Utils",
+              "preserveMemberOrder": false,
+              "members": [
+                {
+                  "kind": "PropertySignature",
+                  "canonicalReference": "@cxbox-ui/core!interfaces.Utils#getInternalWidgets:member",
+                  "docComment": "",
+                  "excerptTokens": [
+                    {
+                      "kind": "Content",
+                      "text": "getInternalWidgets?: "
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "(widgets: "
+                    },
+                    {
+                      "kind": "Reference",
+                      "text": "WidgetMeta",
+                      "canonicalReference": "@cxbox-ui/core!WidgetMeta:interface"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": "[]) => string[]"
+                    },
+                    {
+                      "kind": "Content",
+                      "text": ";"
+                    }
+                  ],
+                  "isReadonly": false,
+                  "isOptional": true,
+                  "releaseTag": "Public",
+                  "name": "getInternalWidgets",
+                  "propertyTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 4
+                  }
+                }
+              ],
+              "extendsTokenRanges": []
+            },
+            {
+              "kind": "Interface",
               "canonicalReference": "@cxbox-ui/core!interfaces.ViewMetaResponse:interface",
               "docComment": "/**\n * View description returned by Cxbox API\n */\n",
               "excerptTokens": [
@@ -27993,6 +28429,220 @@
           "name": "isCustomWidgetConfiguration"
         },
         {
+          "kind": "Interface",
+          "canonicalReference": "@cxbox-ui/core!ISendOperation:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface ISendOperation "
+            }
+          ],
+          "fileUrlPath": "src/interfaces/operation.ts",
+          "releaseTag": "Public",
+          "name": "ISendOperation",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!ISendOperation#bcKey:member",
+              "docComment": "/**\n * key called bk\n *\n * @deprecated\n *\n * TODO: Remove in 2.0.0\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "bcKey?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "bcKey",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!ISendOperation#bcName:member",
+              "docComment": "/**\n * The business component to fetch data for\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "bcName: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "bcName",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!ISendOperation#confirm:member",
+              "docComment": "/**\n * params for confirm modal\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "confirm?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "confirm",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!ISendOperation#confirmOperation:member",
+              "docComment": "/**\n * @deprecated\n *\n * TODO: Remove in 2.0.0 in favor of sendOperationWithConfirm\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "confirmOperation?: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OperationPreInvoke",
+                  "canonicalReference": "@cxbox-ui/core!OperationPreInvoke:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "confirmOperation",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!ISendOperation#onSuccessAction:member",
+              "docComment": "/**\n * Any other action\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "onSuccessAction?: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "AnyAction",
+                  "canonicalReference": "redux!AnyAction:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "onSuccessAction",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!ISendOperation#operationType:member",
+              "docComment": "/**\n * Type of operation to be performed\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "operationType: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "OperationTypeCrud",
+                  "canonicalReference": "@cxbox-ui/core!OperationTypeCrud:enum"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "operationType",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 3
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!ISendOperation#widgetName:member",
+              "docComment": "/**\n * What widget requires data\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "widgetName: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "widgetName",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
           "kind": "Function",
           "canonicalReference": "@cxbox-ui/core!isOperationGroup:function(1)",
           "docComment": "/**\n * @param operation - \n */\n",
@@ -28451,6 +29101,33 @@
               "isOptional": true,
               "releaseTag": "Public",
               "name": "activeRole",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!LoginResponse#defaultUrl:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "defaultUrl?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "defaultUrl",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
                 "endIndex": 2
@@ -37467,6 +38144,60 @@
           "extendsTokenRanges": []
         },
         {
+          "kind": "Interface",
+          "canonicalReference": "@cxbox-ui/core!Utils:interface",
+          "docComment": "",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface Utils "
+            }
+          ],
+          "fileUrlPath": "src/interfaces/customEpics.ts",
+          "releaseTag": "Public",
+          "name": "Utils",
+          "preserveMemberOrder": false,
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "@cxbox-ui/core!Utils#getInternalWidgets:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getInternalWidgets?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(widgets: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WidgetMeta",
+                  "canonicalReference": "@cxbox-ui/core!WidgetMeta:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]) => string[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": true,
+              "releaseTag": "Public",
+              "name": "getInternalWidgets",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 4
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
           "kind": "Namespace",
           "canonicalReference": "@cxbox-ui/core!utils:namespace",
           "docComment": "",
@@ -39751,6 +40482,57 @@
                 }
               ],
               "name": "presort"
+            },
+            {
+              "kind": "Function",
+              "canonicalReference": "@cxbox-ui/core!utils.processDrilldownFilters:function(1)",
+              "docComment": "/**\n * Function for converting filters from 'moreOrEqualThan' and 'lessOrEqualThan' types to a 'range' type\n *\n * @param filters - array of BcFilter objects  @category Utils\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "processDrilldownFilters: (filters: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "BcFilter",
+                  "canonicalReference": "@cxbox-ui/core!BcFilter:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "BcFilter",
+                  "canonicalReference": "@cxbox-ui/core!BcFilter:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]"
+                }
+              ],
+              "fileUrlPath": "src/utils/filters.ts",
+              "returnTypeTokenRange": {
+                "startIndex": 4,
+                "endIndex": 6
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "filters",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  },
+                  "isOptional": false
+                }
+              ],
+              "name": "processDrilldownFilters"
             },
             {
               "kind": "Function",
