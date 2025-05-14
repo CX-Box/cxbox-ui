@@ -125,7 +125,8 @@ declare namespace actions {
         removePendingRequest,
         addNotification,
         removeNotifications,
-        waitUntil
+        waitUntil,
+        setPendingSendOperation
     }
 }
 export { actions }
@@ -922,9 +923,11 @@ depthFrom: number;
 const emptyAction: ActionCreatorWithOptionalPayload<null, string>;
 
 // @public (undocumented)
-export interface EpicDependencyInjection<A = Api> {
+export interface EpicDependencyInjection<A = Api, B = Utils> {
     // (undocumented)
     api: A;
+    // (undocumented)
+    utils?: B;
 }
 
 declare namespace epics {
@@ -939,6 +942,7 @@ declare namespace epics {
         showAllTableRecordsInitEpic,
         clearPendingDataChangesAfterCursorChangeEpic,
         waitUntilEpic,
+        setPendingSendOperationEpic,
         drillDownEpic,
         loginDoneEpic,
         changeViewEpic,
@@ -1352,6 +1356,7 @@ declare namespace interfaces {
         OperationError,
         OperationErrorEntity,
         RequestType,
+        ISendOperation,
         RowMeta,
         RowMetaResponse,
         RowMetaField,
@@ -1359,6 +1364,7 @@ declare namespace interfaces {
         BcFilter,
         BcSorter,
         FilterGroup,
+        Utils,
         EpicDependencyInjection,
         CXBoxEpic,
         isViewNavigationItem,
@@ -1387,6 +1393,19 @@ export function isCustomWidget(descriptor: CustomWidgetDescriptor): descriptor i
 
 // @public
 export function isCustomWidgetConfiguration(descriptor: CustomWidgetDescriptor): descriptor is CustomWidgetConfiguration;
+
+// @public (undocumented)
+export interface ISendOperation {
+    // @deprecated
+    bcKey?: string;
+    bcName: string;
+    confirm?: string;
+    // @deprecated (undocumented)
+    confirmOperation?: OperationPreInvoke;
+    onSuccessAction?: AnyAction_2;
+    operationType: OperationTypeCrud | string;
+    widgetName: string;
+}
 
 // @public (undocumented)
 export function isOperationGroup(operation: Operation | OperationGroup): operation is OperationGroup;
@@ -1445,6 +1464,8 @@ errorMsg: string;
 export interface LoginResponse extends CxboxResponse {
     // (undocumented)
     activeRole?: string;
+    // (undocumented)
+    defaultUrl?: string;
     // (undocumented)
     devPanelEnabled?: boolean;
     // (undocumented)
@@ -1885,6 +1906,9 @@ export enum PositionTypes {
 function presort(data: TreeNodeBidirectional[]): TreeNodeBidirectional[];
 
 // @public
+const processDrilldownFilters: (filters: BcFilter[]) => BcFilter[];
+
+// @public
 const processPostInvoke: ActionCreatorWithOptionalPayload<    {
 bcName: string;
 postInvoke: OperationPostInvokeAny;
@@ -2187,15 +2211,7 @@ viewName: string;
 const selectViewFailEpic: CXBoxEpic;
 
 // @public
-const sendOperation: ActionCreatorWithOptionalPayload<    {
-bcName: string;
-operationType: OperationTypeCrud | string;
-widgetName: string;
-onSuccessAction?: AnyAction_2;
-confirm?: string;
-bcKey?: string;
-confirmOperation?: OperationPreInvoke;
-}, string>;
+const sendOperation: ActionCreatorWithOptionalPayload<ISendOperation, string>;
 
 // @public
 const sendOperationAssociateEpic: CXBoxEpic;
@@ -2279,6 +2295,12 @@ export interface SessionScreen {
     // (undocumented)
     url: string;
 }
+
+// @public (undocumented)
+const setPendingSendOperation: ActionCreatorWithOptionalPayload<ISendOperation, string>;
+
+// @public (undocumented)
+const setPendingSendOperationEpic: CXBoxEpic;
 
 // @public
 const showAllTableRecordsInit: ActionCreatorWithOptionalPayload<    {
@@ -2469,6 +2491,12 @@ export interface UserRole {
     value: string;
 }
 
+// @public (undocumented)
+export interface Utils {
+    // (undocumented)
+    getInternalWidgets?: (widgets: WidgetMeta[]) => string[];
+}
+
 declare namespace utils {
     export {
         addTailControlSequences,
@@ -2494,6 +2522,7 @@ declare namespace utils {
         parseFilters,
         parseSorters,
         getFilterType,
+        processDrilldownFilters,
         flattenOperations,
         matchOperationRole,
         getBcChildren,
