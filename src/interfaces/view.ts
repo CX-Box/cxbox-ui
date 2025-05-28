@@ -54,6 +54,11 @@ export interface ViewState extends ViewMetaResponse {
             [cursor: string]: PendingDataItem
         }
     }
+    pendingDataChangesNow: {
+        [bcName: string]: {
+            [cursor: string]: PendingDataItem
+        }
+    }
     handledForceActive: {
         [bcName: string]: {
             [cursor: string]: PendingDataItem

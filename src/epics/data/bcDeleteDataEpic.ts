@@ -31,9 +31,10 @@ export const bcDeleteDataEpic: CXBoxEpic = (action$, store$, { api }) =>
             const bcName = action.payload.bcName
             const cursor = state.screen.bo.bc[bcName].cursor
             const bcUrl = buildBcUrl(bcName, true, state)
+            const pendingChangesNow = state.view.pendingDataChangesNow[bcName]?.[cursor]
             const context = { widgetName: action.payload.widgetName }
             const isTargetFormatPVF = state.view.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-            return api.deleteBcData(state.screen.screenName, bcUrl, context).pipe(
+            return api.deleteBcData(state.screen.screenName, bcUrl, pendingChangesNow, context).pipe(
                 mergeMap(data => {
                     const postInvoke = data.postActions?.[0]
                     return concat(

@@ -71,21 +71,31 @@ export class Api {
         screenName: string,
         bcUrl: string,
         data: PendingDataItem & { vstamp: number },
+        changedNow: PendingDataItem,
         context: ApiCallContext,
         params?: GetParamsMap
     ) {
         const url = applyParams(buildUrl`data/${screenName}/` + bcUrl, params)
-        return this.api$.put<DataItemResponse>(url, { data }, context).pipe(map(response => response.data))
+        return this.api$.put<DataItemResponse>(url, { data, changedNow }, context).pipe(map(response => response.data))
     }
 
-    deleteBcData(screenName: string, bcUrl: string = '', context: ApiCallContext, params?: GetParamsMap) {
+    deleteBcData(screenName: string, bcUrl: string = '', changedNow: PendingDataItem, context: ApiCallContext, params?: GetParamsMap) {
         const url = applyParams(buildUrl`data/${screenName}/` + bcUrl, params)
-        return this.api$.delete<DataItemResponse>(url, context).pipe(map(response => response.data))
+        return this.api$.delete<DataItemResponse>(url, { data: { changedNow }, ...context }).pipe(map(response => response.data))
     }
 
-    customAction(screenName: string, bcUrl: string, data?: Record<string, any>, context?: ApiCallContext, params?: GetParamsMap) {
+    customAction(
+        screenName: string,
+        bcUrl: string,
+        data?: Record<string, any>,
+        changedNow?: PendingDataItem,
+        context?: ApiCallContext,
+        params?: GetParamsMap
+    ) {
         const url = applyParams(buildUrl`custom-action/${screenName}/` + bcUrl, params)
-        return this.api$.post<DataItemResponse>(url, { data: data || {} }, undefined, context).pipe(map(response => response.data))
+        return this.api$
+            .post<DataItemResponse>(url, { data: data || {}, changedNow }, undefined, context)
+            .pipe(map(response => response.data))
     }
 
     associate(screenName: string, bcUrl: string, data: AssociatedItem[] | Record<string, AssociatedItem[]>, params?: GetParamsMap) {
@@ -101,9 +111,15 @@ export class Api {
         return this.api$.post<any>(url, processedData).pipe(map(response => response.data))
     }
 
-    getRmByForceActive(screenName: string, bcUrl: string | null, data: PendingDataItem & { vstamp: number }, params?: GetParamsMap) {
+    getRmByForceActive(
+        screenName: string,
+        bcUrl: string | null,
+        data: PendingDataItem & { vstamp: number },
+        changedNow: PendingDataItem,
+        params?: GetParamsMap
+    ) {
         const url = applyParams(buildUrl`row-meta/${screenName}/` + (bcUrl ?? ''), params)
-        return this.api$.post<RowMetaResponse>(url, { data }).pipe(map(response => response.data.row))
+        return this.api$.post<RowMetaResponse>(url, { data, changedNow }).pipe(map(response => response.data.row))
     }
     /**
      * Get Cxbox API file upload endpoint based on baseURL of axios instance
