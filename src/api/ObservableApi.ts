@@ -110,9 +110,9 @@ export class Api {
             .pipe(map(response => response.data.data))
     }
 
-    getRmByForceActive(screenName: string, bcUrl: string | null, data: PendingDataItem & { vstamp: number }, params?: GetParamsMap) {
+    getRmByForceActive(screenName: string, bcUrl: string | null, data: PendingDataItem & { vstamp: number },changedNow: PendingDataItem, params?: GetParamsMap) {
         return this.api$
-            .request<RowMetaResponse>('post', buildUrl`row-meta/${screenName}/` + (bcUrl ?? ''), { data: { data }, params })
+            .request<RowMetaResponse>('post', buildUrl`row-meta/${screenName}/` + (bcUrl ?? ''), { data: { data, changedNow }, params })
             .pipe(map(response => response.data.data.row))
     }
     /**
