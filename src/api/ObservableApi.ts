@@ -101,9 +101,15 @@ export class Api {
         return this.api$.post<any>(url, processedData).pipe(map(response => response.data))
     }
 
-    getRmByForceActive(screenName: string, bcUrl: string | null, data: PendingDataItem & { vstamp: number }, params?: GetParamsMap) {
+    getRmByForceActive(
+        screenName: string,
+        bcUrl: string | null,
+        data: PendingDataItem & { vstamp: number },
+        changedNow: PendingDataItem,
+        params?: GetParamsMap
+    ) {
         const url = applyParams(buildUrl`row-meta/${screenName}/` + (bcUrl ?? ''), params)
-        return this.api$.post<RowMetaResponse>(url, { data }).pipe(map(response => response.data.row))
+        return this.api$.post<RowMetaResponse>(url, { data, changedNow }).pipe(map(response => response.data.row))
     }
     /**
      * Get Cxbox API file upload endpoint based on baseURL of axios instance
