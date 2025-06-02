@@ -47,12 +47,7 @@ export function getFilters(filters: BcFilter[]) {
                 result[`${item.fieldName}.${FilterType.lessOrEqualThan}`] = String(values[1])
             }
         } else {
-            let value = String(item.value)
-            if (Array.isArray(item.value)) {
-                const values = (item.value as DataValue[]).map(val => `"${val}"`)
-                value = `[${values}]`
-            }
-
+            const value = Array.isArray(item.value) ? JSON.stringify(item.value) : String(item.value)
             const separator = item.fieldName ? '.' : ''
             result[`${item.fieldName}${separator}${item.type}`] = value
         }
