@@ -21,7 +21,8 @@ import {
     changeLocation,
     sendOperation,
     sendOperationFail,
-    sendOperationSuccess
+    sendOperationSuccess,
+    setOperationFinished
 } from '../../actions'
 import { catchError, concat, EMPTY, filter, mergeMap, of } from 'rxjs'
 import { buildBcUrl, getFilters, getSorters, matchOperationRole } from '../../utils'
@@ -91,15 +92,18 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
 
                     // defaultSaveOperation mean that executed custom autosave and postAction will be ignored
                     // drop pendingChanges and onSuccessAction execute instead
-                    return defaultSaveOperation
-                        ? action?.payload?.onSuccessAction
-                            ? concat(of(bcCancelPendingChanges({ bcNames: [bcName] })), of(action.payload.onSuccessAction))
-                            : EMPTY
-                        : concat(
-                              of(sendOperationSuccess({ bcName, cursor, dataItem })),
-                              withoutBcForceUpdate ? EMPTY : of(bcForceUpdate({ bcName })),
-                              ...postOperationRoutine(widgetName, postInvoke, preInvoke, operationType, bcName)
-                          )
+                    return concat(
+                        of(setOperationFinished({ bcName, operationType })),
+                        defaultSaveOperation
+                            ? action?.payload?.onSuccessAction
+                                ? concat(of(bcCancelPendingChanges({ bcNames: [bcName] })), of(action.payload.onSuccessAction))
+                                : EMPTY
+                            : concat(
+                                  of(sendOperationSuccess({ bcName, cursor, dataItem })),
+                                  withoutBcForceUpdate ? EMPTY : of(bcForceUpdate({ bcName })),
+                                  ...postOperationRoutine(widgetName, postInvoke, preInvoke, operationType, bcName)
+                              )
+                    )
                 }),
                 catchError((e: AxiosError) => {
                     console.error(e)
@@ -110,7 +114,11 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
                         entityError = operationError?.error?.entity
                         viewError = operationError?.error?.popup?.[0]
                     }
-                    return concat(of(sendOperationFail({ bcName, bcUrl, viewError, entityError })), createApiErrorObservable(e, context))
+                    return concat(
+                        of(setOperationFinished({ bcName, operationType })),
+                        of(sendOperationFail({ bcName, bcUrl, viewError, entityError })),
+                        createApiErrorObservable(e, context)
+                    )
                 })
             )
         })

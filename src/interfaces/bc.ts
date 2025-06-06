@@ -19,6 +19,7 @@
  */
 
 import { FilterGroup } from './filters'
+import { OperationType } from '@cxbox-ui/schema'
 
 /**
  * Meta data.ts for Business Component
@@ -99,4 +100,5 @@ export interface BcMetaState extends BcMeta {
      * controls which record is expanded and which children should be fetched.
      */
     depthBc?: DepthBcType
+    operationsInProgress?: OperationType[]
 }
