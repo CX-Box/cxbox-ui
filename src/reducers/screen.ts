@@ -20,6 +20,7 @@ import { OperationTypeCrud } from '@cxbox-ui/schema'
 import { parseFilters, parseSorters } from '../utils'
 import { BcFilter, BcSorter } from '../interfaces'
 import {
+    associateInProgress,
     bcAddFilter,
     bcAddSorter,
     bcChangeCursors,
@@ -43,6 +44,7 @@ import {
     sendOperation,
     sendOperationFail,
     sendOperationSuccess,
+    setOperationFinished,
     showViewPopup
 } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
@@ -136,8 +138,11 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             }
         })
         .addCase(sendOperation, (state, action) => {
+            const { bcName, operationType } = action.payload
             if (!operationsHandledLocally.includes(action.payload.operationType)) {
-                state.bo.bc[action.payload.bcName].loading = true
+                state.bo.bc[bcName].loading = true
+                const prevOperationsInProgress = state.bo.bc[bcName].operationsInProgress ?? []
+                state.bo.bc[bcName].operationsInProgress = [...prevOperationsInProgress, operationType]
             }
         })
         .addCase(bcNewDataSuccess, (state, action) => {
@@ -244,4 +249,15 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
         })
         .addCase(bcSaveDataFail, (state, action) => {
             state.bo.bc[action.payload.bcName].loading = false
+        })
+        .addCase(associateInProgress, (state, action) => {
+            const bcName = action.payload.bcName
+            if (bcName) {
+                const prevOperationsInProgress = state.bo.bc[bcName].operationsInProgress ?? []
+                state.bo.bc[bcName].operationsInProgress = [...prevOperationsInProgress, 'saveAssociations']
+            }
+        })
+        .addCase(setOperationFinished, (state, action) => {
+            const { bcName, operationType } = action.payload
+            state.bo.bc[bcName].operationsInProgress = state.bo.bc[bcName].operationsInProgress?.filter(item => item !== operationType)
         })

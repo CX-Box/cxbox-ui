@@ -25,7 +25,8 @@ import {
     changeDataItem,
     processPostInvoke,
     selectTableRow,
-    sendOperation
+    sendOperation,
+    setOperationFinished
 } from '../../actions'
 import { createApiErrorObservable } from '../../utils/apiError'
 
@@ -75,6 +76,7 @@ export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     const postInvoke = data.postActions?.[0]
                     const cursor = dataItem.id
                     return concat(
+                        of(setOperationFinished({ bcName, operationType: OperationTypeCrud.create })),
                         of(bcNewDataSuccess({ bcName, dataItem, bcUrl })),
                         of(bcFetchRowMetaSuccess({ bcName, bcUrl: `${bcUrl}/${cursor}`, rowMeta, cursor })),
                         of(
@@ -93,7 +95,11 @@ export const bcNewDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                 }),
                 catchError((error: any) => {
                     console.error(error)
-                    return concat(of(bcNewDataFail({ bcName })), createApiErrorObservable(error, context))
+                    return concat(
+                        of(setOperationFinished({ bcName, operationType: OperationTypeCrud.create })),
+                        of(bcNewDataFail({ bcName })),
+                        createApiErrorObservable(error, context)
+                    )
                 })
             )
         })

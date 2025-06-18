@@ -34,6 +34,7 @@ import {
 import { AxiosError } from 'axios'
 import { ApiCallContext } from '../utils'
 import { createAction, AnyAction } from '@reduxjs/toolkit'
+import { OperationType } from '@cxbox-ui/schema'
 
 export const changeLocation = createAction<{ location: Route; forceUpdate?: boolean; isTab?: boolean; onSuccessAction?: AnyAction }>(
     'changeLocation'
@@ -1188,3 +1189,5 @@ export const removeNotifications = createAction<NotificationKeys>('removeNotific
 export const waitUntil = createAction<{ bcName: string; postInvoke: Omit<OperationPostInvokeWaitUntil, 'type'> }>('waitUntil')
 
 export const setPendingSendOperation = createAction<ISendOperation>('setPendingSendOperation')
+export const associateInProgress = createAction<{ bcName: string }>('associateInProgress')
+export const setOperationFinished = createAction<{ bcName: string; operationType: OperationType }>('setOperationFinished')
