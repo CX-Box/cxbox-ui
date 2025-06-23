@@ -64,6 +64,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
 
             const bcUrl = buildBcUrl(bcName, true, state)
             const pendingChanges = state.view.pendingDataChanges[bcName]?.[cursor]
+            const pendingChangesNow = state.view.pendingDataChangesNow[bcName]?.[cursor]
             const handledForceActive = state.view.handledForceActive[bcName]?.[cursor] || {}
             const currentRecordData = state.data[bcName]?.find(record => record.id === cursor)
             const fieldsRowMeta = state.view.rowMeta[bcName]?.[bcUrl]?.fields
@@ -86,56 +87,63 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
             if (someForceActiveChanged && !disableRetry) {
                 return concat(
                     of(addPendingRequest({ request: { requestId, type: 'force-active' } })),
-                    api.getRmByForceActive(state.screen.screenName, bcUrl, { ...pendingChanges, vstamp: currentRecordData?.vstamp }).pipe(
-                        mergeMap(data => {
-                            const result: Array<Observable<AnyAction>> = [of(removePendingRequest({ requestId }))]
-                            if (state.view.url === initUrl) {
-                                result.push(
-                                    of(
-                                        forceActiveRmUpdate({
-                                            rowMeta: data,
-                                            currentRecordData,
-                                            bcName,
-                                            bcUrl,
-                                            cursor
-                                        })
+                    api
+                        .getRmByForceActive(
+                            state.screen.screenName,
+                            bcUrl,
+                            { ...pendingChanges, vstamp: currentRecordData?.vstamp },
+                            pendingChangesNow
+                        )
+                        .pipe(
+                            mergeMap(data => {
+                                const result: Array<Observable<AnyAction>> = [of(removePendingRequest({ requestId }))]
+                                if (state.view.url === initUrl) {
+                                    result.push(
+                                        of(
+                                            forceActiveRmUpdate({
+                                                rowMeta: data,
+                                                currentRecordData,
+                                                bcName,
+                                                bcUrl,
+                                                cursor
+                                            })
+                                        )
                                     )
+                                }
+                                if (needPopupClose) {
+                                    result.push(closePopup)
+                                }
+                                return concat(...result)
+                            }),
+                            catchError((e: AxiosError) => {
+                                console.error(e)
+                                let viewError: string = null
+                                let entityError: OperationErrorEntity = null
+                                const operationError = e.response?.data as OperationError
+                                if (e.response?.data === Object(e.response?.data)) {
+                                    entityError = operationError?.error?.entity
+                                    viewError = operationError?.error?.popup?.[0]
+                                }
+                                return concat(
+                                    of(removePendingRequest({ requestId })),
+                                    state.view.url === initUrl
+                                        ? concat(
+                                              of(
+                                                  changeDataItem({
+                                                      bcName,
+                                                      bcUrl: buildBcUrl(bcName, true, state),
+                                                      cursor,
+                                                      dataItem: { [changedFiledKey]: currentRecordData?.[changedFiledKey] },
+                                                      disableRetry: true
+                                                  })
+                                              ),
+                                              of(forceActiveChangeFail({ bcName, bcUrl, viewError, entityError }))
+                                          )
+                                        : EMPTY,
+                                    createApiErrorObservable(e)
                                 )
-                            }
-                            if (needPopupClose) {
-                                result.push(closePopup)
-                            }
-                            return concat(...result)
-                        }),
-                        catchError((e: AxiosError) => {
-                            console.error(e)
-                            let viewError: string = null
-                            let entityError: OperationErrorEntity = null
-                            const operationError = e.response?.data as OperationError
-                            if (e.response?.data === Object(e.response?.data)) {
-                                entityError = operationError?.error?.entity
-                                viewError = operationError?.error?.popup?.[0]
-                            }
-                            return concat(
-                                of(removePendingRequest({ requestId })),
-                                state.view.url === initUrl
-                                    ? concat(
-                                          of(
-                                              changeDataItem({
-                                                  bcName,
-                                                  bcUrl: buildBcUrl(bcName, true, state),
-                                                  cursor,
-                                                  dataItem: { [changedFiledKey]: currentRecordData?.[changedFiledKey] },
-                                                  disableRetry: true
-                                              })
-                                          ),
-                                          of(forceActiveChangeFail({ bcName, bcUrl, viewError, entityError }))
-                                      )
-                                    : EMPTY,
-                                createApiErrorObservable(e)
-                            )
-                        })
-                    )
+                            })
+                        )
                 )
             }
             return needPopupClose ? closePopup : EMPTY
