@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PendingValidationFailsFormat, ViewState, PendingDataItem } from '../interfaces'
+import { PendingValidationFailsFormat, ViewState, PendingDataItem, PendingValidationFails } from '../interfaces'
 import { DataItem, OperationTypeCrud } from '@cxbox-ui/schema'
 import {
     bcCancelPendingChanges,
@@ -149,6 +149,13 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
 
             // консолидация полученной разницы с актуальной дельтой
             const newPendingDataChanges = { ...state.pendingDataChanges[bcName][cursor], ...newPendingChangesDiff }
+
+            // зачистка возможных ошибок, которые заполнятся через роу-мету
+            Object.keys(newPendingDataChanges).forEach(key => {
+                if (state.pendingValidationFailsFormat === PendingValidationFailsFormat.target) {
+                    delete (state.pendingValidationFails as PendingValidationFails)[bcName][cursor][key]
+                }
+            })
 
             // отразим в списке обработанных forceActive полей - те что содержатся в новой дельте
             forceActiveFieldKeys.forEach(key => {
