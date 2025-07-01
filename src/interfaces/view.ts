@@ -18,9 +18,10 @@ import { WidgetMeta } from './widget'
 import { RowMeta } from './rowMeta'
 import { PendingDataItem, PickMap } from './data'
 import { SystemNotification } from './objectMap'
-import { OperationTypeCrud, OperationPostInvokeConfirm } from './operation'
+import { OperationTypeCrud, OperationPostInvokeConfirm, OperationPostInvokeAny } from './operation'
 import { AxiosError } from 'axios'
 import { WaitUntilPopupOptions } from '../actions'
+import { DataItem } from '@cxbox-ui/schema'
 export { FieldType } from '@cxbox-ui/schema'
 
 export interface ViewSelectedRow {
@@ -49,6 +50,11 @@ export interface ViewState extends ViewMetaResponse {
             [bcUrl: string]: RowMeta
         }
     }
+    pendingPostInvoke: {
+        [bcName: string]: {
+            [type: string]: OperationPostInvokeAny
+        }
+    }
     pendingDataChanges: {
         [bcName: string]: {
             [cursor: string]: PendingDataItem
@@ -66,6 +72,7 @@ export interface ViewState extends ViewMetaResponse {
     infiniteWidgets?: string[]
     pickMap?: PickMap
     selectedRow: ViewSelectedRow | null
+    selectedRows: { [bcName: string]: Array<Omit<DataItem, 'vstamp'>> | undefined }
     systemNotifications?: SystemNotification[]
     error?: ApplicationError
     /**

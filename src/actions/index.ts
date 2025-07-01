@@ -1189,5 +1189,34 @@ export const removeNotifications = createAction<NotificationKeys>('removeNotific
 export const waitUntil = createAction<{ bcName: string; postInvoke: Omit<OperationPostInvokeWaitUntil, 'type'> }>('waitUntil')
 
 export const setPendingSendOperation = createAction<ISendOperation>('setPendingSendOperation')
+
 export const associateInProgress = createAction<{ bcName: string }>('associateInProgress')
+
 export const setOperationFinished = createAction<{ bcName: string; operationType: OperationType }>('setOperationFinished')
+
+export const selectRows = createAction<{
+    bcName: string
+    dataItems: Array<Omit<DataItem, 'vstamp'>>
+}>('selectRows')
+
+export const deselectRows = createAction<{
+    bcName: string
+    ids: string[]
+}>('deselectRows')
+
+export const clearSelectedRows = createAction<{
+    bcName: string
+}>('clearSelectedRows')
+
+export const setPendingPostInvoke = createAction<{
+    bcName: string
+    operationType: string
+    postInvoke: OperationPostInvokeAny
+}>('setPendingPostInvoke')
+
+export const applyPendingPostInvoke = createAction<{
+    bcName: string
+    widgetName?: string
+    operationType: string
+    postInvoke: OperationPostInvokeAny
+}>('applyPendingPostInvoke')

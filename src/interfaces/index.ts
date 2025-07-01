@@ -32,6 +32,7 @@ export type {
     MultivalueSingleValueOptions,
     PendingDataItem,
     DataItemResponse,
+    IdItemResponse,
     BcDataResponse,
     DataState,
     DepthDataState,

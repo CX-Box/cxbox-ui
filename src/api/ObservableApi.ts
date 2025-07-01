@@ -88,6 +88,17 @@ export class Api {
         return this.api$.post<DataItemResponse>(url, { data: data || {} }, undefined, context).pipe(map(response => response.data))
     }
 
+    customActionWithIds(
+        screenName: string,
+        bcUrl: string,
+        data: { data?: Record<string, any>; ids?: string[] },
+        context?: ApiCallContext,
+        params?: GetParamsMap
+    ) {
+        const url = applyParams(buildUrl`custom-action/${screenName}/` + bcUrl, params)
+        return this.api$.post<DataItemResponse>(url, { data: data.data || {}, ids: data.ids }, undefined, context)
+    }
+
     associate(screenName: string, bcUrl: string, data: AssociatedItem[] | Record<string, AssociatedItem[]>, params?: GetParamsMap) {
         // TODO: Why Cxbox API sends underscored `_associate` but expects `associated` in return?
         const processedData = Array.isArray(data)
