@@ -17,7 +17,14 @@
 import { catchError, concat, EMPTY, filter, mergeMap, of } from 'rxjs'
 import { buildBcUrl, matchOperationRole } from '../../utils'
 import { OperationTypeCrud } from '@cxbox-ui/schema'
-import { bcChangeCursors, bcDeleteDataFail, processPostInvoke, sendOperation, sendOperationSuccess } from '../../actions'
+import {
+    bcChangeCursors,
+    bcDeleteDataFail,
+    processPostInvoke,
+    sendOperation,
+    sendOperationSuccess,
+    setOperationFinished
+} from '../../actions'
 import { CXBoxEpic } from '../../interfaces'
 import { isAnyOf } from '@reduxjs/toolkit'
 import { createApiErrorObservable } from '../../utils/apiError'
@@ -62,6 +69,7 @@ export const bcCancelCreateDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                 mergeMap(response => {
                     const postInvoke = response.postActions?.[0]
                     return concat(
+                        of(setOperationFinished({ bcName, operationType: OperationTypeCrud.cancelCreate })),
                         of(sendOperationSuccess({ bcName, cursor })),
                         of(bcChangeCursors({ cursorsMap })),
                         postInvoke ? of(processPostInvoke({ bcName, postInvoke, cursor, widgetName: context.widgetName })) : EMPTY
@@ -69,7 +77,11 @@ export const bcCancelCreateDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                 }),
                 catchError((error: any) => {
                     console.error(error)
-                    return concat(of(bcDeleteDataFail({ bcName })), createApiErrorObservable(error, context))
+                    return concat(
+                        of(setOperationFinished({ bcName, operationType: OperationTypeCrud.cancelCreate })),
+                        of(bcDeleteDataFail({ bcName })),
+                        createApiErrorObservable(error, context)
+                    )
                 })
             )
         })

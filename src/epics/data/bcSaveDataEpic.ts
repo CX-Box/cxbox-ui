@@ -27,7 +27,8 @@ import {
     bcSaveDataSuccess,
     deselectTableRow,
     processPostInvoke,
-    sendOperation
+    sendOperation,
+    setOperationFinished
 } from '../../actions'
 import { AxiosError } from 'axios'
 import { AnyAction } from '@reduxjs/toolkit'
@@ -115,6 +116,7 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     const postInvoke = data.postActions?.[0]
                     const responseDataItem = data.record
                     return concat(
+                        of(setOperationFinished({ bcName, operationType: OperationTypeCrud.save })),
                         of(bcSaveDataSuccess({ bcName, cursor, dataItem: responseDataItem })),
                         of(bcFetchRowMeta({ widgetName, bcName })),
                         of(deselectTableRow()),
@@ -161,6 +163,7 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                     }
 
                     return concat(
+                        of(setOperationFinished({ bcName, operationType: OperationTypeCrud.save })),
                         of(bcSaveDataFail({ bcName, bcUrl, viewError, entityError })),
                         notification$,
                         createApiErrorObservable(e, context)

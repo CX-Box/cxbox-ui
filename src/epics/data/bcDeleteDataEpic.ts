@@ -16,7 +16,14 @@
 
 import { CXBoxEpic, PendingValidationFailsFormat } from '../../interfaces'
 import { catchError, concat, EMPTY, filter, mergeMap, of } from 'rxjs'
-import { bcCancelPendingChanges, bcDeleteDataFail, bcFetchDataRequest, processPostInvoke, sendOperation } from '../../actions'
+import {
+    bcCancelPendingChanges,
+    bcDeleteDataFail,
+    bcFetchDataRequest,
+    processPostInvoke,
+    sendOperation,
+    setOperationFinished
+} from '../../actions'
 import { buildBcUrl, matchOperationRole } from '../../utils'
 import { OperationTypeCrud } from '@cxbox-ui/schema'
 import { createApiErrorObservable } from '../../utils/apiError'
@@ -37,6 +44,7 @@ export const bcDeleteDataEpic: CXBoxEpic = (action$, store$, { api }) =>
                 mergeMap(data => {
                     const postInvoke = data.postActions?.[0]
                     return concat(
+                        of(setOperationFinished({ bcName, operationType: OperationTypeCrud.delete })),
                         isTargetFormatPVF ? of(bcCancelPendingChanges({ bcNames: [bcName] })) : EMPTY,
                         of(bcFetchDataRequest({ bcName, widgetName })),
                         postInvoke ? of(processPostInvoke({ bcName, postInvoke, cursor, widgetName })) : EMPTY
@@ -44,7 +52,11 @@ export const bcDeleteDataEpic: CXBoxEpic = (action$, store$, { api }) =>
                 }),
                 catchError((error: any) => {
                     console.error(error)
-                    return concat(of(bcDeleteDataFail({ bcName })), createApiErrorObservable(error, context))
+                    return concat(
+                        of(setOperationFinished({ bcName, operationType: OperationTypeCrud.delete })),
+                        of(bcDeleteDataFail({ bcName })),
+                        createApiErrorObservable(error, context)
+                    )
                 })
             )
         })
