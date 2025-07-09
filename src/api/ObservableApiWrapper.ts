@@ -44,6 +44,10 @@ export class ObservableApiWrapper {
         this.instance = instance
     }
 
+    request<ResponsePayload extends CxboxResponse>(config: AxiosRequestConfig) {
+        return from(this.instance.request<ResponsePayload>(config)).pipe(takeWhile(redirectOccurred))
+    }
+
     get<ResponsePayload extends CxboxResponse>(path: string, config?: AxiosRequestConfig, callContext?: ApiCallContext) {
         return from(this.instance.get<ResponsePayload>(path, config)).pipe(
             takeWhile(redirectOccurred),

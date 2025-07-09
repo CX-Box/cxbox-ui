@@ -15,9 +15,18 @@
  */
 
 import { ObservableApiWrapper } from './ObservableApiWrapper'
-import axios, { AxiosInstance, CancelToken } from 'axios'
-import { ApiCallContext, applyParams, applyRawParams, buildUrl } from '../utils'
-import { AssociatedItem, BcDataResponse, DataItem, DataItemResponse, LoginResponse, PendingDataItem, RowMetaResponse } from '../interfaces'
+import axios, { AxiosInstance, AxiosRequestConfig, CancelToken, Method } from 'axios'
+import { ApiCallContext, applyParams, buildUrl, parseFilters } from '../utils'
+import {
+    AssociatedItem,
+    BcDataResponse,
+    CxboxResponse,
+    DataItem,
+    DataItemResponse,
+    LoginResponse,
+    PendingDataItem,
+    RowMetaResponse
+} from '../interfaces'
 import { EMPTY, expand, map, reduce } from 'rxjs'
 
 type GetParamsMap = Record<string, string | number>
@@ -25,12 +34,90 @@ type GetParamsMap = Record<string, string | number>
 export class Api {
     api$: ObservableApiWrapper
 
-    constructor(instance: AxiosInstance) {
+    maxUrlLength: number = Infinity
+
+    filterTypes: string[] = []
+
+    constructor(instance: AxiosInstance, maxUrlLength?: number, filterTypes?: string[]) {
         this.api$ = new ObservableApiWrapper(instance)
+        this.maxUrlLength = maxUrlLength ?? this.maxUrlLength
+        this.filterTypes = filterTypes ?? this.filterTypes
+    }
+
+    request<ResponsePayload extends CxboxResponse>(method: Method, path: string, config?: AxiosRequestConfig) {
+        let params = config?.params
+        let data = config?.data
+
+        const processedConfig = { ...config }
+
+        delete processedConfig['params']
+        delete processedConfig['data']
+
+        let url = applyParams(path, params)
+
+        const isLongUrl = url.length > this.maxUrlLength
+        let resultMethod = method
+
+        if (isLongUrl && this.filterTypes.length) {
+            const paramsHasFilter =
+                typeof params === 'object' &&
+                params !== null &&
+                Object.keys(params).some(key => this.filterTypes.includes(key.split('.')[1]))
+            const dataCanBeEdited = (typeof data === 'object' && data !== null) || data === undefined
+
+            if (paramsHasFilter && dataCanBeEdited) {
+                resultMethod = method.toLowerCase() === 'get' ? 'post' : method
+
+                params = { ...params }
+
+                const filter: Record<string, unknown> = {}
+
+                Object.entries(params).forEach(([key, value]) => {
+                    if (this.filterTypes.includes(key.split('.')[1])) {
+                        filter[key] = value
+                        delete params[key]
+                    }
+                })
+
+                const processedFilter = Object.keys(filter).length
+                    ? parseFilters(applyParams('', filter as Record<string, string | number>))
+                    : undefined
+
+                data = {
+                    ...data,
+                    filter: processedFilter
+                }
+
+                url = applyParams(path, params)
+            }
+        }
+
+        return this.api$.request<ResponsePayload>({
+            method: resultMethod,
+            data,
+            url,
+            ...processedConfig
+        })
+    }
+
+    get<ResponsePayload extends CxboxResponse>(path: string, config?: AxiosRequestConfig) {
+        return this.request<ResponsePayload>('get', path, config)
+    }
+
+    put<ResponsePayload extends CxboxResponse>(path: string, config?: AxiosRequestConfig) {
+        return this.request<ResponsePayload>('put', path, config)
+    }
+
+    post<ResponsePayload extends CxboxResponse>(path: string, config?: AxiosRequestConfig) {
+        return this.request<ResponsePayload>('post', path, config)
+    }
+
+    delete<ResponsePayload extends CxboxResponse>(path: string, config?: AxiosRequestConfig) {
+        return this.request<ResponsePayload>('delete', path, config)
     }
 
     routerRequest(path: string, params: Record<string, unknown>) {
-        return this.api$.get(applyRawParams(path, params))
+        return this.get(path, { params }).pipe(map(response => response.data))
     }
 
     fetchBcData(screenName: string, bcUrl: string, params: GetParamsMap = {}, cancelToken?: CancelToken) {
@@ -40,8 +127,10 @@ export class Api {
             _page: !noLimit ? ('_page' in params ? params._page : 1) : undefined,
             _limit: !noLimit ? ('_limit' in params ? params._limit : 30) : undefined
         }
-        const url = applyParams(buildUrl`data/${screenName}/` + bcUrl, queryStringObject)
-        return this.api$.get<BcDataResponse>(url, { cancelToken })
+
+        return this.get<BcDataResponse>(buildUrl`data/${screenName}/` + bcUrl, { params: queryStringObject, cancelToken }).pipe(
+            map(response => response.data)
+        )
     }
 
     fetchBcDataAll(screenName: string, bcUrl: string, params: GetParamsMap = {}) {
@@ -58,13 +147,15 @@ export class Api {
     }
 
     fetchRowMeta(screenName: string, bcUrl: string, params?: GetParamsMap, cancelToken?: CancelToken) {
-        const url = applyParams(buildUrl`row-meta/${screenName}/` + bcUrl, params)
-        return this.api$.get<RowMetaResponse>(url, { cancelToken }).pipe(map(response => response.data.row))
+        return this.get<RowMetaResponse>(buildUrl`row-meta/${screenName}/` + bcUrl, { params, cancelToken }).pipe(
+            map(response => response.data.data.row)
+        )
     }
 
     newBcData(screenName: string, bcUrl: string, context: ApiCallContext, params?: GetParamsMap) {
-        const url = applyParams(buildUrl`row-meta-new/${screenName}/` + bcUrl, params)
-        return this.api$.get<RowMetaResponse>(url, undefined, context).pipe(map(response => response.data))
+        return this.get<RowMetaResponse>(buildUrl`row-meta-new/${screenName}/` + bcUrl, { params }).pipe(
+            map(response => response.data.data)
+        )
     }
 
     saveBcData(
@@ -74,18 +165,19 @@ export class Api {
         context: ApiCallContext,
         params?: GetParamsMap
     ) {
-        const url = applyParams(buildUrl`data/${screenName}/` + bcUrl, params)
-        return this.api$.put<DataItemResponse>(url, { data }, context).pipe(map(response => response.data))
+        return this.put<DataItemResponse>(buildUrl`data/${screenName}/` + bcUrl, { data: { data }, params }).pipe(
+            map(response => response.data.data)
+        )
     }
 
     deleteBcData(screenName: string, bcUrl: string = '', context: ApiCallContext, params?: GetParamsMap) {
-        const url = applyParams(buildUrl`data/${screenName}/` + bcUrl, params)
-        return this.api$.delete<DataItemResponse>(url, context).pipe(map(response => response.data))
+        return this.delete<DataItemResponse>(buildUrl`data/${screenName}/` + bcUrl, { params }).pipe(map(response => response.data.data))
     }
 
     customAction(screenName: string, bcUrl: string, data?: Record<string, any>, context?: ApiCallContext, params?: GetParamsMap) {
-        const url = applyParams(buildUrl`custom-action/${screenName}/` + bcUrl, params)
-        return this.api$.post<DataItemResponse>(url, { data: data || {} }, undefined, context).pipe(map(response => response.data))
+        return this.post<DataItemResponse>(buildUrl`custom-action/${screenName}/` + bcUrl, { data: data || {}, params }).pipe(
+            map(response => response.data.data)
+        )
     }
 
     customActionWithIds(
@@ -95,8 +187,10 @@ export class Api {
         context?: ApiCallContext,
         params?: GetParamsMap
     ) {
-        const url = applyParams(buildUrl`custom-action/${screenName}/` + bcUrl, params)
-        return this.api$.post<DataItemResponse>(url, { data: data.data || {}, ids: data.ids }, undefined, context)
+        return this.post<DataItemResponse>(buildUrl`custom-action/${screenName}/` + bcUrl, {
+            data: { data: data.data || {}, ids: data.ids },
+            params
+        }).pipe(map(response => response.data))
     }
 
     associate(screenName: string, bcUrl: string, data: AssociatedItem[] | Record<string, AssociatedItem[]>, params?: GetParamsMap) {
@@ -108,13 +202,16 @@ export class Api {
                   associated: item._associate
               }))
             : data
-        const url = applyParams(buildUrl`associate/${screenName}/` + bcUrl, params)
-        return this.api$.post<any>(url, processedData).pipe(map(response => response.data))
+
+        return this.post<any>(buildUrl`associate/${screenName}/` + bcUrl, { data: processedData, params }).pipe(
+            map(response => response.data.data)
+        )
     }
 
     getRmByForceActive(screenName: string, bcUrl: string | null, data: PendingDataItem & { vstamp: number }, params?: GetParamsMap) {
-        const url = applyParams(buildUrl`row-meta/${screenName}/` + (bcUrl ?? ''), params)
-        return this.api$.post<RowMetaResponse>(url, { data }).pipe(map(response => response.data.row))
+        return this.post<RowMetaResponse>(buildUrl`row-meta/${screenName}/` + (bcUrl ?? ''), { data: { data }, params }).pipe(
+            map(response => response.data.data.row)
+        )
     }
     /**
      * Get Cxbox API file upload endpoint based on baseURL of axios instance
@@ -134,11 +231,11 @@ export class Api {
     }
 
     refreshMeta() {
-        return this.api$.get(buildUrl`bc-registry/refresh-meta`)
+        return this.get(buildUrl`bc-registry/refresh-meta`).pipe(map(response => response.data))
     }
 
     loginByRoleRequest(role: string) {
-        return this.api$.get<LoginResponse>(buildUrl`login?role=${role}`)
+        return this.get<LoginResponse>(buildUrl`login?role=${role}`).pipe(map(response => response.data))
     }
 
     createCanceler() {
