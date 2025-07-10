@@ -69,8 +69,9 @@ export interface DataItemResponse {
          * @deprecated TODO: Remove in 2.0.0 in favor of postInvokeConfirm (is this todo needed?)
          */
         preInvoke?: OperationPreInvoke
+
+        massIds_?: IdItemResponse[]
     }
-    ids?: IdItemResponse[]
 }
 
 /**
