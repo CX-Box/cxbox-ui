@@ -15,18 +15,9 @@
  */
 
 import { ObservableApiWrapper } from './ObservableApiWrapper'
-import axios, { AxiosInstance, AxiosRequestConfig, CancelToken, Method } from 'axios'
-import { ApiCallContext, applyParams, buildUrl, parseFilters } from '../utils'
-import {
-    AssociatedItem,
-    BcDataResponse,
-    CxboxResponse,
-    DataItem,
-    DataItemResponse,
-    LoginResponse,
-    PendingDataItem,
-    RowMetaResponse
-} from '../interfaces'
+import axios, { AxiosInstance, CancelToken } from 'axios'
+import { ApiCallContext, buildUrl } from '../utils'
+import { AssociatedItem, BcDataResponse, DataItem, DataItemResponse, LoginResponse, PendingDataItem, RowMetaResponse } from '../interfaces'
 import { EMPTY, expand, map, reduce } from 'rxjs'
 
 type GetParamsMap = Record<string, string | number>
@@ -100,7 +91,7 @@ export class Api {
 
     customAction(screenName: string, bcUrl: string, data?: Record<string, any>, context?: ApiCallContext, params?: GetParamsMap) {
         return this.api$
-            .request<DataItemResponse>('post', buildUrl`custom-action/${screenName}/` + bcUrl, { data: data || {}, params })
+            .request<DataItemResponse>('post', buildUrl`custom-action/${screenName}/` + bcUrl, { data: { data: data || {} }, params })
             .pipe(map(response => response.data.data))
     }
 
