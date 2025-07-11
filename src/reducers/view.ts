@@ -15,7 +15,7 @@
  */
 
 import { PendingValidationFailsFormat, ViewState, PendingDataItem } from '../interfaces'
-import { OperationTypeCrud } from '@cxbox-ui/schema'
+import { DataItem, OperationTypeCrud } from '@cxbox-ui/schema'
 import {
     bcCancelPendingChanges,
     bcFetchRowMeta,
@@ -468,7 +468,24 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
         })
         .addCase(selectRows, (state, action) => {
             const { bcName, dataItems } = action.payload
+            const selectedRowsDictionary: Record<string, Omit<DataItem, 'vstamp'>> = {}
             state.selectedRows[bcName] = state.selectedRows[bcName] ?? []
+
+            state.selectedRows[bcName].forEach(row => {
+                selectedRowsDictionary[row.id as string] = row
+            })
+            const newDataItems = dataItems
+            const dataItemIdsToDelete: string[] = []
+
+            dataItems.forEach((row, index) => {
+                if (selectedRowsDictionary[row.id as string]) {
+                    newDataItems[index] = { ...selectedRowsDictionary[row.id as string], ...row }
+                    dataItemIdsToDelete.push(row.id as string)
+                }
+            })
+
+            state.selectedRows[bcName] = state.selectedRows[bcName].filter(dataItem => !dataItemIdsToDelete.includes(dataItem.id as string))
+
             state.selectedRows[bcName].splice(0, 0, ...dataItems)
         })
         .addCase(deselectRows, (state, action) => {
