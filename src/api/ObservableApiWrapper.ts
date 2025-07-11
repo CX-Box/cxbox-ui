@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, Method } from 'axios'
 import { CxboxResponse } from '../interfaces'
-import { ApiCallContext } from '../utils'
+import { ApiCallContext, applyParams, parseFilters } from '../utils'
 import { from, map, takeWhile } from 'rxjs'
 
 function redirectOccurred<R extends CxboxResponse>(value: AxiosResponse<R>) {
@@ -34,38 +34,94 @@ function redirectOccurred<R extends CxboxResponse>(value: AxiosResponse<R>) {
     return true
 }
 
+const mergeConfigWithData = (data: any, config?: AxiosRequestConfig) => {
+    return { ...config, data: config?.data !== undefined ? config.data : data }
+}
+
 export class ObservableApiWrapper {
     instance: AxiosInstance = axios.create({
         responseType: 'json',
         headers: { Pragma: 'no-cache', 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     })
 
-    constructor(instance: AxiosInstance) {
+    maxUrlLength: number = Infinity
+
+    filterTypes: string[] = []
+
+    constructor(instance: AxiosInstance, maxUrlLength?: number, filterTypes?: string[]) {
         this.instance = instance
+        this.maxUrlLength = maxUrlLength ?? this.maxUrlLength
+        this.filterTypes = filterTypes ?? this.filterTypes
+    }
+
+    request<ResponsePayload extends CxboxResponse>(method: Method, path: string, config?: AxiosRequestConfig) {
+        let params = config?.params
+        let data = config?.data
+
+        const processedConfig = { ...config }
+
+        delete processedConfig['params']
+        delete processedConfig['data']
+
+        let url = applyParams(path, params)
+
+        const isLongUrl = url.length > this.maxUrlLength
+        let resultMethod = method
+
+        if (isLongUrl && this.filterTypes.length) {
+            const paramsHasFilter =
+                typeof params === 'object' &&
+                params !== null &&
+                Object.keys(params).some(key => this.filterTypes.includes(key.split('.')[1]))
+            const dataCanBeEdited = (typeof data === 'object' && data !== null) || data === undefined
+
+            if (paramsHasFilter && dataCanBeEdited) {
+                resultMethod = method.toLowerCase() === 'get' ? 'post' : method
+
+                params = { ...params }
+
+                const filter: Record<string, unknown> = {}
+
+                Object.entries(params).forEach(([key, value]) => {
+                    if (this.filterTypes.includes(key.split('.')[1])) {
+                        filter[key] = value
+                        delete params[key]
+                    }
+                })
+
+                const processedFilter = Object.keys(filter).length
+                    ? parseFilters(applyParams('', filter as Record<string, string | number>))
+                    : undefined
+
+                data = {
+                    ...data,
+                    filter: processedFilter
+                }
+
+                url = applyParams(path, params)
+            }
+        }
+
+        return from(
+            this.instance.request<ResponsePayload>({
+                method: resultMethod,
+                data,
+                url,
+                ...processedConfig
+            })
+        ).pipe(takeWhile(redirectOccurred))
     }
 
     get<ResponsePayload extends CxboxResponse>(path: string, config?: AxiosRequestConfig, callContext?: ApiCallContext) {
-        return from(this.instance.get<ResponsePayload>(path, config)).pipe(
-            takeWhile(redirectOccurred),
-            map(response => response.data)
-        )
+        return this.request<ResponsePayload>('get', path, config).pipe(map(response => response.data))
     }
-    put<ResponsePayload extends CxboxResponse>(path: string, data: any, callContext?: ApiCallContext) {
-        return from(this.instance.put<ResponsePayload>(path, data)).pipe(
-            takeWhile(redirectOccurred),
-            map(response => response.data)
-        )
+    put<ResponsePayload extends CxboxResponse>(path: string, data: any, callContext?: ApiCallContext, config?: AxiosRequestConfig) {
+        return this.request<ResponsePayload>('put', path, mergeConfigWithData(data, config)).pipe(map(response => response.data))
     }
     post<ResponsePayload extends CxboxResponse>(path: string, data: any, config?: AxiosRequestConfig, callContext?: ApiCallContext) {
-        return from(this.instance.post<ResponsePayload>(path, data)).pipe(
-            takeWhile(redirectOccurred),
-            map(response => response.data)
-        )
+        return this.request<ResponsePayload>('post', path, mergeConfigWithData(data, config)).pipe(map(response => response.data))
     }
     delete<ResponsePayload extends CxboxResponse>(path: string, data: any, config?: AxiosRequestConfig, callContext?: ApiCallContext) {
-        return from(this.instance.delete<ResponsePayload>(path, data)).pipe(
-            takeWhile(redirectOccurred),
-            map(response => response.data)
-        )
+        return this.request<ResponsePayload>('delete', path, mergeConfigWithData(data, config)).pipe(map(response => response.data))
     }
 }

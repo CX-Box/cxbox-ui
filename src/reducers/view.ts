@@ -15,7 +15,7 @@
  */
 
 import { PendingValidationFailsFormat, ViewState, PendingDataItem } from '../interfaces'
-import { OperationTypeCrud } from '@cxbox-ui/schema'
+import { DataItem, OperationTypeCrud } from '@cxbox-ui/schema'
 import {
     bcCancelPendingChanges,
     bcFetchRowMeta,
@@ -29,11 +29,13 @@ import {
     changeDataItem,
     changeDataItems,
     changeLocation,
+    clearSelectedRows,
     clearValidationFails,
     closeConfirmModal,
     closeNotification,
     closeViewError,
     closeViewPopup,
+    deselectRows,
     deselectTableRow,
     dropAllAssociations,
     dropAllAssociationsFull,
@@ -42,11 +44,14 @@ import {
     forceActiveRmUpdate,
     operationConfirmation,
     processPostInvoke,
+    applyPendingPostInvoke,
+    selectRows,
     selectTableRow,
     selectView,
     sendOperation,
     sendOperationFail,
     sendOperationSuccess,
+    setPendingPostInvoke,
     showFileUploadPopup,
     showNotification,
     showViewError,
@@ -68,11 +73,13 @@ export const initialViewState: ViewState = {
     metaInProgress: {},
     popupData: { bcName: null },
     pendingDataChanges: {},
+    pendingPostInvoke: {},
     infiniteWidgets: [],
     pendingValidationFailsFormat: PendingValidationFailsFormat.old,
     pendingValidationFails: {},
     handledForceActive: {},
     selectedRow: null,
+    selectedRows: {},
     ignoreHistory: null,
     systemNotifications: [],
     error: null,
@@ -458,4 +465,46 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
         })
         .addCase(processPostInvoke, state => {
             state.selectedRow = null
+        })
+        .addCase(selectRows, (state, action) => {
+            const { bcName, dataItems } = action.payload
+            const selectedRowsDictionary: Record<string, Omit<DataItem, 'vstamp'>> = {}
+            state.selectedRows[bcName] = state.selectedRows[bcName] ?? []
+
+            state.selectedRows[bcName].forEach(row => {
+                selectedRowsDictionary[row.id as string] = row
+            })
+            const newDataItems = dataItems
+            const dataItemIdsToDelete: string[] = []
+
+            dataItems.forEach((row, index) => {
+                if (selectedRowsDictionary[row.id as string]) {
+                    newDataItems[index] = { ...selectedRowsDictionary[row.id as string], ...row }
+                    dataItemIdsToDelete.push(row.id as string)
+                }
+            })
+
+            state.selectedRows[bcName] = state.selectedRows[bcName].filter(dataItem => !dataItemIdsToDelete.includes(dataItem.id as string))
+
+            state.selectedRows[bcName].splice(0, 0, ...dataItems)
+        })
+        .addCase(deselectRows, (state, action) => {
+            const { bcName, ids } = action.payload
+            state.selectedRows[bcName] = state.selectedRows[bcName] ?? []
+            state.selectedRows[bcName] = state.selectedRows[bcName].filter(dataItem => !ids.includes(dataItem.id as string))
+        })
+        .addCase(clearSelectedRows, (state, action) => {
+            const { bcName } = action.payload
+            delete state.selectedRows[bcName]
+        })
+        .addCase(setPendingPostInvoke, (state, action) => {
+            const { bcName, operationType, postInvoke } = action.payload
+            state.pendingPostInvoke[bcName] = state.pendingPostInvoke[bcName] ?? {}
+            state.pendingPostInvoke[bcName][operationType] = postInvoke
+        })
+        .addCase(applyPendingPostInvoke, (state, action) => {
+            const { bcName, operationType } = action.payload
+            if (state.pendingPostInvoke[bcName]) {
+                delete state.pendingPostInvoke[bcName][operationType]
+            }
         })

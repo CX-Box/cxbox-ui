@@ -14,11 +14,13 @@ import { AnyAction as AnyAction_2 } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 import { AxiosInstance } from 'axios';
 import { AxiosRequestConfig } from 'axios';
+import { AxiosResponse } from 'axios';
 import { CancelToken } from 'axios';
 import { CaseReducer } from '@reduxjs/toolkit';
 import { ComponentType } from 'react';
 import { Dispatch } from 'redux';
 import { Epic } from 'redux-observable';
+import { Method } from 'axios';
 import { Middleware } from 'redux';
 import { Observable } from 'rxjs';
 
@@ -63,6 +65,7 @@ declare namespace actions {
         changeDataItem,
         changeDataItems,
         forceActiveRmUpdate,
+        WaitUntilPopupOptions,
         showViewPopup,
         showFileUploadPopup,
         closeViewPopup,
@@ -93,8 +96,7 @@ declare namespace actions {
         handleRouter,
         selectTableRowInit,
         selectTableRow,
-        selectTableCellInit,
-        selectTableCell,
+        deselectTableRow,
         showAllTableRecordsInit,
         showNotification,
         closeNotification,
@@ -124,7 +126,16 @@ declare namespace actions {
         addPendingRequest,
         removePendingRequest,
         addNotification,
-        removeNotifications
+        removeNotifications,
+        waitUntil,
+        setPendingSendOperation,
+        associateInProgress,
+        setOperationFinished,
+        selectRows,
+        deselectRows,
+        clearSelectedRows,
+        setPendingPostInvoke,
+        applyPendingPostInvoke
     }
 }
 export { actions }
@@ -145,7 +156,7 @@ export type AllWidgetTypeFieldBase = WidgetFormFieldBase | WidgetListFieldBase;
 
 // @public (undocumented)
 export class Api {
-    constructor(instance: AxiosInstance);
+    constructor(instance: AxiosInstance, maxUrlLength?: number, filterTypes?: string[]);
     // Warning: (ae-forgotten-export) The symbol "ObservableApiWrapper" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -162,12 +173,14 @@ export class Api {
     record: DataItem;
     postActions?: OperationPostInvokeAny[];
     preInvoke?: OperationPreInvoke;
+    massIds_?: IdItemResponse[];
     }>;
     // (undocumented)
     deleteBcData(screenName: string, bcUrl: string, context: ApiCallContext, params?: GetParamsMap): Observable<    {
     record: DataItem;
     postActions?: OperationPostInvokeAny[];
     preInvoke?: OperationPreInvoke;
+    massIds_?: IdItemResponse[];
     }>;
     // Warning: (ae-forgotten-export) The symbol "GetParamsMap" needs to be exported by the entry point index.d.ts
     //
@@ -200,6 +213,7 @@ export class Api {
     record: DataItem;
     postActions?: OperationPostInvokeAny[];
     preInvoke?: OperationPreInvoke;
+    massIds_?: IdItemResponse[];
     }>;
 }
 
@@ -244,6 +258,14 @@ export enum ApplicationErrorType {
 // @public
 function applyParams(url: string, qso?: QueryParamsMap): string;
 
+// @public (undocumented)
+const applyPendingPostInvoke: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+widgetName?: string;
+operationType: string;
+postInvoke: OperationPostInvokeAny;
+}, string>;
+
 // @public
 function applyRawParams(url: string, qso: Record<string, any>): string;
 
@@ -267,6 +289,11 @@ export interface AssociatedItem extends DataItem {
     // (undocumented)
     _associate: boolean;
 }
+
+// @public (undocumented)
+const associateInProgress: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+}, string>;
 
 // @public (undocumented)
 export interface BaseDataNode {
@@ -440,6 +467,9 @@ export interface BcMetaState extends BcMeta {
     hasNext?: boolean;
     limit?: number;
     loading?: boolean;
+    massPageLimit?: number;
+    // (undocumented)
+    operationsInProgress?: OperationType[];
     page?: number;
 }
 
@@ -655,6 +685,7 @@ const changeLocation: ActionCreatorWithOptionalPayload<    {
 location: Route;
 forceUpdate?: boolean;
 isTab?: boolean;
+onSuccessAction?: AnyAction_2;
 }, string>;
 
 // @public
@@ -676,6 +707,11 @@ function checkShowCondition(condition: WidgetShowCondition | undefined, cursor: 
 
 // @public
 const clearPendingDataChangesAfterCursorChangeEpic: CXBoxEpic;
+
+// @public (undocumented)
+const clearSelectedRows: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+}, string>;
 
 // @public
 const clearValidationFails: ActionCreatorWithOptionalPayload<null, string>;
@@ -797,6 +833,7 @@ export interface DataItemResponse {
         record: DataItem;
         postActions?: OperationPostInvokeAny[];
         preInvoke?: OperationPreInvoke;
+        massIds_?: IdItemResponse[];
     };
 }
 
@@ -851,6 +888,15 @@ export interface DepthDataState {
 }
 
 // @public (undocumented)
+const deselectRows: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+ids: string[];
+}, string>;
+
+// @public (undocumented)
+const deselectTableRow: ActionCreatorWithoutPayload<"deselectTableRow">;
+
+// @public (undocumented)
 export type DictionaryFieldMeta = AllWidgetTypeFieldBase & {
     type: FieldType.dictionary;
     multiple?: boolean;
@@ -880,6 +926,7 @@ drillDownType?: DrillDownType;
 urlName?: string;
 route: Route;
 widgetName?: string;
+onSuccessAction?: AnyAction_2;
 }, string>;
 
 // @public (undocumented)
@@ -916,9 +963,11 @@ depthFrom: number;
 const emptyAction: ActionCreatorWithOptionalPayload<null, string>;
 
 // @public (undocumented)
-export interface EpicDependencyInjection<A = Api> {
+export interface EpicDependencyInjection<A = Api, B = Utils> {
     // (undocumented)
     api: A;
+    // (undocumented)
+    utils?: B;
 }
 
 declare namespace epics {
@@ -932,6 +981,8 @@ declare namespace epics {
         getRowMetaByForceActiveEpic,
         showAllTableRecordsInitEpic,
         clearPendingDataChangesAfterCursorChangeEpic,
+        waitUntilEpic,
+        setPendingSendOperationEpic,
         drillDownEpic,
         loginDoneEpic,
         changeViewEpic,
@@ -1108,6 +1159,12 @@ cursor: string;
 // @public
 function getBcChildren(originBcName: string, widgets: WidgetMeta[], bcMap: Record<string, BcMetaState>): Record<string, string[]>;
 
+// @public (undocumented)
+const getDefaultViewForPrimary: (primary: string, views: ViewMetaResponse[]) => ViewMetaResponse;
+
+// @public (undocumented)
+const getDefaultViewFromPrimaries: (primaries: string[] | null, views: ViewMetaResponse[]) => ViewMetaResponse;
+
 // @public
 function getDescendants(nodes: TreeNodeDescending[], result: string[]): void;
 
@@ -1169,6 +1226,16 @@ const httpError500Epic: CXBoxEpic;
 const httpErrorDefaultEpic: CXBoxEpic;
 
 // @public (undocumented)
+export interface IdItemResponse extends Omit<DataItem, 'vstamp'> {
+    // (undocumented)
+    errorMessage?: string;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    success: boolean;
+}
+
+// @public (undocumented)
 const initialDepthDataState: DepthDataState;
 
 // @public (undocumented)
@@ -1216,6 +1283,7 @@ declare namespace interfaces {
         MultivalueSingleValueOptions,
         PendingDataItem,
         DataItemResponse,
+        IdItemResponse,
         BcDataResponse,
         DataState,
         DepthDataState,
@@ -1331,12 +1399,15 @@ declare namespace interfaces {
         OperationPostInvokeDrillDown,
         OperationPostInvokeOpenPickList,
         OperationPostInvokeShowMessage,
+        OperationPostInvokeWaitUntil,
+        OperationPostInvokeDrilldownAndWaitUntil,
         OperationPostInvokeAny,
         OperationScope,
         AssociatedItem,
         OperationError,
         OperationErrorEntity,
         RequestType,
+        ISendOperation,
         RowMeta,
         RowMetaResponse,
         RowMetaField,
@@ -1344,6 +1415,7 @@ declare namespace interfaces {
         BcFilter,
         BcSorter,
         FilterGroup,
+        Utils,
         EpicDependencyInjection,
         CXBoxEpic,
         isViewNavigationItem,
@@ -1372,6 +1444,19 @@ export function isCustomWidget(descriptor: CustomWidgetDescriptor): descriptor i
 
 // @public
 export function isCustomWidgetConfiguration(descriptor: CustomWidgetDescriptor): descriptor is CustomWidgetConfiguration;
+
+// @public (undocumented)
+export interface ISendOperation {
+    // @deprecated
+    bcKey?: string;
+    bcName: string;
+    confirm?: string;
+    // @deprecated (undocumented)
+    confirmOperation?: OperationPreInvoke;
+    onSuccessAction?: AnyAction_2;
+    operationType: OperationTypeCrud | string;
+    widgetName: string;
+}
 
 // @public (undocumented)
 export function isOperationGroup(operation: Operation | OperationGroup): operation is OperationGroup;
@@ -1430,6 +1515,8 @@ errorMsg: string;
 export interface LoginResponse extends CxboxResponse {
     // (undocumented)
     activeRole?: string;
+    // (undocumented)
+    defaultUrl?: string;
     // (undocumented)
     devPanelEnabled?: boolean;
     // (undocumented)
@@ -1652,7 +1739,7 @@ export interface OperationPostInvoke {
 }
 
 // @public
-export type OperationPostInvokeAny = OperationPostInvokeRefreshBc | OperationPostInvokeDownloadFile | OperationPostInvokeDownloadFileByUrl | OperationPostInvokeDrillDown | OperationPostInvokeOpenPickList | OperationPostInvokeShowMessage | OperationPostInvokeConfirm;
+export type OperationPostInvokeAny = OperationPostInvokeRefreshBc | OperationPostInvokeDownloadFile | OperationPostInvokeDownloadFileByUrl | OperationPostInvokeDrillDown | OperationPostInvokeOpenPickList | OperationPostInvokeShowMessage | OperationPostInvokeConfirm | OperationPostInvokeWaitUntil | OperationPostInvokeDrilldownAndWaitUntil;
 
 // @public
 export interface OperationPostInvokeConfirm {
@@ -1686,6 +1773,10 @@ export interface OperationPostInvokeDrillDown extends OperationPostInvoke {
     urlName?: string;
 }
 
+// @public (undocumented)
+export interface OperationPostInvokeDrilldownAndWaitUntil extends OperationPostInvokeDrillDown, OperationPostInvokeWaitUntil {
+}
+
 // @public
 export interface OperationPostInvokeOpenPickList extends OperationPostInvoke {
     pickList: string;
@@ -1707,17 +1798,42 @@ export enum OperationPostInvokeType {
     downloadFile = "downloadFile",
     downloadFileByUrl = "downloadFileByUrl",
     drillDown = "drillDown",
+    // (undocumented)
+    drillDownAndWaitUntil = "drillDownAndWaitUntil",
     openPickList = "openPickList",
     // @deprecated
     postDelete = "postDelete",
     refreshBC = "refreshBC",
-    showMessage = "showMessage"
+    showMessage = "showMessage",
+    // (undocumented)
+    waitUntil = "waitUntil"
+}
+
+// @public (undocumented)
+export interface OperationPostInvokeWaitUntil extends OperationPostInvoke {
+    // (undocumented)
+    inProgressMessage?: string;
+    // (undocumented)
+    successCondition_bcName: string;
+    // (undocumented)
+    successCondition_fieldKey: string;
+    // (undocumented)
+    successCondition_value: unknown;
+    // (undocumented)
+    successMessage?: string;
+    // (undocumented)
+    timeout?: number | string;
+    // (undocumented)
+    timeoutMaxRequests?: number | string;
+    // (undocumented)
+    timeoutMessage?: string;
 }
 
 // @public
 export interface OperationPreInvoke {
     message: string;
     type: OperationPreInvokeType;
+    widget?: string;
 }
 
 // @public
@@ -1728,7 +1844,7 @@ export enum OperationPreInvokeType {
 }
 
 // @public
-export type OperationScope = 'bc' | 'record' | 'page' | 'associate';
+export type OperationScope = 'bc' | 'record' | 'page' | 'associate' | 'mass';
 
 // @public
 export type OperationType = OperationTypeCrud | string;
@@ -1815,12 +1931,14 @@ export interface PopupData {
     calleeBCName?: string;
     calleeWidgetName?: string;
     isFilter?: boolean;
-    type?: PopupType;
+    // (undocumented)
+    options?: Partial<WaitUntilPopupOptions>;
+    type?: PopupType | string;
     widgetName?: string;
 }
 
 // @public (undocumented)
-export type PopupType = 'assoc' | 'file-upload' | null;
+export type PopupType = 'assoc' | 'file-upload' | 'waitUntil' | null;
 
 // @public
 export const PopupWidgetTypes: string[];
@@ -1837,6 +1955,9 @@ export enum PositionTypes {
 
 // @public
 function presort(data: TreeNodeBidirectional[]): TreeNodeBidirectional[];
+
+// @public
+const processDrilldownFilters: (filters: BcFilter[]) => BcFilter[];
 
 // @public
 const processPostInvoke: ActionCreatorWithOptionalPayload<    {
@@ -1988,6 +2109,11 @@ export interface RowMeta {
 // @public
 export interface RowMetaField {
     // (undocumented)
+    allValues?: Array<{
+        value: string;
+        icon: string;
+    }>;
+    // (undocumented)
     currentValue: DataValue;
     // (undocumented)
     defaultValue?: DataValue;
@@ -2021,11 +2147,6 @@ export interface RowMetaField {
     sortable?: boolean;
     // @deprecated (undocumented)
     values?: Array<{
-        value: string;
-        icon: string;
-    }>;
-    // (undocumented)
-    allValues?: Array<{
         value: string;
         icon: string;
     }>;
@@ -2064,6 +2185,8 @@ export interface ScreenMetaResponse {
         menu: Array<ViewNavigationGroup | ViewNavigationItem>;
     };
     // (undocumented)
+    primaries: string[] | null;
+    // (undocumented)
     primary?: string;
     // (undocumented)
     views: ViewMetaResponse[];
@@ -2085,12 +2208,20 @@ export interface ScreenState {
     // (undocumented)
     primaryView: string;
     // (undocumented)
+    primaryViews: string[] | null;
+    // (undocumented)
     screenName: string;
     // (undocumented)
     sorters: Record<string, BcSorter[]>;
     // (undocumented)
     views: ViewMetaResponse[];
 }
+
+// @public (undocumented)
+const selectRows: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+dataItems: Array<Omit<DataItem, 'vstamp'>>;
+}, string>;
 
 // @public
 const selectScreen: ActionCreatorWithOptionalPayload<    {
@@ -2104,20 +2235,6 @@ screenName: string;
 
 // @public
 const selectScreenFailEpic: CXBoxEpic;
-
-// @public @deprecated (undocumented)
-const selectTableCell: ActionCreatorWithOptionalPayload<    {
-widgetName: string;
-rowId: string;
-fieldKey: string;
-}, string>;
-
-// @public @deprecated (undocumented)
-const selectTableCellInit: ActionCreatorWithOptionalPayload<    {
-widgetName: string;
-rowId: string;
-fieldKey: string;
-}, string>;
 
 // @public
 const selectTableRow: ActionCreatorWithOptionalPayload<    {
@@ -2151,15 +2268,7 @@ viewName: string;
 const selectViewFailEpic: CXBoxEpic;
 
 // @public
-const sendOperation: ActionCreatorWithOptionalPayload<    {
-bcName: string;
-operationType: OperationTypeCrud | string;
-widgetName: string;
-onSuccessAction?: AnyAction_2;
-confirm?: string;
-bcKey?: string;
-confirmOperation?: OperationPreInvoke;
-}, string>;
+const sendOperation: ActionCreatorWithOptionalPayload<ISendOperation, string>;
 
 // @public
 const sendOperationAssociateEpic: CXBoxEpic;
@@ -2190,6 +2299,11 @@ export interface Session {
     activeRole?: string;
     debugMode?: boolean;
     devPanelEnabled?: boolean;
+    // (undocumented)
+    disableDeprecatedFeatures?: {
+        popupCloseAfterChangeData?: boolean;
+        secondDataChangeForAssocPopupWhenRemovingTagFromField?: boolean;
+    };
     // (undocumented)
     errorMsg?: string;
     exportStateEnabled?: boolean;
@@ -2230,12 +2344,33 @@ export interface SessionScreen {
     // (undocumented)
     notification?: number;
     // (undocumented)
+    primaries: string[] | null;
+    // (undocumented)
     primary?: string;
     // (undocumented)
     text: string;
     // (undocumented)
     url: string;
 }
+
+// @public (undocumented)
+const setOperationFinished: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+operationType: OperationType;
+}, string>;
+
+// @public (undocumented)
+const setPendingPostInvoke: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+operationType: string;
+postInvoke: OperationPostInvokeAny;
+}, string>;
+
+// @public (undocumented)
+const setPendingSendOperation: ActionCreatorWithOptionalPayload<ISendOperation, string>;
+
+// @public (undocumented)
+const setPendingSendOperationEpic: CXBoxEpic;
 
 // @public
 const showAllTableRecordsInit: ActionCreatorWithOptionalPayload<    {
@@ -2271,6 +2406,7 @@ error: ApplicationError;
 
 // @public
 const showViewPopup: ActionCreatorWithOptionalPayload<    {
+options?: Partial<WaitUntilPopupOptions>;
 bcName: string;
 widgetName?: string;
 calleeBCName?: string;
@@ -2279,7 +2415,7 @@ associateFieldKey?: string;
 assocValueKey?: string;
 active?: boolean;
 isFilter?: boolean;
-type?: PopupType;
+type?: PopupType | string;
 }, string>;
 
 // @public (undocumented)
@@ -2425,6 +2561,12 @@ export interface UserRole {
     value: string;
 }
 
+// @public (undocumented)
+export interface Utils {
+    // (undocumented)
+    getInternalWidgets?: (widgets: WidgetMeta[]) => string[];
+}
+
 declare namespace utils {
     export {
         addTailControlSequences,
@@ -2450,6 +2592,7 @@ declare namespace utils {
         parseFilters,
         parseSorters,
         getFilterType,
+        processDrilldownFilters,
         flattenOperations,
         matchOperationRole,
         getBcChildren,
@@ -2460,7 +2603,9 @@ declare namespace utils {
         presort,
         breadthFirstSearch,
         BreadthFirstResult,
-        deleteUndefinedFromObject
+        deleteUndefinedFromObject,
+        getDefaultViewForPrimary,
+        getDefaultViewFromPrimaries
     }
 }
 export { utils }
@@ -2561,6 +2706,12 @@ export interface ViewState extends ViewMetaResponse {
         };
     };
     // (undocumented)
+    pendingPostInvoke: {
+        [bcName: string]: {
+            [type: string]: OperationPostInvokeAny;
+        };
+    };
+    // (undocumented)
     pendingValidationFails?: Record<string, string> | PendingValidationFails;
     pendingValidationFailsFormat?: PendingValidationFailsFormat.old | PendingValidationFailsFormat.target;
     // (undocumented)
@@ -2576,7 +2727,28 @@ export interface ViewState extends ViewMetaResponse {
     // (undocumented)
     selectedRow: ViewSelectedRow | null;
     // (undocumented)
+    selectedRows: {
+        [bcName: string]: Array<Omit<DataItem, 'vstamp'>> | undefined;
+    };
+    // (undocumented)
     systemNotifications?: SystemNotification[];
+}
+
+// @public (undocumented)
+const waitUntil: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+postInvoke: Omit<OperationPostInvokeWaitUntil, 'type'>;
+}, string>;
+
+// @public (undocumented)
+const waitUntilEpic: CXBoxEpic;
+
+// @public (undocumented)
+interface WaitUntilPopupOptions {
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    status: 'progress' | 'success' | 'timeout';
 }
 
 // @public

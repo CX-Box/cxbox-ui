@@ -393,7 +393,7 @@ export type OperationPostInvokeAny =
 /**
  * TODO: ???
  */
-export type OperationScope = 'bc' | 'record' | 'page' | 'associate'
+export type OperationScope = 'bc' | 'record' | 'page' | 'associate' | 'mass'
 
 export interface AssociatedItem extends DataItem {
     _associate: boolean

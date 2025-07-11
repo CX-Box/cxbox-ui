@@ -14,11 +14,13 @@ import { AnyAction as AnyAction_2 } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 import { AxiosInstance } from 'axios';
 import { AxiosRequestConfig } from 'axios';
+import { AxiosResponse } from 'axios';
 import { CancelToken } from 'axios';
 import { CaseReducer } from '@reduxjs/toolkit';
 import { ComponentType } from 'react';
 import { Dispatch } from 'redux';
 import { Epic } from 'redux-observable';
+import { Method } from 'axios';
 import { Middleware } from 'redux';
 import { Observable } from 'rxjs';
 
@@ -126,7 +128,14 @@ declare namespace actions {
         addNotification,
         removeNotifications,
         waitUntil,
-        setPendingSendOperation
+        setPendingSendOperation,
+        associateInProgress,
+        setOperationFinished,
+        selectRows,
+        deselectRows,
+        clearSelectedRows,
+        setPendingPostInvoke,
+        applyPendingPostInvoke
     }
 }
 export { actions }
@@ -147,7 +156,7 @@ export type AllWidgetTypeFieldBase = WidgetFormFieldBase | WidgetListFieldBase;
 
 // @public (undocumented)
 export class Api {
-    constructor(instance: AxiosInstance);
+    constructor(instance: AxiosInstance, maxUrlLength?: number, filterTypes?: string[]);
     // Warning: (ae-forgotten-export) The symbol "ObservableApiWrapper" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -164,12 +173,14 @@ export class Api {
     record: DataItem;
     postActions?: OperationPostInvokeAny[];
     preInvoke?: OperationPreInvoke;
+    massIds_?: IdItemResponse[];
     }>;
     // (undocumented)
     deleteBcData(screenName: string, bcUrl: string, context: ApiCallContext, params?: GetParamsMap): Observable<    {
     record: DataItem;
     postActions?: OperationPostInvokeAny[];
     preInvoke?: OperationPreInvoke;
+    massIds_?: IdItemResponse[];
     }>;
     // Warning: (ae-forgotten-export) The symbol "GetParamsMap" needs to be exported by the entry point index.d.ts
     //
@@ -202,6 +213,7 @@ export class Api {
     record: DataItem;
     postActions?: OperationPostInvokeAny[];
     preInvoke?: OperationPreInvoke;
+    massIds_?: IdItemResponse[];
     }>;
 }
 
@@ -246,6 +258,14 @@ export enum ApplicationErrorType {
 // @public
 function applyParams(url: string, qso?: QueryParamsMap): string;
 
+// @public (undocumented)
+const applyPendingPostInvoke: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+widgetName?: string;
+operationType: string;
+postInvoke: OperationPostInvokeAny;
+}, string>;
+
 // @public
 function applyRawParams(url: string, qso: Record<string, any>): string;
 
@@ -269,6 +289,11 @@ export interface AssociatedItem extends DataItem {
     // (undocumented)
     _associate: boolean;
 }
+
+// @public (undocumented)
+const associateInProgress: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+}, string>;
 
 // @public (undocumented)
 export interface BaseDataNode {
@@ -442,6 +467,9 @@ export interface BcMetaState extends BcMeta {
     hasNext?: boolean;
     limit?: number;
     loading?: boolean;
+    massLimit?: number;
+    // (undocumented)
+    operationsInProgress?: OperationType[];
     page?: number;
 }
 
@@ -680,6 +708,11 @@ function checkShowCondition(condition: WidgetShowCondition | undefined, cursor: 
 // @public
 const clearPendingDataChangesAfterCursorChangeEpic: CXBoxEpic;
 
+// @public (undocumented)
+const clearSelectedRows: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+}, string>;
+
 // @public
 const clearValidationFails: ActionCreatorWithOptionalPayload<null, string>;
 
@@ -800,6 +833,7 @@ export interface DataItemResponse {
         record: DataItem;
         postActions?: OperationPostInvokeAny[];
         preInvoke?: OperationPreInvoke;
+        massIds_?: IdItemResponse[];
     };
 }
 
@@ -852,6 +886,12 @@ export interface DepthDataState {
         [bcName: string]: DataItem[];
     };
 }
+
+// @public (undocumented)
+const deselectRows: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+ids: string[];
+}, string>;
 
 // @public (undocumented)
 const deselectTableRow: ActionCreatorWithoutPayload<"deselectTableRow">;
@@ -1186,6 +1226,16 @@ const httpError500Epic: CXBoxEpic;
 const httpErrorDefaultEpic: CXBoxEpic;
 
 // @public (undocumented)
+export interface IdItemResponse extends Omit<DataItem, 'vstamp'> {
+    // (undocumented)
+    errorMessage?: string;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    success: boolean;
+}
+
+// @public (undocumented)
 const initialDepthDataState: DepthDataState;
 
 // @public (undocumented)
@@ -1233,6 +1283,7 @@ declare namespace interfaces {
         MultivalueSingleValueOptions,
         PendingDataItem,
         DataItemResponse,
+        IdItemResponse,
         BcDataResponse,
         DataState,
         DepthDataState,
@@ -1793,7 +1844,7 @@ export enum OperationPreInvokeType {
 }
 
 // @public
-export type OperationScope = 'bc' | 'record' | 'page' | 'associate';
+export type OperationScope = 'bc' | 'record' | 'page' | 'associate' | 'mass';
 
 // @public
 export type OperationType = OperationTypeCrud | string;
@@ -2166,6 +2217,12 @@ export interface ScreenState {
     views: ViewMetaResponse[];
 }
 
+// @public (undocumented)
+const selectRows: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+dataItems: Array<Omit<DataItem, 'vstamp'>>;
+}, string>;
+
 // @public
 const selectScreen: ActionCreatorWithOptionalPayload<    {
 screen: SessionScreen;
@@ -2295,6 +2352,19 @@ export interface SessionScreen {
     // (undocumented)
     url: string;
 }
+
+// @public (undocumented)
+const setOperationFinished: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+operationType: OperationType;
+}, string>;
+
+// @public (undocumented)
+const setPendingPostInvoke: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+operationType: string;
+postInvoke: OperationPostInvokeAny;
+}, string>;
 
 // @public (undocumented)
 const setPendingSendOperation: ActionCreatorWithOptionalPayload<ISendOperation, string>;
@@ -2636,6 +2706,12 @@ export interface ViewState extends ViewMetaResponse {
         };
     };
     // (undocumented)
+    pendingPostInvoke: {
+        [bcName: string]: {
+            [type: string]: OperationPostInvokeAny;
+        };
+    };
+    // (undocumented)
     pendingValidationFails?: Record<string, string> | PendingValidationFails;
     pendingValidationFailsFormat?: PendingValidationFailsFormat.old | PendingValidationFailsFormat.target;
     // (undocumented)
@@ -2650,6 +2726,10 @@ export interface ViewState extends ViewMetaResponse {
     };
     // (undocumented)
     selectedRow: ViewSelectedRow | null;
+    // (undocumented)
+    selectedRows: {
+        [bcName: string]: Array<Omit<DataItem, 'vstamp'>> | undefined;
+    };
     // (undocumented)
     systemNotifications?: SystemNotification[];
 }

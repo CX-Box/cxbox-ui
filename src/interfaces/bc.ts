@@ -90,6 +90,10 @@ export interface BcMetaState extends BcMeta {
      */
     limit?: number
     /**
+     * Page limit used in mass operations mode
+     */
+    massLimit?: number
+    /**
      * There is an addional pages of data.ts to fetch
      */
     hasNext?: boolean

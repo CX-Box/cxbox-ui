@@ -46,6 +46,12 @@ export interface DepthDataState {
     }
 }
 
+export interface IdItemResponse extends Omit<DataItem, 'vstamp'> {
+    id: string
+    success: boolean
+    errorMessage?: string
+}
+
 /**
  * Result of saving record, which back-end returns
  */
@@ -63,6 +69,8 @@ export interface DataItemResponse {
          * @deprecated TODO: Remove in 2.0.0 in favor of postInvokeConfirm (is this todo needed?)
          */
         preInvoke?: OperationPreInvoke
+
+        massIds_?: IdItemResponse[]
     }
 }
 
