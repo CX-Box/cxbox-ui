@@ -194,7 +194,7 @@ export class Api {
     // (undocumented)
     getRmByForceActive(screenName: string, bcUrl: string | null, data: PendingDataItem & {
         vstamp: number;
-    }, params?: GetParamsMap): Observable<RowMeta>;
+    }, changedNow: PendingDataItem, params?: GetParamsMap): Observable<RowMeta>;
     // (undocumented)
     loginByRoleRequest(role: string): Observable<LoginResponse>;
     // (undocumented)
@@ -2701,6 +2701,12 @@ export interface ViewState extends ViewMetaResponse {
     };
     // (undocumented)
     pendingDataChanges: {
+        [bcName: string]: {
+            [cursor: string]: PendingDataItem;
+        };
+    };
+    // (undocumented)
+    pendingDataChangesNow: {
         [bcName: string]: {
             [cursor: string]: PendingDataItem;
         };

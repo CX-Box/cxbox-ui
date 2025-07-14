@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { PendingValidationFailsFormat, ViewState, PendingDataItem, PendingValidationFails } from '../interfaces'
+import { PendingValidationFailsFormat, ViewState, PendingDataItem } from '../interfaces'
 import { DataItem, OperationTypeCrud } from '@cxbox-ui/schema'
 import {
     bcCancelPendingChanges,
@@ -87,6 +87,21 @@ export const initialViewState: ViewState = {
     modalInvoke: null
 }
 
+const isEmptyFieldValue = (value: unknown) =>
+    value === null || value === undefined || value === '' || (Array.isArray(value) && Object.keys(value).length === 0)
+
+const getFailsByRequiredFields = (data: PendingDataItem, isRequired: (fieldKey: string) => boolean) => {
+    const fails: Record<string, string> = {}
+
+    Object.keys(data).forEach(fieldKey => {
+        if (isRequired(fieldKey) && isEmptyFieldValue(data[fieldKey])) {
+            fails[fieldKey] = 'This field is mandatory'
+        }
+    })
+
+    return fails
+}
+
 /**
  * View reducer
  *
@@ -150,12 +165,20 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             // консолидация полученной разницы с актуальной дельтой
             const newPendingDataChanges = { ...state.pendingDataChanges[bcName][cursor], ...newPendingChangesDiff }
 
-            // зачистка возможных ошибок, которые заполнятся через роу-мету
-            Object.keys(newPendingDataChanges).forEach(key => {
-                if (state.pendingValidationFailsFormat === PendingValidationFailsFormat.target) {
-                    delete (state.pendingValidationFails as PendingValidationFails)[bcName][cursor][key]
-                }
-            })
+            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
+            const nextValidationFails = getFailsByRequiredFields(
+                newPendingDataChanges,
+                fieldKey => !!state.rowMeta[bcName]?.[bcUrl]?.fields.find(item => item.required && item.key === fieldKey)
+            )
+
+            // обновление ошибок, на основе полей заполненных через роу-мету
+            if (isTargetFormatPVF) {
+                state.pendingValidationFails = state.pendingValidationFails ?? {}
+                state.pendingValidationFails[bcName] = state.pendingValidationFails[bcName] ?? {}
+                ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = nextValidationFails
+            } else {
+                state.pendingValidationFails = nextValidationFails
+            }
 
             // отразим в списке обработанных forceActive полей - те что содержатся в новой дельте
             forceActiveFieldKeys.forEach(key => {
@@ -180,20 +203,7 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             const prevPending = prevCursor || {}
             const nextPending = { ...prevPending, ...action.payload.dataItem }
             const bcUrl = action.payload.bcUrl
-            const rowMeta = state.rowMeta[actionBcName]?.[bcUrl]
-            const nextValidationFails: Record<string, string> = {}
-            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-            Object.keys(nextPending).forEach(fieldKey => {
-                const required = rowMeta?.fields.find(item => item.required && item.key === fieldKey)
-                const isEmpty =
-                    nextPending[fieldKey] === null ||
-                    nextPending[fieldKey] === undefined ||
-                    nextPending[fieldKey] === '' ||
-                    (Array.isArray(nextPending[fieldKey]) && Object.keys(nextPending[fieldKey] as string).length === 0)
-                if (required && isEmpty) {
-                    nextValidationFails[fieldKey] = 'This field is mandatory'
-                }
-            })
+
             state.pendingDataChanges[action.payload.bcName] = state.pendingDataChanges[action.payload.bcName] ?? {}
             state.pendingDataChanges[action.payload.bcName][action.payload.cursor] = nextPending
             const prevBcNow = state.pendingDataChangesNow[action.payload.bcName] || {}
@@ -201,6 +211,13 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             const prevPendingNow = prevCursorNow || {}
             state.pendingDataChangesNow[action.payload.bcName] = state.pendingDataChangesNow[action.payload.bcName] ?? {}
             state.pendingDataChangesNow[action.payload.bcName][action.payload.cursor] = { ...prevPendingNow, ...action.payload.dataItem }
+
+            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
+            const nextValidationFails = getFailsByRequiredFields(
+                nextPending,
+                fieldKey => !!state.rowMeta[actionBcName]?.[bcUrl]?.fields.find(item => item.required && item.key === fieldKey)
+            )
+
             if (isTargetFormatPVF) {
                 state.pendingValidationFails = state.pendingValidationFails ?? {}
                 state.pendingValidationFails[actionBcName] = state.pendingValidationFails[actionBcName] ?? {}
