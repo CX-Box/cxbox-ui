@@ -82,12 +82,7 @@ export const requiredFields: Middleware =
                                 const isConfirmWidgetField =
                                     skipConfirmWidgetFieldsCheck &&
                                     confirmWidget?.fields?.find((field: WidgetField) => field.key === widgetField.key)
-                                if (
-                                    !fieldsToCheck[widgetField.key] &&
-                                    matchingRowMeta &&
-                                    !matchingRowMeta.hidden &&
-                                    !isConfirmWidgetField
-                                ) {
+                                if (!fieldsToCheck[widgetField.key] && matchingRowMeta && !isConfirmWidgetField) {
                                     fieldsToCheck[widgetField.key] = matchingRowMeta
                                 }
                             })
@@ -97,6 +92,19 @@ export const requiredFields: Middleware =
                     if (dataItem && TableLikeWidgetTypes.includes((widget as WidgetTableMeta)?.type)) {
                         dispatch(selectTableRowInit({ widgetName, rowId: cursor }))
                     }
+
+                    if (dataItem && rowMeta?.fields?.some(rowMetaField => rowMetaField.hidden && rowMetaField.key in dataItem)) {
+                        dispatch(
+                            addNotification({
+                                key: 'requiredFieldHidden',
+                                type: 'error',
+                                message:
+                                    'The form contains required fields that are not available for completion. Contact your administrator.',
+                                duration: 0
+                            })
+                        )
+                    }
+
                     return dataItem
                         ? next(changeDataItem({ bcName, bcUrl: buildBcUrl(bcName, true, state), cursor, dataItem }))
                         : next(action)
