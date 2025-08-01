@@ -23,6 +23,7 @@ import {
     isWidgetFieldBlock,
     Operation,
     OperationGroup,
+    OperationTypeCrud,
     PendingDataItem,
     PendingValidationFailsFormat,
     RowMetaField,
@@ -100,6 +101,11 @@ export const requiredFields: Middleware =
                     return dataItem
                         ? next(changeDataItem({ bcName, bcUrl: buildBcUrl(bcName, true, state), cursor, dataItem }))
                         : next(action)
+                }
+
+                // If operation is in cancelling pool, there is no need to validate
+                if (isOperationSkipsValidation(operationType)) {
+                    return next(action)
                 }
 
                 // If operation is not validation-sensetive and validation failed, offer to drop pending changes
@@ -199,4 +205,8 @@ export function hasPendingValidationFails(store: Store, bcName: string) {
         }
     }
     return checkResult
+}
+
+function isOperationSkipsValidation(operationType: string) {
+    return [OperationTypeCrud.delete, OperationTypeCrud.cancelCreate, 'cancel'].includes(operationType)
 }
