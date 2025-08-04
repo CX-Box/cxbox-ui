@@ -1075,6 +1075,7 @@ export const downloadFile = createAction<{
  */
 export const downloadFileByUrl = createAction<{
     url: string
+    name?: string
 }>('downloadFileByUrl')
 
 /**
