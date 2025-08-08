@@ -39,8 +39,9 @@ import {
     selectTableRowInit,
     sendOperation
 } from '../actions'
-import { buildBcUrl, flattenOperations } from '../utils'
+import { buildBcUrl, checkShowCondition, flattenOperations } from '../utils'
 import { DataItem, WidgetField } from '@cxbox-ui/schema'
+import { FieldType } from '../interfaces/view'
 
 export const requiredFields: Middleware =
     ({ getState, dispatch }: MiddlewareAPI<Dispatch, Store>) =>
@@ -62,6 +63,7 @@ export const requiredFields: Middleware =
                 if (operationRequiresAutosave(operationType, rowMeta?.actions)) {
                     // While `required` fields are assigned via rowMeta, only visually visible fields should be checked
                     // to avoid situations when field is marked as `required` but not available for user to interact.
+                    const hiddenFieldKeys: string[] = []
                     const fieldsToCheck: Record<string, RowMetaField> = {}
                     const skipConfirmWidgetFieldsCheck = confirmWidget && confirmWidget.bcName === bcName
                     // Form could be split into multiple widgets so we check all widget with the same BC as action initiator.
@@ -69,6 +71,13 @@ export const requiredFields: Middleware =
                     state.view.widgets
                         .filter(item => item.bcName === widget?.bcName)
                         .forEach(item => {
+                            const showConditionBcName = item.showCondition?.bcName
+                            const isWidgetVisible = checkShowCondition(
+                                item.showCondition,
+                                state.screen.bo.bc[showConditionBcName]?.cursor || '',
+                                state.data[showConditionBcName],
+                                state.view.pendingDataChanges
+                            )
                             const itemFieldsCalc = [...item.fields]
                             if (item.fields) {
                                 item.fields.forEach((block: Record<string, unknown> | WidgetFieldBlock<unknown>) => {
@@ -82,13 +91,18 @@ export const requiredFields: Middleware =
                                 const isConfirmWidgetField =
                                     skipConfirmWidgetFieldsCheck &&
                                     confirmWidget?.fields?.find((field: WidgetField) => field.key === widgetField.key)
-                                if (
-                                    !fieldsToCheck[widgetField.key] &&
-                                    matchingRowMeta &&
-                                    !matchingRowMeta.hidden &&
-                                    !isConfirmWidgetField
-                                ) {
+
+                                if (!fieldsToCheck[widgetField.key] && matchingRowMeta && !isConfirmWidgetField) {
                                     fieldsToCheck[widgetField.key] = matchingRowMeta
+
+                                    if (
+                                        !isWidgetVisible ||
+                                        widgetField.hidden ||
+                                        widgetField.type === FieldType.hidden ||
+                                        matchingRowMeta.hidden
+                                    ) {
+                                        hiddenFieldKeys.push(widgetField.key)
+                                    }
                                 }
                             })
                         })
@@ -97,6 +111,19 @@ export const requiredFields: Middleware =
                     if (dataItem && TableLikeWidgetTypes.includes((widget as WidgetTableMeta)?.type)) {
                         dispatch(selectTableRowInit({ widgetName, rowId: cursor }))
                     }
+
+                    if (dataItem && hiddenFieldKeys.some(item => item in dataItem)) {
+                        dispatch(
+                            addNotification({
+                                key: 'requiredFieldHidden',
+                                type: 'error',
+                                message:
+                                    'The form contains required fields that are not available for completion. Contact your administrator.',
+                                duration: 0
+                            })
+                        )
+                    }
+
                     return dataItem
                         ? next(changeDataItem({ bcName, bcUrl: buildBcUrl(bcName, true, state), cursor, dataItem }))
                         : next(action)
