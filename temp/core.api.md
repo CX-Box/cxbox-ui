@@ -911,6 +911,7 @@ fileId: string;
 // @public
 const downloadFileByUrl: ActionCreatorWithOptionalPayload<    {
 url: string;
+name?: string;
 }, string>;
 
 // @public (undocumented)
@@ -2040,6 +2041,16 @@ const refreshMetaEpic: CXBoxEpic;
 // @public
 const refreshMetaFail: ActionCreatorWithoutPayload<"refreshMetaFail">;
 
+// @public (undocumented)
+const removeDisabledFields: <Changes extends {
+    [p: string]: DataValue;
+}>(changes: Changes, rowMeta: RowMeta | undefined) => Changes;
+
+// @public (undocumented)
+const removeDisabledFieldsMutate: <Changes extends {
+    [p: string]: DataValue;
+}>(changes: Changes, rowMeta: RowMeta | undefined) => Changes;
+
 // @public
 const removeMultivalueTag: ActionCreatorWithOptionalPayload<    {
 bcName: string;
@@ -2605,7 +2616,9 @@ declare namespace utils {
         BreadthFirstResult,
         deleteUndefinedFromObject,
         getDefaultViewForPrimary,
-        getDefaultViewFromPrimaries
+        getDefaultViewFromPrimaries,
+        removeDisabledFieldsMutate,
+        removeDisabledFields
     }
 }
 export { utils }

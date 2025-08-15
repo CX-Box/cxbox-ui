@@ -2082,7 +2082,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": "<{\n    url: string;\n}, string>"
+                  "text": "<{\n    url: string;\n    name?: string;\n}, string>"
                 }
               ],
               "fileUrlPath": "src/actions/index.ts",
@@ -41401,6 +41401,190 @@
                 }
               ],
               "name": "processDrilldownFilters"
+            },
+            {
+              "kind": "Function",
+              "canonicalReference": "@cxbox-ui/core!utils.removeDisabledFields:function(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "removeDisabledFields: <Changes extends "
+                },
+                {
+                  "kind": "Content",
+                  "text": "{\n    [p: string]: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DataValue",
+                  "canonicalReference": "@cxbox-ui/core!DataValue:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";\n}"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(changes: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "Changes"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", rowMeta: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "RowMeta",
+                  "canonicalReference": "@cxbox-ui/core!RowMeta:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | undefined"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => "
+                },
+                {
+                  "kind": "Content",
+                  "text": "Changes"
+                }
+              ],
+              "fileUrlPath": "src/utils/data.ts",
+              "returnTypeTokenRange": {
+                "startIndex": 10,
+                "endIndex": 11
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "changes",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 5,
+                    "endIndex": 6
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "rowMeta",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 7,
+                    "endIndex": 9
+                  },
+                  "isOptional": false
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "Changes",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 4
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ],
+              "name": "removeDisabledFields"
+            },
+            {
+              "kind": "Function",
+              "canonicalReference": "@cxbox-ui/core!utils.removeDisabledFieldsMutate:function(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "removeDisabledFieldsMutate: <Changes extends "
+                },
+                {
+                  "kind": "Content",
+                  "text": "{\n    [p: string]: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DataValue",
+                  "canonicalReference": "@cxbox-ui/core!DataValue:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";\n}"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">(changes: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "Changes"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", rowMeta: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "RowMeta",
+                  "canonicalReference": "@cxbox-ui/core!RowMeta:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": " | undefined"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => "
+                },
+                {
+                  "kind": "Content",
+                  "text": "Changes"
+                }
+              ],
+              "fileUrlPath": "src/utils/data.ts",
+              "returnTypeTokenRange": {
+                "startIndex": 10,
+                "endIndex": 11
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "changes",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 5,
+                    "endIndex": 6
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "rowMeta",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 7,
+                    "endIndex": 9
+                  },
+                  "isOptional": false
+                }
+              ],
+              "typeParameters": [
+                {
+                  "typeParameterName": "Changes",
+                  "constraintTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 4
+                  },
+                  "defaultTypeTokenRange": {
+                    "startIndex": 0,
+                    "endIndex": 0
+                  }
+                }
+              ],
+              "name": "removeDisabledFieldsMutate"
             },
             {
               "kind": "Function",

@@ -29,7 +29,8 @@ import { buildBcUrl, getFilters, getSorters, matchOperationRole } from '../../ut
 import { AxiosError } from 'axios'
 
 import { postOperationRoutine } from '../utils/postOperationRoutine'
-import { createApiErrorObservable } from '../../utils/apiError'
+import { createApiErrorObservable } from '../../utils'
+import { removeDisabledFields } from '../../utils/data'
 
 /**
  * Handle any `sendOperationEpic` action which is not part of built-in operations types
@@ -52,18 +53,13 @@ export const sendOperationEpic: CXBoxEpic = (action$, state$, { api }) =>
             const bcUrl = buildBcUrl(bcName, true, state)
             const bc = state.screen.bo.bc[bcName]
             const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
-            const fields = rowMeta?.fields
             const cursor = bc.cursor
             const record = state.data[bcName]?.find(item => item.id === bc.cursor)
             const filters = state.screen.filters[bcName]
             const sorters = state.screen.sorters[bcName]
-            const pendingRecordChange = { ...state.view.pendingDataChanges[bcName]?.[bc.cursor] }
-            for (const key in pendingRecordChange) {
-                if (fields.find(item => item.key === key && item.disabled)) {
-                    delete pendingRecordChange[key]
-                }
-            }
-            const data = record && { ...pendingRecordChange, vstamp: record.vstamp }
+            const pendingChanges = removeDisabledFields(state.view.pendingDataChanges[bcName]?.[bc.cursor], rowMeta)
+
+            const data = record && { ...pendingChanges, vstamp: record.vstamp }
             const defaultSaveOperation =
                 state.view.widgets?.find(item => item.name === widgetName)?.options?.actionGroups?.defaultSave ===
                     action.payload.operationType && changeLocation.match(action.payload?.onSuccessAction?.type)
