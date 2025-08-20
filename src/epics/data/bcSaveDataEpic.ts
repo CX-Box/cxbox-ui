@@ -33,6 +33,7 @@ import {
 import { AxiosError } from 'axios'
 import { AnyAction } from '@reduxjs/toolkit'
 import { createApiErrorObservable } from '../../utils/apiError'
+import { removeDisabledFields } from '../../utils/data'
 
 /**
  * Post record's pending changes to `save dataEpics.ts` API endpoint.
@@ -91,19 +92,10 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
             const widgetName = action.payload.widgetName
             const cursor = state.screen.bo.bc[bcName].cursor as string
             const dataItem = state.data[bcName].find(item => item.id === cursor)
-            const pendingChanges = { ...state.view.pendingDataChanges[bcName]?.[cursor] }
             const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
             const options = state.view.widgets.find(widget => widget.name === widgetName)?.options
 
-            // there is no row meta when parent bc custom operation's postaction triggers autosave, because custom operation call bcForceUpdate
-            if (rowMeta) {
-                const fields = rowMeta.fields
-                for (const key in pendingChanges) {
-                    if (fields.find(item => item.key === key && item.disabled)) {
-                        delete pendingChanges[key]
-                    }
-                }
-            }
+            const pendingChanges = removeDisabledFields(state.view.pendingDataChanges[bcName]?.[cursor], rowMeta)
 
             const fetchChildrenBcData = Object.entries(getBcChildren(bcName, state.view.widgets, state.screen.bo.bc)).map(entry => {
                 const [childBcName, widgetNames] = entry
