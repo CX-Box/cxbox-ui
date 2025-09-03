@@ -113,14 +113,22 @@ export const requiredFields: Middleware =
                         dispatch(selectTableRowInit({ widgetName, rowId: cursor }))
                     }
 
-                    if (dataItem && hiddenFieldKeys.some(item => item in dataItem)) {
+                    const requiredHiddenFieldKeys = dataItem && hiddenFieldKeys.filter(item => item in dataItem)
+                    const requiredHiddenFieldKeysLength = requiredHiddenFieldKeys?.length
+
+                    if (requiredHiddenFieldKeysLength) {
                         dispatch(
                             addNotification({
                                 key: 'requiredFieldHidden',
                                 type: 'error',
                                 message:
-                                    'The form contains required fields that are not available for completion. Contact your administrator.',
-                                duration: 0
+                                    requiredHiddenFieldKeysLength === 1
+                                        ? 'The form contains a required field that is not available for completion. Contact your administrator.'
+                                        : 'The form contains required fields that are not available for completion. Contact your administrator.',
+                                duration: 0,
+                                options: {
+                                    messageOptions: { value: requiredHiddenFieldKeys.join('", "') }
+                                }
                             })
                         )
                     }
