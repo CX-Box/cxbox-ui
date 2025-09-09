@@ -21,7 +21,7 @@ import { CustomWidgetDescriptor, isCustomWidgetConfiguration, PopupWidgetTypes }
  *
  * @param customWidgets client's widgets
  */
-function extendPopupWidgetTypes(customWidgets: Record<string, CustomWidgetDescriptor>) {
+export function extendPopupWidgetTypes(customWidgets: Record<string, CustomWidgetDescriptor>) {
     if (customWidgets) {
         Object.entries(customWidgets).forEach(([widgetType, descriptor]) => {
             if (isCustomWidgetConfiguration(descriptor) && descriptor.isPopup) {
@@ -32,5 +32,3 @@ function extendPopupWidgetTypes(customWidgets: Record<string, CustomWidgetDescri
         })
     }
 }
-
-export default extendPopupWidgetTypes

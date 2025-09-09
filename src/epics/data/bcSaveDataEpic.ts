@@ -15,7 +15,7 @@
  */
 
 import { OperationError, OperationErrorEntity, OperationTypeCrud } from '../../interfaces'
-import { buildBcUrl, getBcChildren, matchOperationRole } from '../../utils'
+import { buildBcUrl, getEagerBcChildren, getWidgetsForLazyLoad, matchOperationRole } from '../../utils'
 import { catchError, concat, EMPTY, filter, mergeMap, Observable, of } from 'rxjs'
 import { CXBoxEpic } from '../../interfaces'
 import {
@@ -58,7 +58,7 @@ import { removeDisabledFields } from '../../utils/data'
  * @category Epics
  */
 
-export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
+export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api, utils }) =>
     action$.pipe(
         filter(sendOperation.match),
         filter(action => matchOperationRole(OperationTypeCrud.save, action.payload, state$.value)),
@@ -97,7 +97,10 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api }) =>
 
             const pendingChanges = removeDisabledFields(state.view.pendingDataChanges[bcName]?.[cursor], rowMeta)
 
-            const fetchChildrenBcData = Object.entries(getBcChildren(bcName, state.view.widgets, state.screen.bo.bc)).map(entry => {
+            const lazyWidgetNames = getWidgetsForLazyLoad(state.view.widgets, utils?.getInternalWidgets)
+            const fetchChildrenBcData = Object.entries(
+                getEagerBcChildren(bcName, state.view.widgets, state.screen.bo.bc, lazyWidgetNames, false)
+            ).map(entry => {
                 const [childBcName, widgetNames] = entry
                 return bcFetchDataRequest({ bcName: childBcName, widgetName: widgetNames[0] })
             })

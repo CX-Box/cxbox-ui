@@ -60,6 +60,37 @@ export function getBcChildren(originBcName: string, widgets: WidgetMeta[], bcMap
     return childrenBcMap
 }
 
+export const isEagerWidget = (widget: WidgetMeta, lazyWidgetNames: string[], showConditionCheck?: (widget: WidgetMeta) => boolean) => {
+    const isNotLazy = !lazyWidgetNames.includes(widget.name)
+    const isVisible = showConditionCheck?.(widget) ?? true
+
+    return isNotLazy && isVisible
+}
+
+export function getEagerBcChildren(
+    originBcName: string,
+    widgets: WidgetMeta[],
+    bcMap: Record<string, BcMetaState>,
+    lazyWidgetNames: string[],
+    ignoreLazyLoad: boolean = false,
+    showConditionCheck?: (widget: WidgetMeta) => boolean
+) {
+    const childrenBcMap = getBcChildren(originBcName, widgets, bcMap)
+    const result: Record<string, string[]> = {}
+
+    for (const [childBcName, widgetNames] of Object.entries(childrenBcMap)) {
+        const nonLazyWidget = widgets.find(item => {
+            return widgetNames.includes(item.name) && isEagerWidget(item, lazyWidgetNames, showConditionCheck)
+        })
+
+        if (nonLazyWidget || ignoreLazyLoad) {
+            result[childBcName] = widgetNames
+        }
+    }
+
+    return result
+}
+
 /**
  * Find child bc for hierarchy widget
  *
