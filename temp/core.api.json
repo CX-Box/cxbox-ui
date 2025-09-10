@@ -40290,6 +40290,65 @@
             },
             {
               "kind": "Function",
+              "canonicalReference": "@cxbox-ui/core!utils.extendPopupWidgetTypes:function(1)",
+              "docComment": "/**\n * Add new values to `PopupWidgetTypes` from client application\n *\n * @param customWidgets - client's widgets\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "export declare function extendPopupWidgetTypes(customWidgets: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string, "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "CustomWidgetDescriptor",
+                  "canonicalReference": "@cxbox-ui/core!CustomWidgetDescriptor:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "fileUrlPath": "src/utils/extendPopupWidgetTypes.ts",
+              "returnTypeTokenRange": {
+                "startIndex": 6,
+                "endIndex": 7
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "customWidgets",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 5
+                  },
+                  "isOptional": false
+                }
+              ],
+              "name": "extendPopupWidgetTypes"
+            },
+            {
+              "kind": "Function",
               "canonicalReference": "@cxbox-ui/core!utils.flattenOperations:function(1)",
               "docComment": "/**\n * Extract operations from all operations groups and return them as an array of flat operations\n *\n * @param operations - Operations or operation groups as received from row meta  @category Utils\n */\n",
               "excerptTokens": [
@@ -40656,6 +40715,164 @@
             },
             {
               "kind": "Function",
+              "canonicalReference": "@cxbox-ui/core!utils.getEagerBcChildren:function(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "export declare function getEagerBcChildren(originBcName: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", widgets: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WidgetMeta",
+                  "canonicalReference": "@cxbox-ui/core!WidgetMeta:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", bcMap: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string, "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "BcMetaState",
+                  "canonicalReference": "@cxbox-ui/core!BcMetaState:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ">"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", lazyWidgetNames: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", ignoreLazyLoad?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", showConditionCheck?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(widget: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WidgetMeta",
+                  "canonicalReference": "@cxbox-ui/core!WidgetMeta:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": "): "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "Record",
+                  "canonicalReference": "!Record:type"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<string, string[]>"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "fileUrlPath": "src/utils/bc.ts",
+              "returnTypeTokenRange": {
+                "startIndex": 19,
+                "endIndex": 21
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "originBcName",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "widgets",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 5
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "bcMap",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 6,
+                    "endIndex": 10
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "lazyWidgetNames",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 11,
+                    "endIndex": 12
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "ignoreLazyLoad",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 13,
+                    "endIndex": 14
+                  },
+                  "isOptional": true
+                },
+                {
+                  "parameterName": "showConditionCheck",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 15,
+                    "endIndex": 18
+                  },
+                  "isOptional": true
+                }
+              ],
+              "name": "getEagerBcChildren"
+            },
+            {
+              "kind": "Function",
               "canonicalReference": "@cxbox-ui/core!utils.getFieldTitle:function(1)",
               "docComment": "/**\n * If there is a template in the field name then returns the formatted string\n *\n * @param title - Field name\n *\n * @param dataItem - An object in the fields of which tokens should be searched\n */\n",
               "excerptTokens": [
@@ -41003,6 +41220,156 @@
                 }
               ],
               "name": "getTemplate"
+            },
+            {
+              "kind": "Function",
+              "canonicalReference": "@cxbox-ui/core!utils.getWidgetsForLazyLoad:function(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "getWidgetsForLazyLoad: (widgets: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WidgetMeta",
+                  "canonicalReference": "@cxbox-ui/core!WidgetMeta:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", getInternalWidgets: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "EpicDependencyInjection",
+                  "canonicalReference": "@cxbox-ui/core!EpicDependencyInjection:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "['utils']['getInternalWidgets']"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string[]"
+                }
+              ],
+              "fileUrlPath": "src/utils/getWidgetsForLazyLoad.ts",
+              "returnTypeTokenRange": {
+                "startIndex": 7,
+                "endIndex": 8
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "widgets",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 3
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "getInternalWidgets",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 4,
+                    "endIndex": 6
+                  },
+                  "isOptional": false
+                }
+              ],
+              "name": "getWidgetsForLazyLoad"
+            },
+            {
+              "kind": "Function",
+              "canonicalReference": "@cxbox-ui/core!utils.isEagerWidget:function(1)",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "isEagerWidget: (widget: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WidgetMeta",
+                  "canonicalReference": "@cxbox-ui/core!WidgetMeta:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", lazyWidgetNames: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string[]"
+                },
+                {
+                  "kind": "Content",
+                  "text": ", showConditionCheck?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "(widget: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "WidgetMeta",
+                  "canonicalReference": "@cxbox-ui/core!WidgetMeta:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ") => "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                }
+              ],
+              "fileUrlPath": "src/utils/bc.ts",
+              "returnTypeTokenRange": {
+                "startIndex": 9,
+                "endIndex": 10
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [
+                {
+                  "parameterName": "widget",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 1,
+                    "endIndex": 2
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "lazyWidgetNames",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 3,
+                    "endIndex": 4
+                  },
+                  "isOptional": false
+                },
+                {
+                  "parameterName": "showConditionCheck",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 5,
+                    "endIndex": 8
+                  },
+                  "isOptional": true
+                }
+              ],
+              "name": "isEagerWidget"
             },
             {
               "kind": "Function",

@@ -1039,6 +1039,9 @@ function escapedSrc(str: string): RegExp;
 // @public
 const exportState: ActionCreatorWithOptionalPayload<null, string>;
 
+// @public
+function extendPopupWidgetTypes(customWidgets: Record<string, CustomWidgetDescriptor>): void;
+
 // @public (undocumented)
 export enum FieldType {
     // (undocumented)
@@ -1169,6 +1172,9 @@ const getDefaultViewFromPrimaries: (primaries: string[] | null, views: ViewMetaR
 // @public
 function getDescendants(nodes: TreeNodeDescending[], result: string[]): void;
 
+// @public (undocumented)
+function getEagerBcChildren(originBcName: string, widgets: WidgetMeta[], bcMap: Record<string, BcMetaState>, lazyWidgetNames: string[], ignoreLazyLoad?: boolean, showConditionCheck?: (widget: WidgetMeta) => boolean): Record<string, string[]>;
+
 // @public
 function getFieldTitle(title: string, dataItem?: DataItem): string;
 
@@ -1189,6 +1195,9 @@ function getSorters(sorters: BcSorter[]): Record<string, string>;
 
 // @public
 function getTemplate(literals: TemplateStringsArray, ...placeholders: any[]): string;
+
+// @public (undocumented)
+const getWidgetsForLazyLoad: (widgets: WidgetMeta[], getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']) => string[];
 
 // @public
 const handleRouter: ActionCreatorWithOptionalPayload<    {
@@ -1445,6 +1454,9 @@ export function isCustomWidget(descriptor: CustomWidgetDescriptor): descriptor i
 
 // @public
 export function isCustomWidgetConfiguration(descriptor: CustomWidgetDescriptor): descriptor is CustomWidgetConfiguration;
+
+// @public (undocumented)
+const isEagerWidget: (widget: WidgetMeta, lazyWidgetNames: string[], showConditionCheck?: (widget: WidgetMeta) => boolean) => boolean;
 
 // @public (undocumented)
 export interface ISendOperation {
@@ -2607,7 +2619,9 @@ declare namespace utils {
         flattenOperations,
         matchOperationRole,
         getBcChildren,
+        getEagerBcChildren,
         checkShowCondition,
+        isEagerWidget,
         assignTreeLinks,
         getDescendants,
         buildSearchResultTree,
@@ -2618,7 +2632,9 @@ declare namespace utils {
         getDefaultViewForPrimary,
         getDefaultViewFromPrimaries,
         removeDisabledFieldsMutate,
-        removeDisabledFields
+        removeDisabledFields,
+        getWidgetsForLazyLoad,
+        extendPopupWidgetTypes
     }
 }
 export { utils }
