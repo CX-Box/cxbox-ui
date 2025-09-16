@@ -2,13 +2,14 @@ import { EpicDependencyInjection, PopupWidgetTypes, WidgetMeta } from '../interf
 
 export const getWidgetsForLazyLoad = (
     widgets: WidgetMeta[],
-    getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']
+    getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets'],
+    activePopupBcName?: string
 ) => {
     const popupWidgets: WidgetMeta[] = []
     const mainWidgets: WidgetMeta[] = []
 
     for (const widget of widgets) {
-        if (PopupWidgetTypes.includes(widget.type)) {
+        if (PopupWidgetTypes.includes(widget.type) && (!activePopupBcName || widget.bcName !== activePopupBcName)) {
             popupWidgets.push(widget)
         } else {
             mainWidgets.push(widget)

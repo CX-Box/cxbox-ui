@@ -33,6 +33,7 @@
     "src/api/*.ts",
     "src/utils/*.ts",
     "src/interfaces/*.ts",
+    "src/selectors/*.ts",
     "src/*.ts"
   ],
   "exclude": [

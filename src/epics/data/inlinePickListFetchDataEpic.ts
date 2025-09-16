@@ -16,7 +16,7 @@
 
 import { CXBoxEpic } from '../../interfaces'
 import { catchError, filter, mergeMap, of, race } from 'rxjs'
-import { bcFetchDataFail, bcFetchDataSuccess, inlinePickListFetchDataRequest } from '../../actions'
+import { bcFetchDataFail, inlinePickListFetchDataRequest, inlinePickListFetchDataSuccess } from '../../actions'
 import { buildBcUrl } from '../../utils'
 import { cancelRequestActionTypes, cancelRequestEpic } from '../../utils/cancelRequestEpic'
 
@@ -33,7 +33,7 @@ export const inlinePickListFetchDataEpic: CXBoxEpic = (action$, state$, { api })
                 .fetchBcData(state$.value.screen.screenName, bcUrl, { [searchSpec + '.contains']: searchString }, canceler.cancelToken)
                 .pipe(
                     mergeMap(data => {
-                        return of(bcFetchDataSuccess({ bcName, data: data.data, bcUrl }))
+                        return of(inlinePickListFetchDataSuccess({ bcName, data: data.data, bcUrl }))
                     }),
                     catchError((error: any) => {
                         console.error(error)

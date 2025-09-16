@@ -72,7 +72,6 @@ export function getEagerBcChildren(
     widgets: WidgetMeta[],
     bcMap: Record<string, BcMetaState>,
     lazyWidgetNames: string[],
-    ignoreLazyLoad: boolean = false,
     showConditionCheck?: (widget: WidgetMeta) => boolean
 ) {
     const childrenBcMap = getBcChildren(originBcName, widgets, bcMap)
@@ -83,7 +82,7 @@ export function getEagerBcChildren(
             return widgetNames.includes(item.name) && isEagerWidget(item, lazyWidgetNames, showConditionCheck)
         })
 
-        if (nonLazyWidget || ignoreLazyLoad) {
+        if (nonLazyWidget) {
             result[childBcName] = widgetNames
         }
     }

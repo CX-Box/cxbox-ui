@@ -34,6 +34,7 @@ import { AxiosError } from 'axios'
 import { AnyAction } from '@reduxjs/toolkit'
 import { createApiErrorObservable } from '../../utils/apiError'
 import { removeDisabledFields } from '../../utils/data'
+import { selectBcNameFromPopupData } from '../../selectors/selectors'
 
 /**
  * Post record's pending changes to `save dataEpics.ts` API endpoint.
@@ -97,9 +98,9 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api, utils }) =>
 
             const pendingChanges = removeDisabledFields(state.view.pendingDataChanges[bcName]?.[cursor], rowMeta)
 
-            const lazyWidgetNames = getWidgetsForLazyLoad(state.view.widgets, utils?.getInternalWidgets)
+            const lazyWidgetNames = getWidgetsForLazyLoad(state.view.widgets, utils?.getInternalWidgets, selectBcNameFromPopupData(state))
             const fetchChildrenBcData = Object.entries(
-                getEagerBcChildren(bcName, state.view.widgets, state.screen.bo.bc, lazyWidgetNames, false)
+                getEagerBcChildren(bcName, state.view.widgets, state.screen.bo.bc, lazyWidgetNames)
             ).map(entry => {
                 const [childBcName, widgetNames] = entry
                 return bcFetchDataRequest({ bcName: childBcName, widgetName: widgetNames[0] })

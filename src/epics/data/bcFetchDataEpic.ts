@@ -252,11 +252,14 @@ const getChildrenData = (
     showConditionCheck: (widget: WidgetMeta) => boolean,
     getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']
 ) => {
-    const { bcName } = action.payload
+    const { bcName, widgetName } = action.payload
 
-    const ignoreLazyLoad = showViewPopup.match(action)
-    const lazyWidgetNames = getWidgetsForLazyLoad(widgets, getInternalWidgets)
-    const eagerChildren = getEagerBcChildren(bcName as string, widgets, bcDictionary, lazyWidgetNames, ignoreLazyLoad, showConditionCheck)
+    const lazyWidgetNames = getWidgetsForLazyLoad(
+        widgets,
+        getInternalWidgets,
+        showViewPopup.match(action) ? bcName ?? widgets.find(widget => widget.name === widgetName)?.bcName : undefined
+    )
+    const eagerChildren = getEagerBcChildren(bcName as string, widgets, bcDictionary, lazyWidgetNames, showConditionCheck)
 
     return concat(
         ...Object.entries(eagerChildren).map(([childBcName, widgetNames]) => {
