@@ -135,7 +135,8 @@ declare namespace actions {
         deselectRows,
         clearSelectedRows,
         setPendingPostInvoke,
-        applyPendingPostInvoke
+        applyPendingPostInvoke,
+        inlinePickListFetchDataSuccess
     }
 }
 export { actions }
@@ -1173,7 +1174,7 @@ const getDefaultViewFromPrimaries: (primaries: string[] | null, views: ViewMetaR
 function getDescendants(nodes: TreeNodeDescending[], result: string[]): void;
 
 // @public (undocumented)
-function getEagerBcChildren(originBcName: string, widgets: WidgetMeta[], bcMap: Record<string, BcMetaState>, lazyWidgetNames: string[], ignoreLazyLoad?: boolean, showConditionCheck?: (widget: WidgetMeta) => boolean): Record<string, string[]>;
+function getEagerBcChildren(originBcName: string, widgets: WidgetMeta[], bcMap: Record<string, BcMetaState>, lazyWidgetNames: string[], showConditionCheck?: (widget: WidgetMeta) => boolean): Record<string, string[]>;
 
 // @public
 function getFieldTitle(title: string, dataItem?: DataItem): string;
@@ -1197,7 +1198,7 @@ function getSorters(sorters: BcSorter[]): Record<string, string>;
 function getTemplate(literals: TemplateStringsArray, ...placeholders: any[]): string;
 
 // @public (undocumented)
-const getWidgetsForLazyLoad: (widgets: WidgetMeta[], getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']) => string[];
+const getWidgetsForLazyLoad: (widgets: WidgetMeta[], getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets'], activePopupBcName?: string) => string[];
 
 // @public
 const handleRouter: ActionCreatorWithOptionalPayload<    {
@@ -1268,6 +1269,14 @@ const inlinePickListFetchDataRequest: ActionCreatorWithOptionalPayload<    {
 bcName: string;
 searchSpec: string;
 searchString: string;
+}, string>;
+
+// @public (undocumented)
+const inlinePickListFetchDataSuccess: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+data: DataItem[];
+bcUrl: string;
+hasNext?: boolean;
 }, string>;
 
 // @public (undocumented)

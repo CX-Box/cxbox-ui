@@ -2529,6 +2529,47 @@
             },
             {
               "kind": "Variable",
+              "canonicalReference": "@cxbox-ui/core!actions.inlinePickListFetchDataSuccess:var",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "inlinePickListFetchDataSuccess: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "import(\"@reduxjs/toolkit\")."
+                },
+                {
+                  "kind": "Reference",
+                  "text": "ActionCreatorWithOptionalPayload",
+                  "canonicalReference": "@reduxjs/toolkit!ActionCreatorWithOptionalPayload:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "<{\n    bcName: string;\n    data: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "DataItem",
+                  "canonicalReference": "@cxbox-ui/core!DataItem:interface"
+                },
+                {
+                  "kind": "Content",
+                  "text": "[];\n    bcUrl: string;\n    hasNext?: boolean;\n}, string>"
+                }
+              ],
+              "fileUrlPath": "src/actions/index.ts",
+              "isReadonly": true,
+              "releaseTag": "Public",
+              "name": "inlinePickListFetchDataSuccess",
+              "variableTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 6
+              }
+            },
+            {
+              "kind": "Variable",
               "canonicalReference": "@cxbox-ui/core!actions.login:var",
               "docComment": "/**\n * Authentication request\n */\n",
               "excerptTokens": [
@@ -40771,14 +40812,6 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ", ignoreLazyLoad?: "
-                },
-                {
-                  "kind": "Content",
-                  "text": "boolean"
-                },
-                {
-                  "kind": "Content",
                   "text": ", showConditionCheck?: "
                 },
                 {
@@ -40814,8 +40847,8 @@
               ],
               "fileUrlPath": "src/utils/bc.ts",
               "returnTypeTokenRange": {
-                "startIndex": 19,
-                "endIndex": 21
+                "startIndex": 17,
+                "endIndex": 19
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -40853,18 +40886,10 @@
                   "isOptional": false
                 },
                 {
-                  "parameterName": "ignoreLazyLoad",
-                  "parameterTypeTokenRange": {
-                    "startIndex": 13,
-                    "endIndex": 14
-                  },
-                  "isOptional": true
-                },
-                {
                   "parameterName": "showConditionCheck",
                   "parameterTypeTokenRange": {
-                    "startIndex": 15,
-                    "endIndex": 18
+                    "startIndex": 13,
+                    "endIndex": 16
                   },
                   "isOptional": true
                 }
@@ -41254,6 +41279,14 @@
                 },
                 {
                   "kind": "Content",
+                  "text": ", activePopupBcName?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "string"
+                },
+                {
+                  "kind": "Content",
                   "text": ") => "
                 },
                 {
@@ -41263,8 +41296,8 @@
               ],
               "fileUrlPath": "src/utils/getWidgetsForLazyLoad.ts",
               "returnTypeTokenRange": {
-                "startIndex": 7,
-                "endIndex": 8
+                "startIndex": 9,
+                "endIndex": 10
               },
               "releaseTag": "Public",
               "overloadIndex": 1,
@@ -41284,6 +41317,14 @@
                     "endIndex": 6
                   },
                   "isOptional": false
+                },
+                {
+                  "parameterName": "activePopupBcName",
+                  "parameterTypeTokenRange": {
+                    "startIndex": 7,
+                    "endIndex": 8
+                  },
+                  "isOptional": true
                 }
               ],
               "name": "getWidgetsForLazyLoad"
