@@ -4,6 +4,7 @@
 /docs
 .idea/
 .vscode/
+/temp
 
 # Yarn 3 files
 .yarn/*
