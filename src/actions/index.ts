@@ -1221,3 +1221,24 @@ export const applyPendingPostInvoke = createAction<{
     operationType: string
     postInvoke: OperationPostInvokeAny
 }>('applyPendingPostInvoke')
+
+export const inlinePickListFetchDataSuccess = createAction<{
+    /**
+     * Business component that requested data
+     *
+     * @deprecated TODO: 2.0.0 Remove in favor of widgetName
+     */
+    bcName: string
+    /**
+     * Data records from response for this business component
+     */
+    data: DataItem[]
+    /**
+     * BC url with respect of parents cursors
+     */
+    bcUrl: string
+    /**
+     * If there are more data to fetch (other pages etc.)
+     */
+    hasNext?: boolean
+}>('inlinePickListFetchDataSuccess')

@@ -38,6 +38,7 @@ import {
     bcSaveDataFail,
     bcSaveDataSuccess,
     bcSelectRecord,
+    inlinePickListFetchDataSuccess,
     selectScreen,
     selectScreenFail,
     selectView,
@@ -124,6 +125,12 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             state.bo.bc = { ...state.bo.bc, ...newBcs }
         })
         .addCase(bcFetchDataSuccess, (state, action) => {
+            const currentBc = state.bo.bc[action.payload.bcName]
+            currentBc.hasNext = action.payload.hasNext
+            currentBc.loading = false
+            state.cachedBc[action.payload.bcName] = action.payload.bcUrl
+        })
+        .addCase(inlinePickListFetchDataSuccess, (state, action) => {
             const currentBc = state.bo.bc[action.payload.bcName]
             currentBc.hasNext = action.payload.hasNext
             currentBc.loading = false

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { CXBoxEpic, EpicDependencyInjection, PopupWidgetTypes, Store, WidgetMeta } from '../../interfaces'
+import { CXBoxEpic, EpicDependencyInjection, Store, WidgetMeta } from '../../interfaces'
 import { EMPTY, filter, mergeMap } from 'rxjs'
 import { bcFetchDataRequest, selectView } from '../../actions'
+import { getWidgetsForLazyLoad } from '../../utils'
 
 /**
  * Schedules dataEpics.ts fetch for every widget on the view
@@ -48,7 +49,7 @@ export const selectViewEpic: CXBoxEpic = (action$, state$, { utils }) =>
                     return lazyLoad(state, utils?.getInternalWidgets)
                 }
 
-                return fullLoad(state)
+                return fullLoad(state, utils?.getInternalWidgets)
             } catch (e) {
                 console.error(`selectView Epic:: ${e}`)
                 return EMPTY
@@ -56,11 +57,12 @@ export const selectViewEpic: CXBoxEpic = (action$, state$, { utils }) =>
         })
     )
 
-function fullLoad<S extends Store>(state: S) {
+function fullLoad<S extends Store>(state: S, getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']) {
     const bcToLoad: Record<string, WidgetMeta> = {}
+    const lazyWidgetNames = getWidgetsForLazyLoad(state.view.widgets, getInternalWidgets)
 
     state.view.widgets
-        .filter(widget => !PopupWidgetTypes.includes(widget.type))
+        .filter(widget => !lazyWidgetNames.includes(widget.name))
         .forEach(widget => {
             if (widget.bcName) {
                 let bcName = widget.bcName
@@ -83,29 +85,6 @@ function fullLoad<S extends Store>(state: S) {
     })
 }
 
-const getExcludedWidgetsFromDataFetching = (
-    widgets: WidgetMeta[],
-    getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']
-) => {
-    const popupWidgets: typeof widgets = []
-    const mainWidgets: typeof widgets = []
-
-    widgets.forEach(widget => {
-        PopupWidgetTypes.includes(widget.type) ? popupWidgets.push(widget) : mainWidgets.push(widget)
-    })
-
-    let internalPopupWidgetsNames = getInternalWidgets?.(popupWidgets) || []
-    const internalMainWidgetsNames = getInternalWidgets?.(mainWidgets) || []
-
-    if (internalPopupWidgetsNames.length && internalMainWidgetsNames.length) {
-        internalPopupWidgetsNames = internalPopupWidgetsNames.filter(internalPopupWidgetName => {
-            return !internalMainWidgetsNames.includes(internalPopupWidgetName)
-        })
-    }
-
-    return [...popupWidgets.map(widget => widget.name), ...internalPopupWidgetsNames]
-}
-
 /**
  * Here is a list of bc that require downloading.
  * Either bc that have no data are loaded, or the cursor has been reset.
@@ -119,10 +98,10 @@ function lazyLoad<S extends Store>(state: S, getInternalWidgets: EpicDependencyI
     const cursorIsNull = (bcName?: string) => (bcName ? bcDictionary[bcName]?.cursor === null : false)
     const hasBcCursor = (bcName?: string) => (bcName ? !!bcDictionary[bcName]?.cursor : false)
     const hasBcParent = (bcName?: string) => !!bcDictionary[bcName]?.parentName
-    const excludedWidgetsFromDataFetching = getExcludedWidgetsFromDataFetching(state.view.widgets, getInternalWidgets)
+    const lazyWidgetNames = getWidgetsForLazyLoad(state.view.widgets, getInternalWidgets)
 
     state.view.widgets
-        .filter(widget => !excludedWidgetsFromDataFetching.includes(widget.name))
+        .filter(widget => !lazyWidgetNames.includes(widget.name))
         .forEach(widget => {
             if (widget.bcName && (!hasBcData(widget.bcName) || cursorIsNull(widget.bcName))) {
                 let bcName = widget.bcName

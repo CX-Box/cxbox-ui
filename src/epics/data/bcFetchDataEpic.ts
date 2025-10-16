@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-import { catchError, concat, EMPTY, filter, mergeMap, Observable, of, race } from 'rxjs'
+import { catchError, concat, EMPTY, filter, mergeMap, of, race } from 'rxjs'
 import { AnyAction } from 'redux'
-import { buildBcUrl, checkShowCondition, getBcChildren, getFilters, getSorters } from '../../utils'
+import {
+    buildBcUrl,
+    checkShowCondition,
+    getEagerBcChildren,
+    getFilters,
+    getSorters,
+    getWidgetsForLazyLoad,
+    isEagerWidget
+} from '../../utils'
 import { cancelRequestActionTypes, cancelRequestEpic } from '../../utils/cancelRequestEpic'
 import { DataItem, WidgetTypes } from '@cxbox-ui/schema'
-import { BcMetaState, CXBoxEpic, PopupData, PopupWidgetTypes, WidgetMeta } from '../../interfaces'
+import { BcMetaState, CXBoxEpic, EpicDependencyInjection, PopupData, PopupWidgetTypes, WidgetMeta } from '../../interfaces'
 import { isAnyOf } from '@reduxjs/toolkit'
 import {
     bcChangeCursors,
@@ -49,7 +57,7 @@ import { createApiErrorObservable } from '../../utils/apiError'
  *
  * @category Epics
  */
-export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
+export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api, utils }) =>
     action$.pipe(
         filter(isAnyOf(bcFetchDataRequest, bcFetchDataPages, showViewPopup, bcForceUpdate, bcChangePage)),
         mergeMap(action => {
@@ -173,7 +181,14 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api }) =>
                         return concat(cursorChange, setDataSuccess, fetchRowMeta)
                     }
                     const fetchChildren = response.data?.length
-                        ? getChildrenData(action, widgets, state.screen.bo.bc, !!anyHierarchyWidget, isWidgetVisible)
+                        ? getChildrenData(
+                              action,
+                              widgets,
+                              state.screen.bo.bc,
+                              !!anyHierarchyWidget,
+                              isWidgetVisible,
+                              utils?.getInternalWidgets
+                          )
                         : EMPTY
                     const resetOutdatedData = resetOutdatedChildrenData(bcName, state.screen.bo.bc, state.data)
 
@@ -234,35 +249,33 @@ const getChildrenData = (
     widgets: WidgetMeta[],
     bcDictionary: Record<string, BcMetaState>,
     isHierarchy: boolean,
-    showConditionCheck: (widget: WidgetMeta) => boolean
+    showConditionCheck: (widget: WidgetMeta) => boolean,
+    getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets']
 ) => {
-    const { bcName } = action.payload
+    const { bcName, widgetName } = action.payload
+
+    const lazyWidgetNames = getWidgetsForLazyLoad(
+        widgets,
+        getInternalWidgets,
+        showViewPopup.match(action) ? bcName ?? widgets.find(widget => widget.name === widgetName)?.bcName : undefined
+    )
+    const eagerChildren = getEagerBcChildren(bcName as string, widgets, bcDictionary, lazyWidgetNames, showConditionCheck)
 
     return concat(
-        ...Object.entries(getBcChildren(bcName as string, widgets, bcDictionary)).reduce<Array<Observable<AnyAction>>>(
-            (acc, [childBcName, widgetNames]) => {
-                const ignoreLazyLoad = showViewPopup.match(action)
-                const nonLazyWidget = widgets.find(item => {
-                    return widgetNames.includes(item.name) && !isPopupWidget(item.type) && showConditionCheck(item)
+        ...Object.entries(eagerChildren).map(([childBcName, widgetNames]) => {
+            const nonLazyWidget = widgets.find(item => {
+                return widgetNames.includes(item.name) && isEagerWidget(item, lazyWidgetNames, showConditionCheck)
+            })
+
+            return of(
+                bcFetchDataRequest({
+                    bcName: childBcName,
+                    widgetName: nonLazyWidget?.name ?? widgetNames[0],
+                    ignorePageLimit: action.payload?.ignorePageLimit || showViewPopup.match(action),
+                    keepDelta: isHierarchy || action.payload?.keepDelta
                 })
-
-                if (nonLazyWidget || ignoreLazyLoad) {
-                    acc.push(
-                        of(
-                            bcFetchDataRequest({
-                                bcName: childBcName,
-                                widgetName: nonLazyWidget?.name as string,
-                                ignorePageLimit: action.payload?.ignorePageLimit || showViewPopup.match(action),
-                                keepDelta: isHierarchy || action.payload?.keepDelta
-                            })
-                        )
-                    )
-                }
-
-                return acc
-            },
-            []
-        )
+            )
+        })
     )
 }
 

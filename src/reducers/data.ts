@@ -6,6 +6,7 @@ import {
     bcNewDataSuccess,
     bcSaveDataSuccess,
     changeAssociations,
+    inlinePickListFetchDataSuccess,
     selectView
 } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
@@ -17,6 +18,9 @@ export const dataInitialState: DataState = {}
 export const createDataReducerBuilderManager = (initialState: DataState) =>
     new ReducerBuilderManager<typeof initialState>()
         .addCase(bcFetchDataSuccess, (state, action) => {
+            state[action.payload.bcName] = action.payload.data
+        })
+        .addCase(inlinePickListFetchDataSuccess, (state, action) => {
             state[action.payload.bcName] = action.payload.data
         })
         .addCase(bcNewDataSuccess, (state, action) => {

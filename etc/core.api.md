@@ -135,7 +135,8 @@ declare namespace actions {
         deselectRows,
         clearSelectedRows,
         setPendingPostInvoke,
-        applyPendingPostInvoke
+        applyPendingPostInvoke,
+        inlinePickListFetchDataSuccess
     }
 }
 export { actions }
@@ -911,6 +912,7 @@ fileId: string;
 // @public
 const downloadFileByUrl: ActionCreatorWithOptionalPayload<    {
 url: string;
+name?: string;
 }, string>;
 
 // @public (undocumented)
@@ -1037,6 +1039,9 @@ function escapedSrc(str: string): RegExp;
 
 // @public
 const exportState: ActionCreatorWithOptionalPayload<null, string>;
+
+// @public
+function extendPopupWidgetTypes(customWidgets: Record<string, CustomWidgetDescriptor>): void;
 
 // @public (undocumented)
 export enum FieldType {
@@ -1168,6 +1173,9 @@ const getDefaultViewFromPrimaries: (primaries: string[] | null, views: ViewMetaR
 // @public
 function getDescendants(nodes: TreeNodeDescending[], result: string[]): void;
 
+// @public (undocumented)
+function getEagerBcChildren(originBcName: string, widgets: WidgetMeta[], bcMap: Record<string, BcMetaState>, lazyWidgetNames: string[], showConditionCheck?: (widget: WidgetMeta) => boolean): Record<string, string[]>;
+
 // @public
 function getFieldTitle(title: string, dataItem?: DataItem): string;
 
@@ -1188,6 +1196,9 @@ function getSorters(sorters: BcSorter[]): Record<string, string>;
 
 // @public
 function getTemplate(literals: TemplateStringsArray, ...placeholders: any[]): string;
+
+// @public (undocumented)
+const getWidgetsForLazyLoad: (widgets: WidgetMeta[], getInternalWidgets: EpicDependencyInjection['utils']['getInternalWidgets'], activePopupBcName?: string) => string[];
 
 // @public
 const handleRouter: ActionCreatorWithOptionalPayload<    {
@@ -1258,6 +1269,14 @@ const inlinePickListFetchDataRequest: ActionCreatorWithOptionalPayload<    {
 bcName: string;
 searchSpec: string;
 searchString: string;
+}, string>;
+
+// @public (undocumented)
+const inlinePickListFetchDataSuccess: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+data: DataItem[];
+bcUrl: string;
+hasNext?: boolean;
 }, string>;
 
 // @public (undocumented)
@@ -1444,6 +1463,9 @@ export function isCustomWidget(descriptor: CustomWidgetDescriptor): descriptor i
 
 // @public
 export function isCustomWidgetConfiguration(descriptor: CustomWidgetDescriptor): descriptor is CustomWidgetConfiguration;
+
+// @public (undocumented)
+const isEagerWidget: (widget: WidgetMeta, lazyWidgetNames: string[], showConditionCheck?: (widget: WidgetMeta) => boolean) => boolean;
 
 // @public (undocumented)
 export interface ISendOperation {
@@ -2040,6 +2062,16 @@ const refreshMetaEpic: CXBoxEpic;
 // @public
 const refreshMetaFail: ActionCreatorWithoutPayload<"refreshMetaFail">;
 
+// @public (undocumented)
+const removeDisabledFields: <Changes extends {
+    [p: string]: DataValue;
+}>(changes: Changes, rowMeta: RowMeta | undefined) => Changes;
+
+// @public (undocumented)
+const removeDisabledFieldsMutate: <Changes extends {
+    [p: string]: DataValue;
+}>(changes: Changes, rowMeta: RowMeta | undefined) => Changes;
+
 // @public
 const removeMultivalueTag: ActionCreatorWithOptionalPayload<    {
 bcName: string;
@@ -2596,7 +2628,9 @@ declare namespace utils {
         flattenOperations,
         matchOperationRole,
         getBcChildren,
+        getEagerBcChildren,
         checkShowCondition,
+        isEagerWidget,
         assignTreeLinks,
         getDescendants,
         buildSearchResultTree,
@@ -2605,7 +2639,11 @@ declare namespace utils {
         BreadthFirstResult,
         deleteUndefinedFromObject,
         getDefaultViewForPrimary,
-        getDefaultViewFromPrimaries
+        getDefaultViewFromPrimaries,
+        removeDisabledFieldsMutate,
+        removeDisabledFields,
+        getWidgetsForLazyLoad,
+        extendPopupWidgetTypes
     }
 }
 export { utils }

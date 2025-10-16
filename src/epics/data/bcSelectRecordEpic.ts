@@ -17,16 +17,22 @@
 import { CXBoxEpic } from '../../interfaces'
 import { concat, filter, mergeMap, of } from 'rxjs'
 import { bcChangeCursors, bcFetchDataRequest, bcFetchRowMeta, bcSelectRecord } from '../../actions'
-import { getBcChildren } from '../../utils'
+import { getEagerBcChildren, getWidgetsForLazyLoad } from '../../utils'
+import { selectBcNameFromPopupData } from '../../selectors/selectors'
 
-export const bcSelectRecordEpic: CXBoxEpic = (action$, store$) =>
+export const bcSelectRecordEpic: CXBoxEpic = (action$, state$, { utils }) =>
     action$.pipe(
         filter(bcSelectRecord.match),
         mergeMap(action => {
             const { bcName, cursor } = action.payload
-            const widgets = store$.value.view.widgets
-            const bcMap = store$.value.screen.bo.bc
-            const fetchChildrenBcData = Object.entries(getBcChildren(bcName, widgets, bcMap)).map(entry => {
+            const widgets = state$.value.view.widgets
+            const bcMap = state$.value.screen.bo.bc
+            const lazyWidgetNames = getWidgetsForLazyLoad(
+                state$.value.view.widgets,
+                utils?.getInternalWidgets,
+                selectBcNameFromPopupData(state$.value)
+            )
+            const fetchChildrenBcData = Object.entries(getEagerBcChildren(bcName, widgets, bcMap, lazyWidgetNames)).map(entry => {
                 const [childBcName, widgetNames] = entry
                 return bcFetchDataRequest({
                     bcName: childBcName,
