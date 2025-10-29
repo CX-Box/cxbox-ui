@@ -136,7 +136,9 @@ declare namespace actions {
         clearSelectedRows,
         setPendingPostInvoke,
         applyPendingPostInvoke,
-        inlinePickListFetchDataSuccess
+        inlinePickListFetchDataSuccess,
+        setPendingForceActiveFieldKey,
+        clearPendingForceActiveFieldKey
     }
 }
 export { actions }
@@ -711,6 +713,12 @@ function checkShowCondition(condition: WidgetShowCondition | undefined, cursor: 
 
 // @public
 const clearPendingDataChangesAfterCursorChangeEpic: CXBoxEpic;
+
+// @public (undocumented)
+const clearPendingForceActiveFieldKey: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+cursor: string;
+}, string>;
 
 // @public (undocumented)
 const clearSelectedRows: ActionCreatorWithOptionalPayload<    {
@@ -2395,6 +2403,13 @@ operationType: OperationType;
 }, string>;
 
 // @public (undocumented)
+const setPendingForceActiveFieldKey: ActionCreatorWithOptionalPayload<    {
+bcName: string;
+cursor: string;
+fieldKey: string;
+}, string>;
+
+// @public (undocumented)
 const setPendingPostInvoke: ActionCreatorWithOptionalPayload<    {
 bcName: string;
 operationType: string;
@@ -2750,6 +2765,12 @@ export interface ViewState extends ViewMetaResponse {
     pendingDataChangesNow: {
         [bcName: string]: {
             [cursor: string]: PendingDataItem;
+        };
+    };
+    // (undocumented)
+    pendingForceActiveFieldKeys: {
+        [bcName: string]: {
+            [cursor: string]: string;
         };
     };
     // (undocumented)

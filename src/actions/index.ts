@@ -1243,3 +1243,9 @@ export const inlinePickListFetchDataSuccess = createAction<{
      */
     hasNext?: boolean
 }>('inlinePickListFetchDataSuccess')
+
+export const setPendingForceActiveFieldKey = createAction<{ bcName: string; cursor: string; fieldKey: string }>(
+    'setPendingForceActiveFieldKey'
+)
+
+export const clearPendingForceActiveFieldKey = createAction<{ bcName: string; cursor: string }>('clearPendingForceActiveFieldKey')
