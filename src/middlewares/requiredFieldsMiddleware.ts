@@ -26,6 +26,7 @@ import {
     OperationTypeCrud,
     PendingDataItem,
     PendingValidationFailsFormat,
+    PopupWidgetTypes,
     RowMetaField,
     Store,
     TableLikeWidgetTypes,
@@ -43,6 +44,8 @@ import {
 import { buildBcUrl, checkShowCondition, flattenOperations } from '../utils'
 import { DataItem, WidgetField } from '@cxbox-ui/schema'
 import { FieldType } from '../interfaces/view'
+
+const skipValidationTypes = [...PopupWidgetTypes, 'FormPopup']
 
 export const requiredFields: Middleware =
     ({ getState, dispatch }: MiddlewareAPI<Dispatch, Store>) =>
@@ -67,10 +70,15 @@ export const requiredFields: Middleware =
                     const hiddenFieldKeys: string[] = []
                     const fieldsToCheck: Record<string, RowMetaField> = {}
                     const skipConfirmWidgetFieldsCheck = confirmWidget && confirmWidget.bcName === bcName
+                    const popupWidgetName = state.view.popupData?.widgetName
                     // Form could be split into multiple widgets so we check all widget with the same BC as action initiator.
                     // TODO: use visibleSameBcWidgets instead of state.view.widgets (i.e. widgets showCondition should be respected)
                     state.view.widgets
-                        .filter(item => item.bcName === widget?.bcName)
+                        .filter(
+                            item =>
+                                item.bcName === widget?.bcName &&
+                                (!skipValidationTypes.includes(item.type) || item.name === popupWidgetName)
+                        )
                         .forEach(item => {
                             const showConditionBcName = item.showCondition?.bcName
                             const isWidgetVisible = checkShowCondition(
