@@ -60,6 +60,8 @@ import {
     viewPutPickMap
 } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
+import { applyValidationFails, calculateNewPendingChanges, extractForceActiveInfo, updateHandledForceActive } from './view.utils'
+import { isEmptyFieldValue } from '../utils/isEmptyFieldValue'
 
 export const initialViewState: ViewState = {
     id: undefined,
@@ -87,9 +89,6 @@ export const initialViewState: ViewState = {
     modalInvoke: null
 }
 
-const isEmptyFieldValue = (value: unknown) =>
-    value === null || value === undefined || value === '' || (Array.isArray(value) && Object.keys(value).length === 0)
-
 const getFailsByRequiredFields = (data: PendingDataItem, isRequired: (fieldKey: string) => boolean) => {
     const fails: Record<string, string> = {}
 
@@ -106,7 +105,7 @@ const getFailsByRequiredFields = (data: PendingDataItem, isRequired: (fieldKey: 
  * View reducer
  *
  * Stores information about currently active view and various fast-living pending values which should be stored
- * until we navitage to a different view.
+ * until we navigate to a different view.
  */
 export const createViewReducerBuilderManager = <S extends ViewState>(initialState: S) =>
     new ReducerBuilderManager<S>()
@@ -141,91 +140,46 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
         })
         .addCase(forceActiveRmUpdate, (state, action) => {
             const { bcName, bcUrl, currentRecordData, rowMeta, cursor } = action.payload
-            const handledForceActive: PendingDataItem = {}
-            const rowMetaForcedValues: PendingDataItem = {}
-            const newPendingChangesDiff: PendingDataItem = {}
-            const forceActiveFieldKeys: string[] = []
 
-            // приведем значения переданные в forcedValue в вид дельты изменений
-            rowMeta.fields.forEach(field => {
-                rowMetaForcedValues[field.key] = field.currentValue
-                if (field.forceActive) {
-                    forceActiveFieldKeys.push(field.key)
-                }
-            })
+            const { rowMetaForcedValues, forceActiveFieldKeys } = extractForceActiveInfo(rowMeta.fields)
+
             state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
-            const consolidatedFrontData: PendingDataItem = { ...currentRecordData, ...state.pendingDataChanges[bcName][cursor] }
-            // вычислим "разницу" между консолид.данными и полученными forcedValue's в пользу последних
-            Object.keys(consolidatedFrontData).forEach(key => {
-                if (rowMetaForcedValues[key] !== undefined && consolidatedFrontData[key] !== rowMetaForcedValues[key]) {
-                    newPendingChangesDiff[key] = rowMetaForcedValues[key]
-                }
-            })
+            const currentPendingChanges = state.pendingDataChanges[bcName][cursor]
 
-            // консолидация полученной разницы с актуальной дельтой
-            const newPendingDataChanges = { ...state.pendingDataChanges[bcName][cursor], ...newPendingChangesDiff }
+            const { newPendingDataChanges } = calculateNewPendingChanges(currentRecordData, currentPendingChanges, rowMetaForcedValues)
 
-            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-            const nextValidationFails = getFailsByRequiredFields(
-                newPendingDataChanges,
-                fieldKey => !!state.rowMeta[bcName]?.[bcUrl]?.fields.find(item => item.required && item.key === fieldKey)
-            )
+            const isRequired = (fieldKey: string) => !!rowMeta.fields.some(item => item.required && item.key === fieldKey)
+            const nextValidationFails = getFailsByRequiredFields(newPendingDataChanges, isRequired)
 
-            // обновление ошибок, на основе полей заполненных через роу-мету
-            if (isTargetFormatPVF) {
-                state.pendingValidationFails = state.pendingValidationFails ?? {}
-                state.pendingValidationFails[bcName] = state.pendingValidationFails[bcName] ?? {}
-                ;(state.pendingValidationFails[bcName] as { [cursor: string]: Record<string, string> })[cursor] = nextValidationFails
-            } else {
-                state.pendingValidationFails = nextValidationFails
-            }
+            applyValidationFails(state, bcName, cursor, nextValidationFails)
 
-            // отразим в списке обработанных forceActive полей - те что содержатся в новой дельте
-            forceActiveFieldKeys.forEach(key => {
-                if (newPendingDataChanges[key] !== undefined) {
-                    handledForceActive[key] = newPendingDataChanges[key]
-                }
-            })
-            state.handledForceActive[bcName] = state.handledForceActive[bcName] ?? {}
-            state.handledForceActive[bcName][cursor] = state.handledForceActive[bcName][cursor] ?? {}
-            Object.assign(state.handledForceActive[bcName][cursor], handledForceActive)
-            state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
+            updateHandledForceActive(state, bcName, cursor, forceActiveFieldKeys, newPendingDataChanges)
+
             state.pendingDataChanges[bcName][cursor] = newPendingDataChanges
+
             state.pendingDataChangesNow[bcName] = state.pendingDataChangesNow[bcName] ?? {}
             state.pendingDataChangesNow[bcName][cursor] = {}
+
             state.rowMeta[bcName] = state.rowMeta[bcName] ?? {}
             state.rowMeta[bcName][bcUrl] = rowMeta
         })
         .addCase(changeDataItem, (state, action) => {
-            const actionBcName = action.payload.bcName
-            const prevBc = state.pendingDataChanges[action.payload.bcName] || {}
-            const prevCursor = prevBc[action.payload.cursor] || {}
-            const prevPending = prevCursor || {}
-            const nextPending = { ...prevPending, ...action.payload.dataItem }
-            const bcUrl = action.payload.bcUrl
+            const { bcName, cursor, dataItem, bcUrl } = action.payload
 
-            state.pendingDataChanges[action.payload.bcName] = state.pendingDataChanges[action.payload.bcName] ?? {}
-            state.pendingDataChanges[action.payload.bcName][action.payload.cursor] = nextPending
-            const prevBcNow = state.pendingDataChangesNow[action.payload.bcName] || {}
-            const prevCursorNow = prevBcNow[action.payload.cursor] || {}
-            const prevPendingNow = prevCursorNow || {}
-            state.pendingDataChangesNow[action.payload.bcName] = state.pendingDataChangesNow[action.payload.bcName] ?? {}
-            state.pendingDataChangesNow[action.payload.bcName][action.payload.cursor] = { ...prevPendingNow, ...action.payload.dataItem }
+            state.pendingDataChanges[bcName] = state.pendingDataChanges[bcName] ?? {}
+            const prevPending = state.pendingDataChanges[bcName][cursor] || {}
+            const nextPending = { ...prevPending, ...dataItem }
+            state.pendingDataChanges[bcName][cursor] = nextPending
 
-            const isTargetFormatPVF = state.pendingValidationFailsFormat === PendingValidationFailsFormat.target
-            const nextValidationFails = getFailsByRequiredFields(
-                nextPending,
-                fieldKey => !!state.rowMeta[actionBcName]?.[bcUrl]?.fields.find(item => item.required && item.key === fieldKey)
-            )
+            state.pendingDataChangesNow[bcName] = state.pendingDataChangesNow[bcName] ?? {}
+            const prevPendingNow = state.pendingDataChangesNow[bcName][cursor] || {}
+            state.pendingDataChangesNow[bcName][cursor] = { ...prevPendingNow, ...dataItem }
 
-            if (isTargetFormatPVF) {
-                state.pendingValidationFails = state.pendingValidationFails ?? {}
-                state.pendingValidationFails[actionBcName] = state.pendingValidationFails[actionBcName] ?? {}
-                ;(state.pendingValidationFails[actionBcName] as { [cursor: string]: Record<string, string> })[action.payload.cursor] =
-                    nextValidationFails
-            } else {
-                state.pendingValidationFails = nextValidationFails
-            }
+            const isRequired = (fieldKey: string) =>
+                !!state.rowMeta[bcName]?.[bcUrl]?.fields.some(item => item.required && item.key === fieldKey)
+            const nextValidationFails = getFailsByRequiredFields(nextPending, isRequired)
+
+            applyValidationFails(state, bcName, cursor, nextValidationFails)
         })
         .addCase(changeDataItems, (state, action) => {
             const newPendingChanges = { ...state.pendingDataChanges[action.payload.bcName] }
