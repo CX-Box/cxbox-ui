@@ -15,6 +15,7 @@
  */
 
 import { DataValue } from './data'
+import { DataItem } from '@cxbox-ui/schema'
 
 export enum FilterType {
     /**
@@ -39,6 +40,7 @@ export interface BcFilter {
     value: DataValue | DataValue[]
     viewName?: string
     widgetName?: string
+    assocItems?: DataItem[]
 }
 
 export interface BcSorter {
