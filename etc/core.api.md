@@ -424,6 +424,8 @@ cursor?: string;
 // @public (undocumented)
 export interface BcFilter {
     // (undocumented)
+    assocItems?: DataItem[];
+    // (undocumented)
     fieldName: string;
     // (undocumented)
     type: FilterType | string;

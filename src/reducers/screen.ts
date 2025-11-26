@@ -197,7 +197,9 @@ export const createScreenReducerBuilderManager = <S extends ScreenState>(initial
             const prevFilters = state.filters[bcName] || []
             const prevFilter = prevFilters.find(item => item.fieldName === filter.fieldName && item.type === filter.type)
             const newFilters = prevFilter
-                ? prevFilters.map(item => (item === prevFilter ? { ...prevFilter, value: newFilter.value } : item))
+                ? prevFilters.map(item =>
+                      item === prevFilter ? { ...prevFilter, value: newFilter.value, assocItems: newFilter.assocItems } : item
+                  )
                 : [...prevFilters, newFilter]
 
             if (state.bo.bc[bcName]) {
