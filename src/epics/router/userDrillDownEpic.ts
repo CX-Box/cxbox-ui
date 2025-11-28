@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import { catchError, filter, mergeMap, switchMap } from 'rxjs'
 import { buildBcUrl } from '../../utils'
-import { CXBoxEpic, DrillDownType, WidgetFieldBase } from '../../interfaces'
-import { catchError, concat, EMPTY, filter, mergeMap, of, switchMap } from 'rxjs'
-import { bcFetchRowMetaSuccess, drillDown, userDrillDown, userDrillDownSuccess } from '../../actions'
 import { createApiErrorObservable } from '../../utils/apiError'
+import processUserDrillDown from '../utils/processUserDrillDown'
+import { userDrillDown } from '../../actions'
+import { CXBoxEpic, DrillDownType } from '../../interfaces'
 
 /**
  *
@@ -50,37 +51,14 @@ export const userDrillDownEpic: CXBoxEpic = (action$, state$, { api }) =>
             const state = state$.value
             const { bcName, fieldKey, cursor } = action.payload
             const bcUrl = buildBcUrl(bcName, true, state)
+            const existingRowMeta = state$.value.view.rowMeta[bcName]?.[bcUrl]
+
+            if (existingRowMeta) {
+                return processUserDrillDown(state, existingRowMeta, fieldKey, cursor, bcName, bcUrl)
+            }
+
             return api.fetchRowMeta(state.screen.screenName, bcUrl).pipe(
-                mergeMap(rowMeta => {
-                    const drillDownField = rowMeta.fields.find(field => field.key === fieldKey)
-                    const route = state.router
-                    const drillDownKey = (
-                        state.view.widgets
-                            .find(widget => widget.bcName === bcName)
-                            ?.fields.find((field: WidgetFieldBase) => field.key === fieldKey) as WidgetFieldBase
-                    )?.drillDownKey
-                    const customDrillDownUrl = state.data[bcName]?.find(record => record.id === cursor)?.[drillDownKey] as string
-                    /**
-                     * It seems that behavior is wrong here; matching route condition will probably never be hit
-                     *
-                     * TODO: Review this case and either make condition strict or remove it completely
-                     */
-                    return customDrillDownUrl || drillDownField?.drillDown || drillDownField?.drillDown !== route.path
-                        ? concat(
-                              drillDownField?.drillDownType !== DrillDownType.inner
-                                  ? of(bcFetchRowMetaSuccess({ bcName, rowMeta, bcUrl, cursor }))
-                                  : EMPTY,
-                              of(userDrillDownSuccess({ bcName, bcUrl, cursor })),
-                              of(
-                                  drillDown({
-                                      url: customDrillDownUrl || drillDownField.drillDown,
-                                      drillDownType: drillDownField.drillDownType as DrillDownType,
-                                      route
-                                  })
-                              )
-                          )
-                        : EMPTY
-                }),
+                mergeMap(rowMeta => processUserDrillDown(state, rowMeta, fieldKey, cursor, bcName, bcUrl, true)),
                 catchError(error => {
                     console.error(error)
                     return createApiErrorObservable(error) // TODO:
