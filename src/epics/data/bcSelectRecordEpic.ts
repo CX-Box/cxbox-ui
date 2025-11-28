@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-import { CXBoxEpic } from '../../interfaces'
-import { concat, filter, mergeMap, of } from 'rxjs'
+import { concat, EMPTY, filter, mergeMap, of } from 'rxjs'
+import { buildBcUrl, getEagerBcChildren, getWidgetsForLazyLoad } from '../../utils'
 import { bcChangeCursors, bcFetchDataRequest, bcFetchRowMeta, bcSelectRecord } from '../../actions'
-import { getEagerBcChildren, getWidgetsForLazyLoad } from '../../utils'
 import { selectBcNameFromPopupData } from '../../selectors/selectors'
+import { CXBoxEpic } from '../../interfaces'
 
 export const bcSelectRecordEpic: CXBoxEpic = (action$, state$, { utils }) =>
     action$.pipe(
         filter(bcSelectRecord.match),
         mergeMap(action => {
-            const { bcName, cursor } = action.payload
+            const { bcName, cursor, keepRowMeta } = action.payload
             const widgets = state$.value.view.widgets
             const bcMap = state$.value.screen.bo.bc
+            let shouldFetchRowMeta = true
+
+            if (keepRowMeta) {
+                const bcUrl = buildBcUrl(bcName, true, state$.value) ?? ''
+                shouldFetchRowMeta = !state$.value.view.rowMeta[bcName]?.[bcUrl]
+            }
+
             const lazyWidgetNames = getWidgetsForLazyLoad(
                 state$.value.view.widgets,
                 utils?.getInternalWidgets,
@@ -43,7 +50,7 @@ export const bcSelectRecordEpic: CXBoxEpic = (action$, state$, { utils }) =>
             })
             return concat(
                 of(bcChangeCursors({ cursorsMap: { [bcName]: cursor }, keepDelta: action.payload.keepDelta })),
-                of(bcFetchRowMeta({ widgetName: '', bcName })),
+                shouldFetchRowMeta ? of(bcFetchRowMeta({ widgetName: '', bcName })) : EMPTY,
                 fetchChildrenBcData
             )
         })

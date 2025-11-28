@@ -547,6 +547,7 @@ bcName: string;
 cursor: string;
 ignoreChildrenPageLimit?: boolean;
 keepDelta?: boolean;
+keepRowMeta?: boolean;
 }, string>;
 
 // @public (undocumented)
