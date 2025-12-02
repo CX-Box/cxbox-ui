@@ -42,8 +42,9 @@ import {
     sendOperation
 } from '../actions'
 import { buildBcUrl, checkShowCondition, flattenOperations } from '../utils'
-import { DataItem, WidgetField } from '@cxbox-ui/schema'
+import { WidgetField } from '@cxbox-ui/schema'
 import { FieldType } from '../interfaces/view'
+import { getRequiredFieldsMissing } from '../utils/getRequiredFieldsMissing'
 
 const skipValidationTypes = [...PopupWidgetTypes, 'FormPopup']
 
@@ -188,35 +189,6 @@ export function operationRequiresAutosave(operationType: string, actions: Array<
     }
     result = flattenOperations(actions).some(action => action.type === operationType && action.autoSaveBefore)
     return result
-}
-
-/**
- * Check if required records fields have a falsy value.
- * "Falsy" stands for "undefined", "null", "", [] and {}.
- *
- * @param record Record to check
- * @param pendingChanges Pending record changes which could override record values
- * @param fieldsMeta
- */
-export function getRequiredFieldsMissing(record: DataItem, pendingChanges: PendingDataItem, fieldsMeta: RowMetaField[]) {
-    const result: PendingDataItem = {}
-    fieldsMeta.forEach(field => {
-        const value = record?.[field.key] as string
-        const pendingValue = pendingChanges?.[field.key]
-        const effectiveValue = pendingValue !== undefined ? pendingValue : value
-        let falsyValue = false
-        if (effectiveValue === null || effectiveValue === undefined || effectiveValue === '') {
-            falsyValue = true
-        } else if (Array.isArray(effectiveValue) && !effectiveValue.length) {
-            falsyValue = true
-        } else if (effectiveValue && typeof effectiveValue === 'object' && !Object.keys(effectiveValue).length) {
-            falsyValue = true
-        }
-        if (field.required && falsyValue) {
-            result[field.key] = Array.isArray(effectiveValue) ? [] : null
-        }
-    })
-    return Object.keys(result).length > 0 ? result : null
 }
 
 /**
