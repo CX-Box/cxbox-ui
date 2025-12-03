@@ -15,7 +15,7 @@ export function getRequiredFieldsMissing(record: DataItem, pendingChanges: Pendi
     fieldsMeta.forEach(field => {
         const value = record?.[field.key] as string
         const pendingValue = pendingChanges?.[field.key]
-        const effectiveValue = pendingValue ?? value
+        const effectiveValue = pendingValue === undefined ? value : pendingValue // NOSONAR
 
         if (field.required && isEmptyFieldValue(effectiveValue)) {
             result[field.key] = Array.isArray(effectiveValue) ? [] : null
