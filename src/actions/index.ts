@@ -801,6 +801,7 @@ export const bcSelectRecord = createAction<{
     cursor: string
     ignoreChildrenPageLimit?: boolean
     keepDelta?: boolean
+    keepRowMeta?: boolean
 }>('bcSelectRecord')
 
 /**
