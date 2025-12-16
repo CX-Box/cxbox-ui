@@ -190,7 +190,15 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api, utils }) =>
                               utils?.getInternalWidgets
                           )
                         : EMPTY
-                    const resetOutdatedData = resetOutdatedChildrenData(bcName, state.screen.bo.bc, state.data)
+                    const popupWidgetBcNames: string[] = []
+
+                    widgets?.forEach(item => {
+                        if (isPopupWidget(item.type)) {
+                            popupWidgetBcNames.push(item.bcName)
+                        }
+                    })
+
+                    const resetOutdatedData = resetOutdatedChildrenData(bcName, state.screen.bo.bc, state.data, popupWidgetBcNames)
 
                     return concat(cursorChange, resetOutdatedData, setDataSuccess, fetchRowMeta, fetchChildren)
                 }),
@@ -279,12 +287,22 @@ const getChildrenData = (
     )
 }
 
-const resetOutdatedChildrenData = (bcName: string, bcDictionary: Record<string, BcMetaState>, data: Record<string, DataItem[]>) => {
+const resetOutdatedChildrenData = (
+    bcName: string,
+    bcDictionary: Record<string, BcMetaState>,
+    data: Record<string, DataItem[]>,
+    popupWidgetBcNames: string[]
+) => {
+    if (popupWidgetBcNames.includes(bcName)) {
+        return EMPTY
+    }
+
     const parentBcNames = [bcName]
     const parentsBcUrls = parentBcNames.map(parentBcName => `${bcDictionary[parentBcName].url}/:id`)
     const childBcNamesWithData = Object.keys(data).reduce<string[]>((acc, bcNameWithData) => {
         const bc = bcDictionary[bcNameWithData]
-        if (parentsBcUrls.some(item => bc.url.includes(item))) {
+
+        if (!popupWidgetBcNames.includes(bcNameWithData) && parentsBcUrls.some(item => bc.url.includes(item))) {
             acc.push(bc.name)
         }
 
