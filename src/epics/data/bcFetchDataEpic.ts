@@ -19,6 +19,8 @@ import { AnyAction } from 'redux'
 import {
     buildBcUrl,
     checkShowCondition,
+    CursorSelectionStrategy,
+    cursorStrategyManager,
     getEagerBcChildren,
     getFilters,
     getSorters,
@@ -141,10 +143,13 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api, utils }) =>
                     return bc.parentName === actionBc
                 }
             )
+            const cursorSelectionStrategy = (data: DataItem[], prevCursor: string | undefined) =>
+                (utils?.cursorStrategyManager ?? cursorStrategyManager).get(bc.cursorSelectionStrategy)(data, prevCursor, bcName, state)
 
             const normalFlow = api.fetchBcData(state.screen.screenName, bcUrl, fetchParams, canceler.cancelToken).pipe(
                 mergeMap(response => {
-                    const cursorChange = getCursorChange(action, response.data, cursor, !!anyHierarchyWidget)
+                    const cursorChange = getCursorChange(action, response.data, cursor, !!anyHierarchyWidget, cursorSelectionStrategy)
+
                     const setDataSuccess = of(
                         bcFetchDataSuccess({
                             bcName,
@@ -172,7 +177,7 @@ export const bcFetchDataEpic: CXBoxEpic = (action$, state$, { api, utils }) =>
                         const dataToCheck =
                             bcName === w.showCondition?.bcName ? response.data : state.data[w.showCondition?.bcName as string]
                         const currentCursor = dataToCheck
-                            ? getCurrentCursor(dataToCheck, state.screen.bo.bc[w.showCondition?.bcName as string]?.cursor).cursor
+                            ? cursorSelectionStrategy(dataToCheck, state.screen.bo.bc[w.showCondition?.bcName as string]?.cursor)
                             : null
                         return checkShowCondition(w.showCondition, currentCursor, dataToCheck, state.view.pendingDataChanges)
                     }
@@ -224,25 +229,22 @@ function isHierarchyWidget(widget: WidgetMeta) {
     return widget.options?.hierarchy || widget.options?.hierarchyFull
 }
 
-const getCurrentCursor = (data: DataItem[], prevCursor: string | undefined) => {
-    const newCursor = data[0]?.id
-    const updatedCursor = !prevCursor || !data?.some(i => i.id === prevCursor)
-
-    return {
-        cursor: updatedCursor ? newCursor : prevCursor,
-        updatedCursor
-    }
-}
-
-const getCursorChange = (action: AnyAction, data: DataItem[], prevCursor: string, isHierarchy: boolean) => {
+const getCursorChange = (
+    action: AnyAction,
+    data: DataItem[],
+    prevCursor: string,
+    isHierarchy: boolean,
+    strategy: (data: DataItem[], prevCursor: string | undefined) => string | null | undefined
+) => {
     const { bcName } = action.payload
     const keepDelta = bcFetchDataRequest.match(action) ? action.payload.keepDelta : undefined
-    const { cursor, updatedCursor } = getCurrentCursor(data, prevCursor)
+    const updatedCursor = !prevCursor || !data?.some(i => i.id === prevCursor)
+
     return updatedCursor
         ? of(
               bcChangeCursors({
                   cursorsMap: {
-                      [bcName as string]: cursor
+                      [bcName as string]: strategy(data, prevCursor)
                   },
                   keepDelta: isHierarchy || keepDelta
               })

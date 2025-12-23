@@ -23,9 +23,11 @@ import { AnyAction } from '@reduxjs/toolkit'
 import { Store } from './store'
 import { Api } from '../api'
 import { WidgetMeta } from './widget'
+import { CursorStrategyManager } from '../utils/CursorStrategyManager'
 
 export interface Utils {
     getInternalWidgets?: (widgets: WidgetMeta[]) => string[]
+    cursorStrategyManager?: CursorStrategyManager
 }
 
 export interface EpicDependencyInjection<A = Api, B = Utils> {
@@ -36,4 +38,4 @@ export interface EpicDependencyInjection<A = Api, B = Utils> {
 /**
  * Default Epic typing with dependency injection
  */
-export type CXBoxEpic<S = Store, A = Api> = Epic<AnyAction, AnyAction, S, EpicDependencyInjection<A>>
+export type CXBoxEpic<S = Store, A = Api, U = Utils> = Epic<AnyAction, AnyAction, S, EpicDependencyInjection<A, U>>
