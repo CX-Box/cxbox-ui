@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { catchError, concat, EMPTY, filter, mergeMap, of, race } from 'rxjs'
 import { AnyAction } from 'redux'
 import {
     buildBcUrl,
     checkShowCondition,
-    CursorSelectionStrategy,
     cursorStrategyManager,
     getEagerBcChildren,
     getFilters,
