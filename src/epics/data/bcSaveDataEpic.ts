@@ -92,7 +92,7 @@ export const bcSaveDataEpic: CXBoxEpic = (action$, state$, { api, utils }) =>
             const bcUrl = buildBcUrl(bcName, true, state) ?? ''
             const widgetName = action.payload.widgetName
             const cursor = state.screen.bo.bc[bcName].cursor as string
-            const dataItem = state.data[bcName].find(item => item.id === cursor)
+            const dataItem = state.data[bcName]?.find(item => item.id === cursor)
             const rowMeta = bcUrl && state.view.rowMeta[bcName]?.[bcUrl]
             const options = state.view.widgets.find(widget => widget.name === widgetName)?.options
 
