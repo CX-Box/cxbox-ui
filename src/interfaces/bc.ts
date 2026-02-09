@@ -66,6 +66,13 @@ export interface BcMeta {
      * i.e. "someField1.contains=someValue&someField2.equalsOneOf=%5B%22someValue1%22%2C%22someValue2%22%5D"
      */
     defaultFilter?: string
+    /**
+     * The name of the cursor selection strategy.
+     *
+     * The value must match the strategy key registered in the 'CursorStrategyManager'.
+     * Allows you to override the default behavior (first record selection).
+     */
+    cursorSelectionStrategy?: string
 }
 
 export type DepthBcType = Record<
