@@ -28,8 +28,11 @@ export const createDataReducerBuilderManager = (initialState: DataState) =>
         })
         .addCase(bcSaveDataSuccess, (state, action) => {
             const nextDataItem = action.payload.dataItem
-            const index = state[action.payload.bcName].findIndex(item => item.id === nextDataItem.id)
-            state[action.payload.bcName][index] = nextDataItem
+
+            if (state[action.payload.bcName]) {
+                const index = state[action.payload.bcName].findIndex(item => item.id === nextDataItem.id)
+                state[action.payload.bcName][index] = nextDataItem
+            }
         })
         .addCase(bcFetchRowMetaSuccess, (state, action) => {
             const cursor = action.payload.cursor
