@@ -20,10 +20,12 @@ import {
     addPendingRequest,
     bcRemoveAllFilters,
     changeDataItem,
+    clearPendingForceActiveFieldKey,
     closeViewPopup,
     forceActiveChangeFail,
     forceActiveRmUpdate,
     removePendingRequest,
+    setPendingForceActiveFieldKey,
     viewClearPickMap
 } from '../../actions'
 import { WidgetTypes } from '@cxbox-ui/schema'
@@ -88,6 +90,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
             const requestId = nanoid()
             if (someForceActiveChanged && !disableRetry) {
                 return concat(
+                    of(setPendingForceActiveFieldKey({ bcName, cursor, fieldKey: changedFiledKey })),
                     of(addPendingRequest({ request: { requestId, type: 'force-active' } })),
                     api
                         .getRmByForceActive(
@@ -115,7 +118,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
                                 if (needPopupClose) {
                                     result.push(closePopup)
                                 }
-                                return concat(...result)
+                                return concat(...result, of(clearPendingForceActiveFieldKey({ bcName, cursor })))
                             }),
                             catchError((e: AxiosError) => {
                                 console.error(e)
@@ -142,6 +145,7 @@ export const getRowMetaByForceActiveEpic: CXBoxEpic = (action$, state$, { api })
                                               of(forceActiveChangeFail({ bcName, bcUrl, viewError, entityError }))
                                           )
                                         : EMPTY,
+                                    of(clearPendingForceActiveFieldKey({ bcName, cursor })),
                                     createApiErrorObservable(e)
                                 )
                             })

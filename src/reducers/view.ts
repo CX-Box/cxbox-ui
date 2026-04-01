@@ -57,7 +57,9 @@ import {
     showViewError,
     showViewPopup,
     viewClearPickMap,
-    viewPutPickMap
+    viewPutPickMap,
+    clearPendingForceActiveFieldKey,
+    setPendingForceActiveFieldKey
 } from '../actions'
 import { ReducerBuilderManager } from './ReducerBuilderManager'
 import { applyValidationFails, calculateNewPendingChanges, extractForceActiveInfo, updateHandledForceActive } from './view.utils'
@@ -77,6 +79,7 @@ export const initialViewState: ViewState = {
     pendingDataChanges: {},
     pendingPostInvoke: {},
     pendingDataChangesNow: {},
+    pendingForceActiveFieldKeys: {},
     infiniteWidgets: [],
     pendingValidationFailsFormat: PendingValidationFailsFormat.old,
     pendingValidationFails: {},
@@ -503,5 +506,17 @@ export const createViewReducerBuilderManager = <S extends ViewState>(initialStat
             const { bcName, operationType } = action.payload
             if (state.pendingPostInvoke[bcName]) {
                 delete state.pendingPostInvoke[bcName][operationType]
+            }
+        })
+        .addCase(setPendingForceActiveFieldKey, (state, action) => {
+            const { bcName, cursor, fieldKey } = action.payload
+            state.pendingForceActiveFieldKeys[bcName] = state.pendingForceActiveFieldKeys[bcName] ?? {}
+            state.pendingForceActiveFieldKeys[bcName][cursor] = fieldKey
+        })
+        .addCase(clearPendingForceActiveFieldKey, (state, action) => {
+            const { bcName, cursor } = action.payload
+
+            if (state.pendingForceActiveFieldKeys[bcName]) {
+                delete state.pendingForceActiveFieldKeys[bcName][cursor]
             }
         })

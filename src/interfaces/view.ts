@@ -73,6 +73,11 @@ export interface ViewState extends ViewMetaResponse {
     metaInProgress: {
         [bcName: string]: boolean
     }
+    pendingForceActiveFieldKeys: {
+        [bcName: string]: {
+            [cursor: string]: string
+        }
+    }
     popupData?: PopupData
     infiniteWidgets?: string[]
     pickMap?: PickMap
